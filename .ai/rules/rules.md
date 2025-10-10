@@ -4,6 +4,37 @@ This document outlines the coding standards and best practices for the FlowCraft
 
 ## General Principles
 
+### Software Design Principles
+- SOLID principles:
+  - Single Responsibility: Each module/class/function should have a single, clear reason to change.
+  - Open/Closed: Entities should be open for extension but closed for modification.
+  - Liskov Substitution: Subtypes must be substitutable for their base types without breaking behavior.
+  - Interface Segregation: Prefer small, focused interfaces over large, catch-all ones.
+  - Dependency Inversion: Depend on abstractions, not concretions.
+- DRY: Eliminate duplication by extracting reusable helpers/components and centralizing shared logic and types.
+- KISS: Favor simple, straightforward solutions over clever or overly abstract designs.
+- YAGNI: Implement only what is necessary now; avoid speculative generality and premature abstractions.
+- Separation of Concerns: Isolate domain logic, presentation, and data access; minimize coupling between layers.
+- Immutability & Pure Functions: Prefer pure, side-effect-free functions and immutable data; isolate effects at boundaries.
+- Clean Code (Uncle Bob) guidelines:
+  - Use meaningful, descriptive names; avoid abbreviations and misleading terms.
+  - Keep functions small and at a single level of abstraction.
+  - Avoid magic numbers/strings; extract constants or enums.
+  - Return early to reduce nesting and improve readability.
+  - Remove dead/commented-out code; write comments for "why", not "what".
+
+### Architectural Structure
+- Feature-sliced organization:
+  - Group files by feature/domain.
+  - Keep components, hooks, utilities, and types local to the feature.
+  - Expose a minimal public API (e.g., index.ts) for cross-feature consumption.
+- Boundaries and dependencies:
+  - Avoid cyclic dependencies.
+  - Cross-feature imports must go through the feature’s public API, not deep internal paths.
+  - Place cross-cutting utilities in dedicated shared modules with clear ownership.
+- Composition over inheritance: Build complex behavior by composing small units rather than deep hierarchies.
+- Encapsulation: Hide implementation details; export minimal interfaces and types.
+
 ### Code Organization
 - **Component Structure**: Split code into multiple, focused components rather than large monolithic files
 - **File Naming**: Use kebab-case for file names (e.g., `issue-card.tsx`, `sprint-form.tsx`)
