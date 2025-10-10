@@ -1,6 +1,33 @@
 # FlowCraft Coding Rules
 
-This document outlines the coding standards and best practices for the FlowCraft project, adhering to v0 guidelines for creating consistent, maintainable code.
+This document defines actionable rules optimized for AI coding agents to produce consistent, high-quality code through iterative changes. Always prefer minimal, focused diffs, follow existing conventions, and validate changes end-to-end.
+
+## AI Coding Agent Operating Procedure
+- Understand before editing:
+  - Read the surrounding code, types, and usage sites. Reuse existing utilities, patterns, and naming.
+  - Respect the current architecture and feature boundaries; avoid cross-feature leakage.
+- File editing protocol:
+  - Only edit files that have been added to the chat. If a needed file is missing, list its full path and ask the user to add it, then stop and wait.
+  - Use SEARCH/REPLACE blocks exactly as specified. The SEARCH must match literally; keep each block small and focused. Prefer multiple small blocks over one large block.
+  - When creating a new file, use a block with an empty SEARCH. To move code, delete then insert in two blocks.
+- Change hygiene:
+  - Make atomic, reversible commits. Do not mix unrelated changes.
+  - Preserve public APIs unless explicitly requested; if changed, provide a clear migration note.
+  - Update all imports/exports, types, and references affected by your changes.
+- Validation and safety:
+  - Keep TypeScript strict (no implicit any). Ensure code compiles and passes linters.
+  - Add input validation and return early to reduce nesting. Handle error paths gracefully.
+  - Avoid side effects; prefer pure functions. Extract helpers if functions exceed ~50 lines or mix concerns.
+- Tests and docs:
+  - Update or add tests when altering behavior. For bug fixes, write a failing test first when feasible.
+  - Update inline docs only for non-obvious logic. Document why, not what.
+- Performance, accessibility, and security:
+  - Choose efficient algorithms and avoid unnecessary re-renders; memoize where appropriate.
+  - Use semantic HTML, ARIA where needed, and manage focus for dialogs/modals.
+  - Do not log secrets; validate and sanitize external input.
+- Communication:
+  - Ask clarifying questions for ambiguous requests.
+  - Offer options with trade-offs for significant design decisions.
 
 ## General Principles
 
@@ -227,14 +254,26 @@ This document outlines the coding standards and best practices for the FlowCraft
 - **Usage Examples**: Provide usage examples for complex components
 - **Edge Cases**: Document edge cases and limitations
 
+## AI Change Checklist
+- Confirm you have all files to edit; request missing ones by full path.
+- Plan minimal, atomic changes; avoid mixing concerns.
+- Verify consistency: update types, imports/exports, and references.
+- Ensure TypeScript compiles; run linter/formatter; update tests/docs as needed.
+- Validate UX: accessibility, error states, empty/loading states.
+- Provide SEARCH/REPLACE blocks with precise, minimal SEARCH sections.
+
 ## Version Control
 
 ### Commit Messages
-- **Clear Messages**: Write clear, descriptive commit messages
-- **Present Tense**: Use present tense ("Add feature" not "Added feature")
-- **Scope**: Include scope when relevant (e.g., "feat(issues): add filtering")
+- Use Conventional Commits: feat(scope):, fix(scope):, docs(scope):, refactor(scope):, test(scope):, chore(scope):
+- One logical change per commit; keep commits small and reversible.
+- Subject in present tense and imperative mood; optionally include a body explaining why, what, and how.
+- Include breaking changes with a "BREAKING CHANGE:" footer and migration notes when applicable.
+- Reference related issues/PRs in the body when helpful.
 
 ### Code Review
-- **Small Changes**: Keep changes focused and reviewable
-- **Self Review**: Review your own code before submitting
-- **Test Changes**: Test all changes before committing
+- Keep changes small and focused; avoid drive-by edits.
+- Self-review diffs for naming, readability, and unintended changes.
+- Ensure linter, type checks, and tests pass locally before submitting.
+- Provide a clear summary of intent, scope, and trade-offs in the PR description.
+- Call out any follow-ups or known limitations.
