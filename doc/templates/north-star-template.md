@@ -204,4 +204,3 @@ notes: |
     - This section acts as a **quick-reference guide** for leadership, investors, or new team members.
 -->
 **"[One concise paragraph summarizing your SaaS, its vision, mission, and strategic direction.]"**
-

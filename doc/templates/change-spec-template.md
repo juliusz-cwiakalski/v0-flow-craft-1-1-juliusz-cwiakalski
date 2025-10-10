@@ -38,21 +38,21 @@ Describe how users or systems interact with this feature.
 
 #### Request
 
-```json
+\`\`\`json
 {
   "tags": ["vegan", "low-carb"],
   "minCalories": 200,
   "maxCalories": 700
 }
-```
+\`\`\`
 
 #### Response
 
-```json
+\`\`\`json
 {
   "recipes": [{ "id": "r1", "title": "Vegan Stir Fry", "calories": 450 }]
 }
-```
+\`\`\`
 
 ## AI CODING AGENT PROMPT
 
@@ -72,15 +72,15 @@ Use the following for your merge request:
 
 ### Checkout Command
 
-```bash
+\`\`\`bash
 git checkout -b <conventional commit compatible branch name using kebab case, start it with feat/feature-summary or refactor/ or fix/ etc>
-```
+\`\`\`
 
 ### Commit Message (used as MR title and description)
 
-```text
+\`\`\`text
 feat: Short summary of what is this change about
 
 Longer, multiline description of this change that covers most important aspects of the change.
 Use markdown formatting to provide more readable description.
-```
+\`\`\`

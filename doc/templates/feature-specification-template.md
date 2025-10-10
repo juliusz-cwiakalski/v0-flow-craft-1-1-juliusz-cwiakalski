@@ -69,14 +69,14 @@ Describe the step-by-step journey a user takes to interact with this feature. Di
 **(Optional) Diagrams:**
 _Use Mermaid or link to diagrams (e.g., in Figma, Miro) to visualize the flow._
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[Start] --> B{Is user logged in?};
     B -- Yes --> C[Show Dashboard];
     B -- No --> D[Show Login Page];
     C --> E[End];
     D --> E[End];
-```
+\`\`\`
 
 ### 3.4. Edge Cases & Alternative Flows
 

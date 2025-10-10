@@ -2,7 +2,7 @@ import type * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 
-const buttonVariants = {
+const variantClasses = {
   variant: {
     default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
     destructive: "bg-destructive text-white shadow-sm hover:bg-destructive/90",
@@ -22,9 +22,20 @@ const buttonVariants = {
 const baseButtonClasses =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 
+export function buttonVariants(props?: {
+  variant?: keyof typeof variantClasses.variant
+  size?: keyof typeof variantClasses.size
+  className?: string
+}) {
+  const variant = props?.variant || "default"
+  const size = props?.size || "default"
+
+  return cn(baseButtonClasses, variantClasses.variant[variant], variantClasses.size[size], props?.className)
+}
+
 interface ButtonProps extends React.ComponentProps<"button"> {
-  variant?: keyof typeof buttonVariants.variant
-  size?: keyof typeof buttonVariants.size
+  variant?: keyof typeof variantClasses.variant
+  size?: keyof typeof variantClasses.size
   asChild?: boolean
 }
 
@@ -33,7 +44,7 @@ function Button({ className, variant = "default", size = "default", asChild = fa
 
   return (
     <Comp
-      className={cn(baseButtonClasses, buttonVariants.variant[variant], buttonVariants.size[size], className)}
+      className={cn(baseButtonClasses, variantClasses.variant[variant], variantClasses.size[size], className)}
       {...props}
     />
   )
