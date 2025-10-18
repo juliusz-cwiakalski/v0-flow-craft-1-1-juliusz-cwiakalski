@@ -10,9 +10,18 @@ interface NavigationProps {
   onViewChange: (view: ViewType) => void
   issues: Issue[]
   sprints: Sprint[]
+  hasUnseenUpdates?: boolean
+  onWhatsNewClick?: () => void
 }
 
-export function Navigation({ currentView, onViewChange, issues, sprints }: NavigationProps) {
+export function Navigation({
+  currentView,
+  onViewChange,
+  issues,
+  sprints,
+  hasUnseenUpdates = false,
+  onWhatsNewClick,
+}: NavigationProps) {
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
   const activeSprintIssues = issues.filter((issue) => issue.sprintId === activeSprint?.id)
 
@@ -20,20 +29,20 @@ export function Navigation({ currentView, onViewChange, issues, sprints }: Navig
     {
       id: "issues" as ViewType,
       label: "Issues",
-      icon: "📋", // Replaced List icon with emoji
+      icon: "📋",
       count: issues.length,
     },
     {
       id: "current-sprint" as ViewType,
       label: "Current Sprint",
-      icon: "📊", // Replaced Kanban icon with emoji
+      icon: "📊",
       count: activeSprintIssues.length,
       disabled: !activeSprint,
     },
     {
       id: "sprints" as ViewType,
       label: "Sprints",
-      icon: "📅", // Replaced Calendar icon with emoji
+      icon: "📅",
       count: sprints.length,
     },
   ]
@@ -77,9 +86,23 @@ export function Navigation({ currentView, onViewChange, issues, sprints }: Navig
             </div>
           </div>
 
-          {!activeSprint && currentView === "current-sprint" && (
-            <div className="text-sm text-muted-foreground">No active sprint</div>
-          )}
+          <div className="flex items-center gap-4">
+            {!activeSprint && currentView === "current-sprint" && (
+              <div className="text-sm text-muted-foreground">No active sprint</div>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onWhatsNewClick}
+              className="relative flex items-center gap-2"
+              title="What's New"
+            >
+              <span className="text-lg">✨</span>
+              <span className="hidden sm:inline">What's New</span>
+              {hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
+            </Button>
+          </div>
         </div>
       </div>
     </nav>

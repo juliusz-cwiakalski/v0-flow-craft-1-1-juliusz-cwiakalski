@@ -1,17 +1,53 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { IssuesList } from "@/components/issues-list"
 import { CurrentSprintView } from "@/components/current-sprint-view"
 import { SprintsView } from "@/components/sprints-view"
+import { ChangelogPanel } from "@/components/changelog-panel"
+import { WhatsNewModal } from "@/components/whats-new-modal"
 import { initialIssues, initialSprints, generateTaskId } from "@/lib/data"
+import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
 
 export default function TaskFlowApp() {
   const [currentView, setCurrentView] = useState<ViewType>("issues")
   const [issues, setIssues] = useState<Issue[]>(initialIssues)
   const [sprints, setSprints] = useState<Sprint[]>(initialSprints)
+  const [showWhatsNew, setShowWhatsNew] = useState(false)
+  const [hasUnseen, setHasUnseen] = useState(false)
+
+  useEffect(() => {
+    const shouldShow = hasUnseenUpdates(APP_VERSION)
+    setHasUnseen(shouldShow)
+
+    if (shouldShow) {
+      // Delay to ensure smooth initial render
+      const timer = setTimeout(() => {
+        setShowWhatsNew(true)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
+  const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
+    if (dontShowAgain) {
+      setLastSeenVersion(APP_VERSION)
+      setHasUnseen(false)
+    }
+  }
+
+  const handleNavigateFromWhatsNew = (view: string) => {
+    if (view === "issues" || view === "current-sprint" || view === "sprints" || view === "changelog") {
+      setCurrentView(view as ViewType)
+    }
+  }
+
+  const handleViewChangelog = () => {
+    setCurrentView("changelog")
+    setShowWhatsNew(false)
+  }
 
   // Issue management functions
   const handleCreateIssue = (issueData: Partial<Issue>) => {
@@ -182,15 +218,37 @@ export default function TaskFlowApp() {
             onEndSprint={handleEndSprint}
           />
         )
+      case "changelog":
+        return <ChangelogPanel onNavigate={handleNavigateFromWhatsNew} />
       default:
         return null
     }
   }
 
+  const latestRelease = getLatestRelease()
+
   return (
     <div className="min-h-screen bg-background">
-      <Navigation currentView={currentView} onViewChange={setCurrentView} issues={issues} sprints={sprints} />
+      <Navigation
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        issues={issues}
+        sprints={sprints}
+        hasUnseenUpdates={hasUnseen}
+        onWhatsNewClick={() => setShowWhatsNew(true)}
+      />
       <main className="container mx-auto px-4 py-8">{renderCurrentView()}</main>
+
+      {latestRelease && (
+        <WhatsNewModal
+          open={showWhatsNew}
+          onOpenChange={setShowWhatsNew}
+          release={latestRelease}
+          onDismiss={handleWhatsNewDismiss}
+          onNavigate={handleNavigateFromWhatsNew}
+          onViewChangelog={handleViewChangelog}
+        />
+      )}
     </div>
   )
 }
