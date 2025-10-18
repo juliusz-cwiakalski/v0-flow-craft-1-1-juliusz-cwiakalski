@@ -32,6 +32,13 @@ interface IssueCardProps {
 export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, showSprint = true }: IssueCardProps) {
   const sprint = sprints.find((s) => s.id === issue.sprintId)
 
+  const acProgress = issue.acceptanceCriteria
+    ? {
+        completed: issue.acceptanceCriteria.filter((ac) => ac.done).length,
+        total: issue.acceptanceCriteria.length,
+      }
+    : null
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -42,6 +49,19 @@ export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, 
               <Badge className={priorityColors[issue.priority]} variant="secondary">
                 {issue.priority}
               </Badge>
+              {acProgress && acProgress.total > 0 && (
+                <Badge
+                  variant={acProgress.completed === acProgress.total ? "default" : "secondary"}
+                  className={
+                    acProgress.completed === acProgress.total
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "bg-gray-200 text-gray-700"
+                  }
+                  title="Acceptance Criteria completed"
+                >
+                  AC {acProgress.completed}/{acProgress.total}
+                </Badge>
+              )}
             </div>
             <h3 className="font-medium leading-tight">{issue.title}</h3>
           </div>

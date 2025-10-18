@@ -7,6 +7,7 @@ import { CurrentSprintView } from "@/components/current-sprint-view"
 import { SprintsView } from "@/components/sprints-view"
 import { ChangelogPanel } from "@/components/changelog-panel"
 import { WhatsNewModal } from "@/components/whats-new-modal"
+import { QuickCapture } from "@/components/quick-capture" // Added QuickCapture import
 import { initialIssues, initialSprints, generateTaskId } from "@/lib/data"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
@@ -16,6 +17,7 @@ export default function TaskFlowApp() {
   const [issues, setIssues] = useState<Issue[]>(initialIssues)
   const [sprints, setSprints] = useState<Sprint[]>(initialSprints)
   const [showWhatsNew, setShowWhatsNew] = useState(false)
+  const [showQuickCapture, setShowQuickCapture] = useState(false) // Added quick capture state
   const [hasUnseen, setHasUnseen] = useState(false)
 
   useEffect(() => {
@@ -29,6 +31,21 @@ export default function TaskFlowApp() {
       }, 500)
       return () => clearTimeout(timer)
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only trigger if Q is pressed and no input is focused
+      if (
+        e.key === "q" &&
+        !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName) &&
+        !(e.target as HTMLElement).isContentEditable
+      ) {
+        e.preventDefault()
+        setShowQuickCapture(true)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
   const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
@@ -109,6 +126,23 @@ export default function TaskFlowApp() {
           : issue,
       ),
     )
+  }
+
+  const handleQuickCreateIssue = (issueData: Partial<Issue>) => {
+    const newIssue: Issue = {
+      id: generateTaskId(issues),
+      title: issueData.title || "",
+      description: issueData.description || "",
+      priority: issueData.priority || "P3",
+      status: issueData.status || "Todo",
+      assignee: issueData.assignee || "",
+      sprintId: issueData.sprintId,
+      templateId: issueData.templateId,
+      acceptanceCriteria: issueData.acceptanceCriteria,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    setIssues([...issues, newIssue])
   }
 
   // Sprint management functions
@@ -236,8 +270,16 @@ export default function TaskFlowApp() {
         sprints={sprints}
         hasUnseenUpdates={hasUnseen}
         onWhatsNewClick={() => setShowWhatsNew(true)}
+        onQuickAddClick={() => setShowQuickCapture(true)} // Added quick add handler
       />
       <main className="container mx-auto px-4 py-8">{renderCurrentView()}</main>
+
+      <QuickCapture
+        open={showQuickCapture}
+        onOpenChange={setShowQuickCapture}
+        sprints={sprints}
+        onSubmit={handleQuickCreateIssue}
+      />
 
       {latestRelease && (
         <WhatsNewModal

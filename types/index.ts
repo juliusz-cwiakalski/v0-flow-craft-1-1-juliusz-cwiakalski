@@ -10,8 +10,27 @@ export interface Issue {
   status: IssueStatus
   assignee: string
   sprintId?: string
+  templateId?: "bug" | "feature" | "request"
+  acceptanceCriteria?: AcceptanceCriterion[]
   createdAt: Date
   updatedAt: Date
+}
+
+export interface AcceptanceCriterion {
+  id: string
+  text: string
+  done: boolean
+}
+
+export interface IssueTemplate {
+  id: "bug" | "feature" | "request"
+  name: string
+  prefix: string
+  defaults: {
+    priority: Priority
+    status: IssueStatus
+  }
+  acceptanceCriteria: string[]
 }
 
 export interface Sprint {

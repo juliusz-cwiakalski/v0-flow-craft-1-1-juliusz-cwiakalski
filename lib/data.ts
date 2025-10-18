@@ -1,4 +1,4 @@
-import type { Issue, Sprint, Priority, IssueStatus } from "@/types"
+import type { Issue, Sprint, Priority, IssueStatus, IssueTemplate } from "@/types"
 
 // Priority color mapping
 export const priorityColors: Record<Priority, string> = {
@@ -25,6 +25,66 @@ export const generateTaskId = (existingIssues: Issue[]): string => {
     return num > max ? num : max
   }, 0)
   return `TSK-${String(maxId + 1).padStart(3, "0")}`
+}
+
+// Template definitions and utilities
+export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
+  bug: {
+    id: "bug",
+    name: "Bug",
+    prefix: "[Bug] ",
+    defaults: {
+      priority: "P1",
+      status: "Todo",
+    },
+    acceptanceCriteria: [
+      "Steps to reproduce defined",
+      "Expected vs actual behavior described",
+      "Reproduction confirmed",
+    ],
+  },
+  feature: {
+    id: "feature",
+    name: "Feature",
+    prefix: "[Feature] ",
+    defaults: {
+      priority: "P3",
+      status: "Todo",
+    },
+    acceptanceCriteria: ["Acceptance scenarios listed", "Non-functional constraints noted", "UX mock agreed"],
+  },
+  request: {
+    id: "request",
+    name: "Request",
+    prefix: "[Request] ",
+    defaults: {
+      priority: "P2",
+      status: "Todo",
+    },
+    acceptanceCriteria: ["User impact clarified", "Success criteria measurable", "Approver identified"],
+  },
+}
+
+// Utility to generate unique AC IDs
+export const generateACId = (): string => {
+  return `ac-${Math.random().toString(36).slice(2, 11)}`
+}
+
+// Utility to apply template to issue data
+export const applyIssueTemplate = (templateId: "bug" | "feature" | "request") => {
+  const template = ISSUE_TEMPLATES[templateId]
+  if (!template) return {}
+
+  return {
+    templateId,
+    priority: template.defaults.priority,
+    status: template.defaults.status,
+    acceptanceCriteria: template.acceptanceCriteria.map((text) => ({
+      id: generateACId(),
+      text,
+      done: false,
+    })),
+  }
 }
 
 // Sample data
@@ -172,6 +232,7 @@ export const initialIssues: Issue[] = [
     priority: "P2",
     status: "Todo",
     assignee: "Charlie Brown",
+    sprintId: "",
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15"),
   },
@@ -182,6 +243,7 @@ export const initialIssues: Issue[] = [
     priority: "P3",
     status: "Todo",
     assignee: "Diana Prince",
+    sprintId: "",
     createdAt: new Date("2024-01-16"),
     updatedAt: new Date("2024-01-16"),
   },
@@ -192,6 +254,7 @@ export const initialIssues: Issue[] = [
     priority: "P4",
     status: "Todo",
     assignee: "Alice Johnson",
+    sprintId: "",
     createdAt: new Date("2024-01-17"),
     updatedAt: new Date("2024-01-17"),
   },
@@ -202,6 +265,7 @@ export const initialIssues: Issue[] = [
     priority: "P3",
     status: "Todo",
     assignee: "Bob Smith",
+    sprintId: "",
     createdAt: new Date("2024-01-18"),
     updatedAt: new Date("2024-01-18"),
   },
@@ -212,6 +276,7 @@ export const initialIssues: Issue[] = [
     priority: "P4",
     status: "Todo",
     assignee: "Charlie Brown",
+    sprintId: "",
     createdAt: new Date("2024-01-19"),
     updatedAt: new Date("2024-01-19"),
   },
@@ -222,6 +287,7 @@ export const initialIssues: Issue[] = [
     priority: "P2",
     status: "Todo",
     assignee: "Diana Prince",
+    sprintId: "",
     createdAt: new Date("2024-01-20"),
     updatedAt: new Date("2024-01-20"),
   },
@@ -232,6 +298,7 @@ export const initialIssues: Issue[] = [
     priority: "P5",
     status: "Todo",
     assignee: "Alice Johnson",
+    sprintId: "",
     createdAt: new Date("2024-01-21"),
     updatedAt: new Date("2024-01-21"),
   },

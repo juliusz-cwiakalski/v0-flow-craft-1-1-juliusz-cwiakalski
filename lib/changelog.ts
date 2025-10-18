@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.1.0"
+export const APP_VERSION = "0.2.0"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -30,7 +30,7 @@ export interface Release {
 // Release content (newest first)
 export const releases: Release[] = [
   {
-    version: "0.1.0",
+    version: "0.2.0",
     dateISO: "2025-01-18",
     items: [
       {
@@ -38,34 +38,58 @@ export const releases: Release[] = [
         kind: "New",
         title: "Quick Capture + Templates",
         summary:
-          'Press Q or click "Quick Add" to create issues instantly. Use Bug/Feature/Request templates with ready Acceptance Criteria to standardize quality.',
+          'Press Q or click "Quick Add" to create issues in ≤10 seconds. Choose Bug, Feature, or Request templates with pre-filled Acceptance Criteria to standardize task quality and reduce coordination overhead.',
         cta: {
           label: "Try Quick Capture",
         },
         deeplink: {
           view: "issues",
         },
-        howToFind: 'Press Q anywhere or click the "New Issue" button in the Issues view',
+        howToFind:
+          'Press Q anywhere (when no input is focused) or click the blue "Quick Add" button in the top navigation',
       },
       {
-        id: "full-export",
+        id: "acceptance-criteria",
         kind: "New",
-        title: "Full Data Export (JSON/CSV)",
-        summary: "Export Issues and Sprints in one click to JSON/CSV. Build trust with guaranteed portability.",
+        title: "Acceptance Criteria Management",
+        summary:
+          "Define and track Acceptance Criteria (AC) for each issue. Issue cards show AC progress badges (e.g., AC 2/3). Edit AC in the Issue Form with checkboxes to mark completion.",
         cta: {
-          label: "Learn More",
+          label: "View Issues",
         },
-        howToFind: "Top navigation → Export → choose format (Coming soon)",
+        deeplink: {
+          view: "issues",
+        },
+        howToFind:
+          "Create or edit any issue to add/manage Acceptance Criteria. Progress badges appear on issue cards automatically.",
       },
       {
-        id: "dashboard",
+        id: "templates",
         kind: "New",
-        title: "Roll-up Dashboard (Lite)",
-        summary: "Bird's-eye view with status breakdown, active sprint progress, and 7-day throughput.",
+        title: "Issue Templates (Bug, Feature, Request)",
+        summary:
+          "Three built-in templates auto-fill priority, status, and AC. Bug template includes reproduction steps, Feature includes acceptance scenarios, Request includes impact clarification.",
+        howToFind: 'Select a template in Quick Capture or when creating a new issue via "Create Issue" button',
+      },
+    ],
+  },
+  {
+    version: "0.1.0",
+    dateISO: "2025-01-17",
+    items: [
+      {
+        id: "initial-release",
+        kind: "New",
+        title: "FlowCraft Launch",
+        summary:
+          "Task management with Issues, Sprints, and Kanban board. Create, edit, and organize tasks across multiple sprints with priority and status tracking.",
         cta: {
-          label: "View Dashboard",
+          label: "Get Started",
         },
-        howToFind: "Dashboard view in top navigation (Coming soon)",
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Navigate using the top menu to explore Issues, Current Sprint, and Sprints views",
       },
     ],
   },

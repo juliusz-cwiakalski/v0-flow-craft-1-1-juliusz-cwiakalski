@@ -12,6 +12,7 @@ interface NavigationProps {
   sprints: Sprint[]
   hasUnseenUpdates?: boolean
   onWhatsNewClick?: () => void
+  onQuickAddClick?: () => void // Added quick add handler
 }
 
 export function Navigation({
@@ -21,6 +22,7 @@ export function Navigation({
   sprints,
   hasUnseenUpdates = false,
   onWhatsNewClick,
+  onQuickAddClick, // Added quick add handler
 }: NavigationProps) {
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
   const activeSprintIssues = issues.filter((issue) => issue.sprintId === activeSprint?.id)
@@ -90,6 +92,17 @@ export function Navigation({
             {!activeSprint && currentView === "current-sprint" && (
               <div className="text-sm text-muted-foreground">No active sprint</div>
             )}
+
+            <Button
+              variant="default"
+              size="sm"
+              onClick={onQuickAddClick}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              title="Quick Add (Q)"
+            >
+              <span className="text-lg">⚡</span>
+              <span className="hidden sm:inline">Quick Add</span>
+            </Button>
 
             <Button
               variant="ghost"
