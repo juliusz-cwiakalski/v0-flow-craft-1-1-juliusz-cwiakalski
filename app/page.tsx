@@ -237,8 +237,11 @@ export default function TaskFlowApp() {
         return (
           <CurrentSprintView
             sprint={activeSprint || null}
+            sprints={sprints}
             issues={issues}
             onUpdateIssueStatus={handleUpdateIssueStatus}
+            onEdit={handleEditIssue}
+            onDelete={handleDeleteIssue}
           />
         )
       case "sprints":

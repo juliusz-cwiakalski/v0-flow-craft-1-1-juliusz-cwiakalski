@@ -7,11 +7,21 @@ import type { Issue, Sprint, IssueStatus } from "@/types"
 
 interface CurrentSprintViewProps {
   sprint: Sprint | null
+  sprints: Sprint[]
   issues: Issue[]
   onUpdateIssueStatus: (issueId: string, newStatus: IssueStatus) => void
+  onEdit: (issue: Issue) => void
+  onDelete: (issueId: string) => void
 }
 
-export function CurrentSprintView({ sprint, issues, onUpdateIssueStatus }: CurrentSprintViewProps) {
+export function CurrentSprintView({
+  sprint,
+  sprints,
+  issues,
+  onUpdateIssueStatus,
+  onEdit,
+  onDelete,
+}: CurrentSprintViewProps) {
   if (!sprint) {
     return (
       <div className="space-y-6">
@@ -160,7 +170,14 @@ export function CurrentSprintView({ sprint, issues, onUpdateIssueStatus }: Curre
         </Card>
       </div>
 
-      <KanbanBoard sprint={sprint} issues={issues} onUpdateIssueStatus={onUpdateIssueStatus} />
+      <KanbanBoard
+        sprint={sprint}
+        issues={issues}
+        sprints={sprints}
+        onUpdateIssueStatus={onUpdateIssueStatus}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     </div>
   )
 }

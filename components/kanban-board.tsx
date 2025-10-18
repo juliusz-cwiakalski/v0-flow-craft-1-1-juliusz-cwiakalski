@@ -4,13 +4,30 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { IssueForm } from "./issue-form"
 import { priorityColors } from "@/lib/data"
 import type { Issue, IssueStatus, Sprint } from "@/types"
 
 interface KanbanBoardProps {
   sprint: Sprint
   issues: Issue[]
+  sprints: Sprint[]
   onUpdateIssueStatus: (issueId: string, newStatus: IssueStatus) => void
+  onEdit: (issue: Issue) => void
+  onDelete: (issueId: string) => void
 }
 
 const columns: { id: IssueStatus; title: string; color: string }[] = [
@@ -20,7 +37,7 @@ const columns: { id: IssueStatus; title: string; color: string }[] = [
   { id: "Done", title: "Done", color: "bg-green-50 border-green-200" },
 ]
 
-export function KanbanBoard({ sprint, issues, onUpdateIssueStatus }: KanbanBoardProps) {
+export function KanbanBoard({ sprint, issues, sprints, onUpdateIssueStatus, onEdit, onDelete }: KanbanBoardProps) {
   const [mounted, setMounted] = useState(false)
   const [sprintIssues, setSprintIssues] = useState<Issue[]>([])
 
@@ -31,6 +48,14 @@ export function KanbanBoard({ sprint, issues, onUpdateIssueStatus }: KanbanBoard
 
   if (!mounted) {
     return <div>Loading...</div>
+  }
+
+  const getAcProgress = (issue: Issue) => {
+    if (!issue.acceptanceCriteria) return null
+    return {
+      completed: issue.acceptanceCriteria.filter((ac) => ac.done).length,
+      total: issue.acceptanceCriteria.length,
+    }
   }
 
   return (
@@ -60,45 +85,107 @@ export function KanbanBoard({ sprint, issues, onUpdateIssueStatus }: KanbanBoard
 
               <div className={`min-h-[200px] p-3 rounded-lg border-2 ${column.color}`}>
                 <div className="space-y-3">
-                  {columnIssues.map((issue) => (
-                    <Card key={issue.id} className="hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-muted-foreground">{issue.id}</span>
-                              <Badge className={priorityColors[issue.priority]} variant="secondary">
-                                {issue.priority}
-                              </Badge>
+                  {columnIssues.map((issue) => {
+                    const acProgress = getAcProgress(issue)
+
+                    return (
+                      <Card key={issue.id} className="hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-mono text-muted-foreground">{issue.id}</span>
+                                <Badge className={priorityColors[issue.priority]} variant="secondary">
+                                  {issue.priority}
+                                </Badge>
+                                {acProgress && acProgress.total > 0 && (
+                                  <Badge
+                                    variant={acProgress.completed === acProgress.total ? "default" : "secondary"}
+                                    className={
+                                      acProgress.completed === acProgress.total
+                                        ? "bg-green-500 text-white hover:bg-green-600"
+                                        : "bg-gray-200 text-gray-700"
+                                    }
+                                    title="Acceptance Criteria completed"
+                                  >
+                                    AC {acProgress.completed}/{acProgress.total}
+                                  </Badge>
+                                )}
+                              </div>
+                              <h4 className="font-medium text-sm leading-tight line-clamp-2">{issue.title}</h4>
                             </div>
-                            <h4 className="font-medium text-sm leading-tight line-clamp-2">{issue.title}</h4>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-1">
+                                  <span className="text-base">⋯</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <IssueForm
+                                  issue={issue}
+                                  sprints={sprints}
+                                  onSubmit={onEdit}
+                                  trigger={
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <span className="mr-2">✏️</span>
+                                      Edit
+                                    </DropdownMenuItem>
+                                  }
+                                />
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                      <span className="mr-2">🗑️</span>
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Delete Issue</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to delete "{issue.title}"? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => onDelete(issue.id)}
+                                        className="bg-red-500 hover:bg-red-600"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        {issue.description && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{issue.description}</p>
-                        )}
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-muted-foreground">{issue.assignee}</span>
-                        </div>
-                        <Select
-                          value={issue.status}
-                          onValueChange={(newStatus: IssueStatus) => onUpdateIssueStatus(issue.id, newStatus)}
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Todo">Todo</SelectItem>
-                            <SelectItem value="In Progress">In Progress</SelectItem>
-                            <SelectItem value="In Review">In Review</SelectItem>
-                            <SelectItem value="Done">Done</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          {issue.description && (
+                            <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{issue.description}</p>
+                          )}
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-muted-foreground">{issue.assignee}</span>
+                          </div>
+                          <Select
+                            value={issue.status}
+                            onValueChange={(newStatus: IssueStatus) => onUpdateIssueStatus(issue.id, newStatus)}
+                          >
+                            <SelectTrigger className="h-7 text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Todo">Todo</SelectItem>
+                              <SelectItem value="In Progress">In Progress</SelectItem>
+                              <SelectItem value="In Review">In Review</SelectItem>
+                              <SelectItem value="Done">Done</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
             </div>
