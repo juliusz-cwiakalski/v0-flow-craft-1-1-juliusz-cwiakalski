@@ -35,11 +35,11 @@ Next steps
 
 Links
 - [Experiment 1: Quick Capture + Templates — see experiment-1-quick-capture-and-templates.md](../changes/001-quick-capture-and-templates/experiment-1-quick-capture-and-templates.md)
-- Experiment 2: Roll‑up Dashboard (Lite) — see experiment-3-rollup-dashboard-lite.md
+- [Experiment 2: Roll‑up Dashboard (Lite) — see experiment-2-rollup-dashboard-lite.md](../changes/003-rollup-dashboard-lite/experiment-2-rollup-dashboard-lite.md)
 - [Experiment 3: Full Data Export — see experiment-3-full-export.md](../changes/004-full-export/experiment-3-full-export.md)
 
 PRDs
 - PRD 0 — What’s New / Changelog — prd-experiment-0-changelog.md
 - PRD 1 — Quick Capture + Templates — prd-experiment-1-quick-capture-and-templates.md
-- PRD 2 — Full Data Export — prd-experiment-2-full-export.md
-- PRD 3 — Roll‑up Dashboard (Lite) — prd-experiment-3-rollup-dashboard-lite.md
+- PRD 3 — Full Data Export — prd-experiment-2-full-export.md
+- PRD 4 — Roll‑up Dashboard (Lite) — prd-experiment-3-rollup-dashboard-lite.md
