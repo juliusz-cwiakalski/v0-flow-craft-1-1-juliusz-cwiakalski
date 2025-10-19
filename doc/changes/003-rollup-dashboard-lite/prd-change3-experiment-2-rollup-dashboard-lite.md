@@ -26,12 +26,15 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * **Issues view:**
 
     * Shows list filtered by selected Project(s)/Team(s). Includes **multi‑select controls** and **Clear filters**. New issues default their `projectId`/`teamId` to the **last used** values; users can change.
+    * Each issue card displays the current **Project** and **Team** (badges/labels) to reinforce scope; gracefully show **Unassigned** when missing.
 * **Current Sprint view:**
 
     * Kanban displays only issues in the **active sprint** intersected with selected Project(s)/Team(s). Includes the same scope controls and **Clear filters**.
+    * Each Kanban card displays the current **Project** and **Team** (badges/labels); these reflect the global filters and the issue’s own assignment.
 * **Issue details (status history):**
 
     * Read‑only timeline panel: `(timestamp) from → to`. New entry appended on every status change. Dates formatted in **user locale**.
+    * **Project** and **Team** are easily editable via dropdowns. Saving updates the issue immediately (Redux) and updates `lastUsedProjectId`/`lastUsedTeamId` when appropriate.
 
 ## AFFECTED COMPONENTS
 
@@ -48,7 +51,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * [MODIFY/CREATE] **Redux — Preferences/UI state** — Persist: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
 * [MODIFY] **Issue Creation (standard & quick capture)** — Initialize `projectId`/`teamId` from **Preferences/UI**; update preferences after creation. fileciteturn0file1
 * [MODIFY] **Issue Details View** — Add **Status History** panel (read‑only V0).
-* [CREATE] **Projects & Teams Management Panel** — Simple CRUD UI to define Projects/Teams; guard deletes when referenced.
+* [CREATE] **Settings Panel (Projects & Teams Management)** — Simple CRUD UI to define Projects/Teams; stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
 * [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter.
 
 ## DECISIONS
@@ -86,9 +89,11 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
     * **Issues** — Add Project(s)/Team(s) multi‑select chips/menus + **Clear filters** button; apply scope to list. On issue creation success, set preferences `lastUsedProjectId/TeamId` to the chosen values (and keep existing defaults for next time).
     * **Current Sprint** — Same controls; board shows only scoped issues within active sprint; **Clear filters** resets scope.
     * **Dashboard** — Header with scope + time controls; render 4 cards in 2×2 grid. Cards consume **scoped** issues/sprints and selected time window.
-* **Projects & Teams management panel:**
+* **Projects & Teams management panel (Settings):**
 
     * Minimal CRUD lists (name, createdAt). Prevent deletion if referenced by any issue (V0 constraint). Seed **Main Project**/**Main Team** on first run via bootstrap effect.
+    * Accessible via a top‑level **Settings** entry in the app navigation.
+    * Stored entirely in UI via Redux + local storage per **ADR‑0008**; no backend calls in V0.
 * **Telemetry wiring (examples):**
 
     * On Dashboard mount: `dashboard_view_opened({ projectIds, teamIds, timeRange })`.
@@ -99,6 +104,40 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
     * Unit tests for derivations and for scope selectors applying multi‑select filters. Avoid rendering tests; focus on logic.
 
+## IMPLEMENTATION CHECKLIST
+
+- Redux slices exist for **Projects** and **Teams** with CRUD reducers/selectors; state is persisted to local storage per **ADR‑0008**.
+- On first run, app seeds one default of each: **Main Project** and **Main Team**.
+- A top‑level **Settings** panel is accessible from navigation with simple CRUD UIs for Projects and Teams:
+  - Create/Edit with name validation; show `createdAt`.
+  - Prevent delete when referenced by any Issue.
+- A persisted **Preferences/UI** slice contains: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
+- Scope controls (Projects/Teams multi‑select) exist on: **Issues**, **Current Sprint**, and **Dashboard**; include a working **Clear filters** action.
+- Global scope selections persist across page reloads and are applied consistently to all selectors and derived data.
+- Issue cards in **Issues** and **Current Sprint** visibly show the current Project and Team (badges/labels); fallback to **Unassigned** when missing.
+- **Issue Details** view allows changing Project and Team via dropdowns; saving updates the Issue and, when relevant, `lastUsedProjectId`/`lastUsedTeamId`.
+- **Dashboard** consumes the same scoped issues/sprints and reflects the currently selected Projects/Teams and Time Range.
+- Throughput derivation prefers status history; falls back to `updatedAt` when necessary and indicates “approximate”.
+- Telemetry emitted: `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`.
+- Minimal unit tests cover: status breakdown, active sprint progress, throughput (history + fallback), workload grouping, and scope filter selectors.
+
+## ACCEPTANCE CRITERIA
+
+- Managing Projects/Teams:
+  - User can create, edit, and delete Projects and Teams in **Settings**; data persists across reloads.
+  - Attempting to delete a Project/Team that is referenced by any Issue is prevented with a clear message.
+- Global filtering:
+  - Selecting Projects/Teams in any of the three views updates the others after navigation; clearing filters resets all views to “All”.
+- Issue presentation and editing:
+  - Every issue card in **Issues** and **Current Sprint** shows Project and Team.
+  - In **Issue Details**, user can easily change Project/Team; changes save immediately and reflect on cards and lists.
+  - New Issues default to the last used Project/Team; users can override during creation.
+- Dashboard consistency:
+  - Dashboard metrics and cards reflect the currently selected Projects/Teams and Time Range.
+- Derivations and telemetry:
+  - Throughput indicates “approximate” when falling back to `updatedAt`.
+  - Defined telemetry events fire at the specified interaction points.
+
 ## AI CODING AGENT PROMPT
 
 Implement **Change 003 — Roll‑up Dashboard Lite + Projects/Teams + Cross‑View Filters** in the frontend using the existing FlowCraft patterns:
@@ -108,6 +147,8 @@ Implement **Change 003 — Roll‑up Dashboard Lite + Projects/Teams + Cross‑V
 * Add a **Preferences/UI** state that persists: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
 * Update **Issue creation flows** (standard & quick capture) to default `projectId`/`teamId` from last used; update those preferences after each creation.
 * Add scope controls (Projects/Teams **multi‑select**) + **Clear filters** to **Issues**, **Current Sprint**, and **Dashboard**; selections persist and apply consistently across these views.
+* Ensure each issue card in **Issues** and **Current Sprint** displays the current **Project** and **Team** (badges/labels).
+* Make **Project** and **Team** editable in **Issue Details** via dropdowns; persist changes and update `lastUsedProjectId`/`lastUsedTeamId` as appropriate.
 * Build **Dashboard (Lite)** container + four **subcomponents** (StatusBreakdownCard, ActiveSprintProgressCard, ThroughputCard, WorkloadByAssigneeCard). The container exposes scope + time‑range controls (7/14/30 days + Custom); default **Last 7 days (rolling)**, locale dates.
 * Derivations are **pure and memoizable**. Throughput **prefers** status history entries where `to==='Done'` within window; **fallback** to (`status==='Done'` && `updatedAt` within window) with an “approximate” tooltip indicator.
 * Place Dashboard tab **after Current Sprint** and **before Sprints** in Navigation. Keep styling consistent with the system’s components/tokens.
