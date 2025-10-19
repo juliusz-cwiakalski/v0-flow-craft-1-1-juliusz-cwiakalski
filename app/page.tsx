@@ -1,6 +1,5 @@
 "use client"
-
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useSearchParams } from "next/navigation"
 import { Navigation } from "@/components/navigation"
@@ -10,6 +9,7 @@ import { SprintsView } from "@/components/sprints-view"
 import { ChangelogPanel } from "@/components/changelog-panel"
 import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
+import { IssueForm } from "@/components/issue-form"
 import { useToast } from "@/hooks/use-toast"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
 import { telemetry } from "@/lib/telemetry"
@@ -39,24 +39,46 @@ export default function TaskFlowApp() {
     hasUnseenUpdates: hasUnseen,
   } = useSelector((state: RootState) => state.ui)
 
+  const [issueToEdit, setIssueToEdit] = useState<Issue | null>(null)
+  const [showIssueEditModal, setShowIssueEditModal] = useState(false)
+
   useEffect(() => {
     const openParam = searchParams?.get("open")
+    const idParam = searchParams?.get("id")
+
     if (openParam === "quick-capture") {
-      // Check if any modal is already open
       const hasOpenModal = document.querySelector('[role="dialog"]') !== null
       if (!hasOpenModal) {
         telemetry.track("quick_capture_opened", { source: "deeplink" })
         dispatch(setShowQuickCapture(true))
 
-        // Clear the query parameter after opening
         if (typeof window !== "undefined") {
           const url = new URL(window.location.href)
           url.searchParams.delete("open")
           window.history.replaceState({}, "", url.toString())
         }
       }
+    } else if (openParam === "issue" && idParam) {
+      // Find the issue by ID
+      const issue = issues.find((i) => i.id === idParam)
+      if (issue) {
+        const hasOpenModal = document.querySelector('[role="dialog"]') !== null
+        if (!hasOpenModal) {
+          telemetry.track("issue_opened_via_deeplink", { issueId: idParam })
+          setIssueToEdit(issue)
+          setShowIssueEditModal(true)
+          dispatch(setCurrentView("issues"))
+
+          if (typeof window !== "undefined") {
+            const url = new URL(window.location.href)
+            url.searchParams.delete("open")
+            url.searchParams.delete("id")
+            window.history.replaceState({}, "", url.toString())
+          }
+        }
+      }
     }
-  }, [searchParams, dispatch])
+  }, [searchParams, dispatch, issues])
 
   useEffect(() => {
     const shouldShow = hasUnseenUpdates(APP_VERSION)
@@ -124,14 +146,18 @@ export default function TaskFlowApp() {
             <span className="font-semibold">
               {issue.id} — {titlePreview}
             </span>
-            <button
-              onClick={() => {
+            <a
+              href={`?open=issue&id=${issue.id}`}
+              onClick={(e) => {
+                e.preventDefault()
+                setIssueToEdit(issue)
+                setShowIssueEditModal(true)
                 dispatch(setCurrentView("issues"))
               }}
               className="text-blue-500 hover:underline text-left"
             >
               Open →
-            </button>
+            </a>
           </div>
         ),
         duration: 6000,
@@ -227,6 +253,16 @@ export default function TaskFlowApp() {
     dispatch(setShowWhatsNew(false))
   }
 
+  const handleCloseIssueEditModal = () => {
+    setShowIssueEditModal(false)
+    setIssueToEdit(null)
+  }
+
+  const handleSaveEditedIssue = (updatedIssue: Issue) => {
+    dispatch(updateIssue(updatedIssue))
+    handleCloseIssueEditModal()
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation
@@ -251,6 +287,16 @@ export default function TaskFlowApp() {
         sprintContext={getSprintContext()}
         source="button"
       />
+
+      {issueToEdit && (
+        <IssueForm
+          open={showIssueEditModal}
+          onOpenChange={handleCloseIssueEditModal}
+          sprints={sprints}
+          onSubmit={handleSaveEditedIssue}
+          issue={issueToEdit}
+        />
+      )}
 
       {latestRelease && (
         <WhatsNewModal

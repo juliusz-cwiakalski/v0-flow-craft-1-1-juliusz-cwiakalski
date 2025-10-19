@@ -153,7 +153,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Dirty state confirmation when closing with unsaved changes
 - Template conflict resolution - asks to overwrite or keep user values
 - Contextual sprint prefill based on current view
-- 6-second toast notification with issue link after creation
+- 6-second toast notification with deep-link to open created issue
 - Telemetry tracking for usage analytics (console-logged)
 
 **Components**:
@@ -183,9 +183,10 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Multi-add workflow - modal stays open after creation
 - Dirty state protection - confirms before closing with unsaved changes
 - Template switching - asks to overwrite or keep when conflicts exist
-- Toast notifications - 6-second duration with issue key, truncated title, and "Open" link
+- Toast notifications - 6-second duration with issue key, truncated title, and deep-link to open issue
+- Deep-link to issue - `?open=issue&id={KEY}` opens issue edit modal directly
 - Time-to-create tracking - measures from modal open to issue creation
-- Telemetry events: `quick_capture_opened`, `template_selected`, `assignee_autofilled`, `issue_created_via_quick_capture`
+- Telemetry events: `quick_capture_opened`, `template_selected`, `assignee_autofilled`, `issue_created_via_quick_capture`, `issue_opened_via_deeplink`
 
 **Entry Points**:
 
@@ -193,6 +194,13 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 2. **Navigation button**: Click "Quick Add ⌨ Q" in top navigation
 3. **Deep link**: Visit any URL with `?open=quick-capture` parameter
 4. **Changelog CTA**: Click "Try Quick Capture" in What's New modal or Changelog panel
+
+**Toast Notification**:
+
+- Appears for 6 seconds after issue creation
+- Format: "Issue {KEY} — {TitlePrefixEllipsized} created — Open"
+- "Open" link uses deep-link `?open=issue&id={KEY}` to open issue edit modal
+- Clicking link navigates to Issues view and opens edit modal for the created issue
 
 **Data Utilities** (in `lib/data.ts`):
 
@@ -364,7 +372,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 3. Select "Edit" option
 4. Modify fields in dialog form
 5. Add/remove/edit acceptance criteria
-6. Check off completed AC items
+6. Check off completed items
 7. Click "Update Issue" to save changes
 
 ### Managing Acceptance Criteria
@@ -454,18 +462,25 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
   - Guards against multiple modals and input focus
   - Auto-clears parameter after opening
 
+- **`?open=issue&id={KEY}`** - Opens issue edit modal for specific issue
+  - Used in toast notifications after issue creation
+  - Navigates to Issues view and opens edit modal
+  - Guards against multiple modals
+  - Auto-clears parameters after opening
+  - Tracks `issue_opened_via_deeplink` telemetry event
+
 ## Version History
 
 ### v0.2.0 (2025-01-18)
 - Added Quick Capture with keyboard shortcut (Q)
-- Added deep-link support (`?open=quick-capture`)
+- Added deep-link support (`?open=quick-capture` and `?open=issue&id={KEY}`)
 - Added Issue Templates (Bug, Feature, Request)
 - Added last-used template memory (localStorage)
 - Added default template configuration (Feature)
 - Added Acceptance Criteria management
 - Added AC progress badges on issue cards
 - Added edit/delete actions in Current Sprint kanban view
-- Added toast notifications for issue creation
+- Added toast notifications with deep-link to open created issues
 - Added telemetry tracking (console-based)
 - Added contextual sprint prefill
 - Added dirty state confirmation
@@ -483,24 +498,3 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Current Sprint Kanban view
 - Navigation system
 - Priority and status tracking
-
-## Future Enhancement Opportunities
-
-### Potential Features
-
-- Backend API integration for data persistence
-- User authentication and authorization
-- Real-time collaboration with WebSockets
-- Advanced filtering and search
-- Issue comments and attachments
-- Time tracking and estimates
-- Burndown charts and analytics
-- Email notifications
-- Export functionality
-- Custom fields and workflows
-- Issue dependencies and blockers
-- Sprint velocity tracking
-- Custom issue templates
-- Bulk operations
-- Issue history/audit log
-- Sprint retrospectives

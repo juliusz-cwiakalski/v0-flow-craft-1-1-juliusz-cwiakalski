@@ -1,7 +1,7 @@
 # CHANGE SPECIFICATION — Quick Capture & Ticket Templates (V0, Frontend Only)
 
 ## SUMMARY
-Introduce a **global Quick Capture** experience with keyboard shortcut **Q** and a header button to create issues in ≤10s using **process templates** (Bug/Feature/Request + user-defined). Templates prefill title prefix, priority, status, optional assignee, and acceptance criteria. Add **deep link** support to open Quick Capture directly (e.g., `?open=quick-capture`), and use this in changelog CTAs so “Try Quick Capture” opens the modal instantly. Quick Capture **remembers the most recently used template**; on first use it defaults to the **Feature** template, and templates configuration indicates which template is the default. Prototype persists state via **Redux Toolkit** with **localStorage**; includes a minimal **Template Manager (basic)** to view/add/edit templates. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
+Introduce a **global Quick Capture** experience with keyboard shortcut **Q** and a header button to create issues in ≤10s using **process templates** (Bug/Feature/Request + user-defined). Templates prefill title prefix, priority, status, optional assignee, and acceptance criteria. Add **deep link** support to open Quick Capture directly (e.g., `?open=quick-capture`) and to open issue edit modal directly (e.g., `?open=issue&id={KEY}`). Use this in changelog CTAs so “Try Quick Capture” opens the modal instantly. Quick Capture **remembers the most recently used template**; on first use it defaults to the **Feature** template, and templates configuration indicates which template is the default. Prototype persists state via **Redux Toolkit** with **localStorage**; includes a minimal **Template Manager (basic)** to view/add/edit templates. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
 
 ## GOAL
 Reduce “work-about-work” and increase consistency of new tickets by enabling **rapid capture** anywhere and **standardized inputs** via templates. Success (prototype): create in ≤10s; ≥70% of Quick Capture tickets use a template; AC badge visible on cards and reflects edits. :contentReference[oaicite:2]{index=2}
@@ -10,7 +10,7 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
 **Entry points**
 - **Global Shortcut**: Press **Q** when no input is focused → opens Quick Capture modal.
 - **Header Button**: “Quick Add ⌨ Q” (icon denotes keyboard key). Tooltip repeats shortcut.  
-- **Deep Link**: Visiting any app URL with `?open=quick-capture` opens the Quick Capture modal (same guards: ignore when input focused; block if another modal is open). Changelog CTAs use this to open via “Try Quick Capture”.  
+- **Deep Link**: Visiting any app URL with `?open=quick-capture` opens the Quick Capture modal (same guards: ignore when input focused; block if another modal is open). Changelog CTAs use this to open via “Try Quick Capture”. Visiting any app URL with `?open=issue&id={KEY}` opens the issue edit modal directly.  
 - Modal remains open after create for **rapid multi-add**. `Esc` closes; if dirty, prompt to confirm discard. :contentReference[oaicite:3]{index=3}
 
 **Quick Capture Modal (minimal fields)**
@@ -36,7 +36,8 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
 - Show **toast** for **6s** (UX best-practice balance for notice + action):  
   “Issue **{KEY} — {TitlePrefixEllipsized}** created — **Open**”.  
   - `TitlePrefixEllipsized` = prefix + first N chars of title (truncate gracefully to fit).  
-  - Toast closes automatically; link opens the created issue.
+  - Toast link uses deep-link format `?open=issue&id={KEY}` to open the issue edit modal directly.
+  - Toast closes automatically after 6 seconds.
 
 **Persistence & instrumentation**
 - All state via **Redux Toolkit**; persisted to **localStorage** (prototype).  
@@ -57,7 +58,8 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
 - [MODIFY] **IssueCard** — AC progress badge `AC x/y` (hidden if no AC; green when x===y>0).
 - [MODIFY] **ChangelogPanel** — Add “Try Quick Capture” CTA using deeplink (`?open=quick-capture`) to open the modal immediately.
 - [MODIFY] **WhatsNewModal** — Support deeplink CTA to open QuickCaptureModal (`?open=quick-capture`).
-- [CREATE] **DeepLinkHandler (App Shell/Router)** — Parse and handle `?open=quick-capture` to open the modal on load/navigation.
+- [CREATE] **DeepLinkHandler (App Shell/Router)** — Parse and handle `?open=quick-capture` and `?open=issue&id={KEY}` to open the modal/issue on load/navigation.
+- [MODIFY] **ToastNotification** — Support clickable links in toast descriptions that trigger deep-link navigation.
 
 ## DECISIONS
 - **Shortcut availability**
@@ -92,7 +94,10 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - ✅ **Adapter** layer with **console** backend in V0; events defined below.
 - **Deep link activation**
   - Options: hash fragment (`#quick-capture`), query string (`?open=quick-capture`), custom scheme (`flowcraft://`)
-  - ✅ **Query string** (`?open=quick-capture`) — SSR-friendly, shareable, and easy to handle via the Next.js router.
+  - ✅ **Query string** (`?open=quick-capture` and `?open=issue&id={KEY}`) — SSR-friendly, shareable, and easy to handle via the Next.js router.
+- **Toast notification link behavior**
+  - Options: navigate to view only; open edit modal; use deep-link
+  - ✅ **Deep-link** — Toast "Open" link uses `?open=issue&id={KEY}` to open the issue edit modal directly, providing immediate access to the created issue.
 - **Default template on first use**
   - Options: none; fixed to Bug/Feature; flag in configuration
   - ✅ **Flag in templates configuration** (`isDefault`), seeded default = **Feature**. On open, select `lastUsedTemplateId` if present; otherwise use the default.
@@ -106,7 +111,10 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - Ignites only when **no input** has focus and **no modal** is open.  
   - Opens **QuickCaptureModal**; autofocus on **Title**.  
 - In **NavigationHeader**, add a **primary button** labeled **“Quick Add ⌨ Q”** with tooltip “Press Q to open Quick Capture”.
-- **Deep Link**: Recognize `?open=quick-capture` in the URL (on initial load and client-side navigation). When present and guards pass, open **QuickCaptureModal** automatically (autofocus Title) and track `quick_capture_opened` with `source: "deeplink"`. After opening, clear the query parameter to allow subsequent re-opens via back/forward or repeated clicks.
+- **Deep Link**: Recognize `?open=quick-capture` and `?open=issue&id={KEY}` in the URL (on initial load and client-side navigation). 
+  - When `?open=quick-capture` is present and guards pass, open **QuickCaptureModal** automatically (autofocus Title) and track `quick_capture_opened` with `source: "deeplink"`.
+  - When `?open=issue&id={KEY}` is present and guards pass, find the issue by ID, open **IssueForm** in edit mode with that issue, and track `issue_opened_via_deeplink` with `issueId`.
+  - After opening, clear the query parameters to allow subsequent re-opens via back/forward or repeated clicks.
 - **Changelog Integration**: Use the same deeplink in “Try Quick Capture” CTAs (ChangelogPanel, WhatsNewModal) so clicking it opens the modal immediately.
 
 **2) QuickCaptureModal**
@@ -116,7 +124,8 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - **Default assignee** resolution: user entry → template.defaultAssignee → current user → empty.  
   - **Sprint**: read **context** from caller (Issues/CurrentSprint/SprintEditor) to prefill or leave empty.  
   - Generate timestamps; create issue; clear Title; keep modal open.
-- **Discard**: on `Esc` or Cancel → if dirty, show confirm; otherwise close.
+  - **Show toast** for 6 seconds with format: "Issue {KEY} — {TitlePrefixEllipsized} created — Open"
+  - Toast "Open" link uses deep-link format `?open=issue&id={KEY}` to open the issue edit modal directly.
 
 **3) Templates & Defaults**
 - Seed **system templates** (Bug/Feature/Request) at boot if no user-defined templates exist. Initial defaults:  
@@ -152,6 +161,7 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - `template_selected` { templateId }  
   - `assignee_autofilled` { source: `"template"|"currentUser"` }  
   - `issue_created_via_quick_capture` { timeToCreateMs, fieldsUsed: {template,assignee,priority,status,sprint}, acCount }  
+  - `issue_opened_via_deeplink` { issueId }
   - `ac_badge_viewed` { issueId }  
   - `ac_updated` { issueId, delta: {doneCount} }  
 - Start **time-to-create** at modal open; stop on create.
@@ -167,13 +177,13 @@ Implement Quick Capture & Ticket Templates (frontend-only) according to this spe
 
 **Behavior to Implement**
 - Global **Q** shortcut (guarded) + header button “Quick Add ⌨ Q” → opens **QuickCaptureModal** (autofocus Title).  
-- **Deeplink**: Recognize `?open=quick-capture` and open **QuickCaptureModal** automatically; use this in “Try Quick Capture” CTAs from the changelog; track `source: "deeplink"`.  
+- **Deeplink**: Recognize `?open=quick-capture` and open **QuickCaptureModal** automatically; use this in “Try Quick Capture” CTAs from the changelog; track `source: "deeplink"`. Recognize `?open=issue&id={KEY}` and open issue edit modal directly; track `issue_opened_via_deeplink`.  
 - **Keep modal open** after create for rapid multi-add; `Esc` closes; prompt on unsaved changes.  
 - **Templates** prefill **prefix, priority, status, defaultAssignee, AC** for **untouched** fields only; changing template asks to overwrite or keep when conflicts exist.  
 - **Default assignee** on create: user value → template.defaultAssignee → current user → empty (do not override user edits).  
 - **Sprint prefill**: none from Issues; **current/edited sprint** when invoked from those contexts (user can change).  
 - **AC** are **preview-only** in modal; full editing in Issue Form; no max count.  
-- **Toast** on create for **6s**: “Issue {KEY} — {TitlePrefixEllipsized} created — Open”; link opens the created issue.  
+- **Toast** on create for **6s**: “Issue {KEY} — {TitlePrefixEllipsized} created — Open”; link opens the created issue via deep-link format `?open=issue&id={KEY}`.  
 - **TemplatesSlice** persists seeded system templates and user-defined templates; **remember last-used template**, and track a single **default template** (`isDefault`, seeded to Feature). Quick Capture selects last-used when available, otherwise the default on first open.  
 - **IssuesSlice** handles quick-create with timestamps and AC mapping.  
 - **TelemetryAdapter** exists with `track(event,payload)`; log events listed in “Telemetry (Adapter)” to console.  
@@ -199,7 +209,7 @@ git checkout -b feat/quick-capture-and-templates-v0
 feat: quick capture modal + process templates (v0) with contextual sprint prefill and telemetry adapter
 
 * Global Q shortcut + header “Quick Add ⌨ Q”
-* Deep link (`?open=quick-capture`) support + changelog CTA uses it
+* Deep link (`?open=quick-capture` and `?open=issue&id={KEY}`) support + changelog CTA uses it
 * QuickCaptureModal (Title required; template/priority/status/assignee/sprint optional)
 * Template defaults (Bug/Feature/Request + user-defined); overwrite rules; default assignee with current-user fallback
 * Contextual sprint prefill from Issues/Current Sprint/Sprint Editor
@@ -212,7 +222,7 @@ feat: quick capture modal + process templates (v0) with contextual sprint prefil
 **Checklist**
 
 * [ ] QA: Q opens modal; Enter creates; Esc confirm on dirty; multi-add flow works
-* [ ] QA: Deep link (`?open=quick-capture`) opens Quick Capture from changelog CTA and direct URL
+* [ ] QA: Deep link (`?open=quick-capture` and `?open=issue&id={KEY}`) opens Quick Capture from changelog CTA and direct URL
 * [ ] QA: Template switching confirm works; untouched vs. edited field overwrite rules verified
 * [ ] QA: Default assignee resolution chain verified
 * [ ] QA: Sprint contextual prefill verified across entry points
