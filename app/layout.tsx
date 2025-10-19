@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Suspense } from "react"
+import { ReduxProvider } from "@/lib/redux/provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <Suspense fallback={null}>{children}</Suspense>
+        <ReduxProvider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </ReduxProvider>
       </body>
     </html>
   )

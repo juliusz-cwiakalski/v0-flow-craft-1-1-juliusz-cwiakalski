@@ -1,33 +1,52 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 import { Navigation } from "@/components/navigation"
 import { IssuesList } from "@/components/issues-list"
 import { CurrentSprintView } from "@/components/current-sprint-view"
 import { SprintsView } from "@/components/sprints-view"
 import { ChangelogPanel } from "@/components/changelog-panel"
 import { WhatsNewModal } from "@/components/whats-new-modal"
-import { QuickCapture } from "@/components/quick-capture" // Added QuickCapture import
-import { initialIssues, initialSprints, generateTaskId } from "@/lib/data"
+import { QuickCapture } from "@/components/quick-capture"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
+import type { RootState, AppDispatch } from "@/lib/redux/store"
+import {
+  addIssue,
+  updateIssue,
+  deleteIssue,
+  updateIssueStatus,
+  assignIssueToSprint,
+  moveUnfinishedIssuesToBacklog,
+} from "@/lib/redux/slices/issuesSlice"
+import { addSprint, updateSprint, startSprint, endSprint } from "@/lib/redux/slices/sprintsSlice"
+import {
+  setCurrentView,
+  setShowWhatsNew,
+  setShowQuickCapture,
+  setHasUnseenUpdates,
+} from "@/lib/redux/slices/uiSlice"
 
 export default function TaskFlowApp() {
-  const [currentView, setCurrentView] = useState<ViewType>("issues")
-  const [issues, setIssues] = useState<Issue[]>(initialIssues)
-  const [sprints, setSprints] = useState<Sprint[]>(initialSprints)
-  const [showWhatsNew, setShowWhatsNew] = useState(false)
-  const [showQuickCapture, setShowQuickCapture] = useState(false) // Added quick capture state
-  const [hasUnseen, setHasUnseen] = useState(false)
+  const dispatch: AppDispatch = useDispatch()
+  const { issues } = useSelector((state: RootState) => state.issues)
+  const { sprints } = useSelector((state: RootState) => state.sprints)
+  const {
+    currentView,
+    showWhatsNew,
+    showQuickCapture,
+    hasUnseenUpdates: hasUnseen,
+  } = useSelector((state: RootState) => state.ui)
 
   useEffect(() => {
     const shouldShow = hasUnseenUpdates(APP_VERSION)
-    setHasUnseen(shouldShow)
+    dispatch(setHasUnseenUpdates(shouldShow))
 
     if (shouldShow) {
       // Delay to ensure smooth initial render
       const timer = setTimeout(() => {
-        setShowWhatsNew(true)
+        dispatch(setShowWhatsNew(true))
       }, 500)
       return () => clearTimeout(timer)
     }
@@ -40,181 +59,73 @@ export default function TaskFlowApp() {
         !(e.target as HTMLElement).isContentEditable
       ) {
         e.preventDefault()
-        setShowQuickCapture(true)
+        dispatch(setShowQuickCapture(true))
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [dispatch])
 
   const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
     if (dontShowAgain) {
       setLastSeenVersion(APP_VERSION)
-      setHasUnseen(false)
+      dispatch(setHasUnseenUpdates(false))
     }
   }
 
   const handleNavigateFromWhatsNew = (view: string) => {
     if (view === "issues" || view === "current-sprint" || view === "sprints" || view === "changelog") {
-      setCurrentView(view as ViewType)
+      dispatch(setCurrentView(view as ViewType))
     }
   }
 
   const handleViewChangelog = () => {
-    setCurrentView("changelog")
-    setShowWhatsNew(false)
+    dispatch(setCurrentView("changelog"))
+    dispatch(setShowWhatsNew(false))
   }
 
   // Issue management functions
   const handleCreateIssue = (issueData: Partial<Issue>) => {
-    const newIssue: Issue = {
-      id: generateTaskId(issues),
-      title: issueData.title || "",
-      description: issueData.description || "",
-      priority: issueData.priority || "P3",
-      status: issueData.status || "Todo",
-      assignee: issueData.assignee || "",
-      sprintId: issueData.sprintId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-    setIssues([...issues, newIssue])
+    dispatch(addIssue(issueData))
   }
 
   const handleEditIssue = (updatedIssue: Issue) => {
-    setIssues(
-      issues.map((issue) =>
-        issue.id === updatedIssue.id
-          ? {
-              ...issue,
-              ...updatedIssue,
-              updatedAt: new Date(),
-            }
-          : issue,
-      ),
-    )
+    dispatch(updateIssue(updatedIssue))
   }
 
   const handleDeleteIssue = (issueId: string) => {
-    setIssues(issues.filter((issue) => issue.id !== issueId))
+    dispatch(deleteIssue(issueId))
   }
 
   const handleUpdateIssueStatus = (issueId: string, newStatus: IssueStatus) => {
-    setIssues(
-      issues.map((issue) =>
-        issue.id === issueId
-          ? {
-              ...issue,
-              status: newStatus,
-              updatedAt: new Date(),
-            }
-          : issue,
-      ),
-    )
+    dispatch(updateIssueStatus({ issueId, newStatus }))
   }
 
   const handleAssignToSprint = (issueId: string, sprintId: string | undefined) => {
-    setIssues(
-      issues.map((issue) =>
-        issue.id === issueId
-          ? {
-              ...issue,
-              sprintId,
-              updatedAt: new Date(),
-            }
-          : issue,
-      ),
-    )
+    dispatch(assignIssueToSprint({ issueId, sprintId }))
   }
 
   const handleQuickCreateIssue = (issueData: Partial<Issue>) => {
-    const newIssue: Issue = {
-      id: generateTaskId(issues),
-      title: issueData.title || "",
-      description: issueData.description || "",
-      priority: issueData.priority || "P3",
-      status: issueData.status || "Todo",
-      assignee: issueData.assignee || "",
-      sprintId: issueData.sprintId,
-      templateId: issueData.templateId,
-      acceptanceCriteria: issueData.acceptanceCriteria,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-    setIssues([...issues, newIssue])
+    dispatch(addIssue(issueData))
   }
 
   // Sprint management functions
   const handleCreateSprint = (sprintData: Partial<Sprint>) => {
-    const newSprint: Sprint = {
-      id: `sprint-${Date.now()}`,
-      name: sprintData.name || "",
-      status: "Planned",
-      startDate: sprintData.startDate || new Date(),
-      endDate: sprintData.endDate || new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-    setSprints([...sprints, newSprint])
+    dispatch(addSprint(sprintData))
   }
 
   const handleEditSprint = (updatedSprint: Sprint) => {
-    setSprints(
-      sprints.map((sprint) =>
-        sprint.id === updatedSprint.id
-          ? {
-              ...sprint,
-              ...updatedSprint,
-              updatedAt: new Date(),
-            }
-          : sprint,
-      ),
-    )
+    dispatch(updateSprint(updatedSprint))
   }
 
   const handleStartSprint = (sprintId: string) => {
-    setSprints(
-      sprints.map((sprint) =>
-        sprint.id === sprintId
-          ? {
-              ...sprint,
-              status: "Active" as const,
-              updatedAt: new Date(),
-            }
-          : sprint,
-      ),
-    )
+    dispatch(startSprint(sprintId))
   }
 
   const handleEndSprint = (sprintId: string) => {
-    // Move unfinished issues back to backlog
-    const unfinishedIssues = issues.filter((issue) => issue.sprintId === sprintId && issue.status !== "Done")
-
-    setIssues(
-      issues.map((issue) =>
-        unfinishedIssues.some((ui) => ui.id === issue.id)
-          ? {
-              ...issue,
-              sprintId: undefined,
-              updatedAt: new Date(),
-            }
-          : issue,
-      ),
-    )
-
-    // Update sprint status
-    setSprints(
-      sprints.map((sprint) =>
-        sprint.id === sprintId
-          ? {
-              ...sprint,
-              status: "Completed" as const,
-              updatedAt: new Date(),
-            }
-          : sprint,
-      ),
-    )
+    dispatch(moveUnfinishedIssuesToBacklog(sprintId))
+    dispatch(endSprint(sprintId))
   }
 
   // Get current active sprint
@@ -268,18 +179,18 @@ export default function TaskFlowApp() {
     <div className="min-h-screen bg-background">
       <Navigation
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={(view) => dispatch(setCurrentView(view))}
         issues={issues}
         sprints={sprints}
         hasUnseenUpdates={hasUnseen}
-        onWhatsNewClick={() => setShowWhatsNew(true)}
-        onQuickAddClick={() => setShowQuickCapture(true)} // Added quick add handler
+        onWhatsNewClick={() => dispatch(setShowWhatsNew(true))}
+        onQuickAddClick={() => dispatch(setShowQuickCapture(true))}
       />
       <main className="container mx-auto px-4 py-8">{renderCurrentView()}</main>
 
       <QuickCapture
         open={showQuickCapture}
-        onOpenChange={setShowQuickCapture}
+        onOpenChange={(open) => dispatch(setShowQuickCapture(open))}
         sprints={sprints}
         onSubmit={handleQuickCreateIssue}
       />
@@ -287,7 +198,7 @@ export default function TaskFlowApp() {
       {latestRelease && (
         <WhatsNewModal
           open={showWhatsNew}
-          onOpenChange={setShowWhatsNew}
+          onOpenChange={(open) => dispatch(setShowWhatsNew(open))}
           release={latestRelease}
           onDismiss={handleWhatsNewDismiss}
           onNavigate={handleNavigateFromWhatsNew}
