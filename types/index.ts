@@ -29,6 +29,7 @@ export interface IssueTemplate {
   defaults: {
     priority: Priority
     status: IssueStatus
+    defaultAssignee?: string // Added optional default assignee
   }
   acceptanceCriteria: string[]
 }

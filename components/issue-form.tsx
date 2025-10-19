@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion } from "@/types"
 import { ISSUE_TEMPLATES, applyIssueTemplate, generateACId } from "@/lib/data"
+import { telemetry } from "@/lib/telemetry"
 
 interface IssueFormProps {
   issue?: Issue
@@ -39,7 +40,7 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
     status: issue?.status || ("Todo" as IssueStatus),
     assignee: issue?.assignee || "",
     sprintId: issue?.sprintId || "0",
-    templateId: issue?.templateId || ("none" as "none" | "bug" | "feature" | "request"), // Changed default from "" to "none"
+    templateId: issue?.templateId || ("none" as "none" | "bug" | "feature" | "request"),
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(issue?.acceptanceCriteria || [])
   const [newACText, setNewACText] = useState("")
@@ -55,7 +56,7 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
         status: issue?.status || "Todo",
         assignee: issue?.assignee || "",
         sprintId: issue?.sprintId || "0",
-        templateId: issue?.templateId || "none", // Changed default from "" to "none"
+        templateId: issue?.templateId || "none",
       })
       setAcceptanceCriteria(issue?.acceptanceCriteria || [])
       setNewACText("")
@@ -64,10 +65,8 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
   }, [open, issue])
 
   const handleTemplateChange = (templateId: "none" | "bug" | "feature" | "request") => {
-    // Changed "" to "none"
     if (templateId === "none") {
-      // Changed check from !templateId to === "none"
-      setFormData({ ...formData, templateId: "none" }) // Changed from "" to "none"
+      setFormData({ ...formData, templateId: "none" })
       return
     }
 
@@ -85,7 +84,7 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
   }
 
   const handleAddAC = () => {
-    if (!newACText.trim() || acceptanceCriteria.length >= 10) return
+    if (!newACText.trim()) return
 
     setAcceptanceCriteria([
       ...acceptanceCriteria,
@@ -99,7 +98,16 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
   }
 
   const handleToggleAC = (id: string) => {
-    setAcceptanceCriteria(acceptanceCriteria.map((ac) => (ac.id === id ? { ...ac, done: !ac.done } : ac)))
+    const updatedAC = acceptanceCriteria.map((ac) => (ac.id === id ? { ...ac, done: !ac.done } : ac))
+    setAcceptanceCriteria(updatedAC)
+
+    if (issue) {
+      const doneCount = updatedAC.filter((ac) => ac.done).length
+      telemetry.track("ac_updated", {
+        issueId: issue.id,
+        delta: { doneCount },
+      })
+    }
   }
 
   const handleDeleteAC = (id: string) => {
@@ -131,7 +139,7 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
     onSubmit({
       ...formData,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
-      templateId: formData.templateId === "none" ? undefined : formData.templateId, // Changed check from || undefined
+      templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
     })
 
@@ -286,34 +294,22 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
                   </div>
                 )}
 
-                {acceptanceCriteria.length < 10 && (
-                  <div className="flex gap-2 pt-2">
-                    <Input
-                      value={newACText}
-                      onChange={(e) => setNewACText(e.target.value)}
-                      placeholder="Add acceptance criterion"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          handleAddAC()
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleAddAC}
-                      disabled={!newACText.trim()}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                )}
-
-                {acceptanceCriteria.length >= 10 && (
-                  <p className="text-xs text-muted-foreground">Maximum 10 criteria reached</p>
-                )}
+                <div className="flex gap-2 pt-2">
+                  <Input
+                    value={newACText}
+                    onChange={(e) => setNewACText(e.target.value)}
+                    placeholder="Add acceptance criterion"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        handleAddAC()
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={handleAddAC} disabled={!newACText.trim()}>
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
 

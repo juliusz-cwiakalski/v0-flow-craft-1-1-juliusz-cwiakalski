@@ -168,13 +168,13 @@ Implement Quick Capture & Ticket Templates (frontend-only) according to this spe
 
 ## MERGE REQUEST TEMPLATE
 **Branch**
-```bash
+\`\`\`bash
 git checkout -b feat/quick-capture-and-templates-v0
-```
+\`\`\`
 
 **Conventional Commit Title**
 
-```
+\`\`\`
 feat: quick capture modal + process templates (v0) with contextual sprint prefill and telemetry adapter
 
 * Global Q shortcut + header “Quick Add ⌨ Q”
@@ -185,7 +185,7 @@ feat: quick capture modal + process templates (v0) with contextual sprint prefil
 * TelemetryAdapter (console backend) + key events; time-to-create metric
 * Redux Toolkit slices for issues/templates; localStorage persistence; remember last-used template
 * Prototype-level a11y (documented)
-```
+\`\`\`
 
 **Checklist**
 

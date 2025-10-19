@@ -9,7 +9,9 @@ import { SprintsView } from "@/components/sprints-view"
 import { ChangelogPanel } from "@/components/changelog-panel"
 import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
+import { useToast } from "@/hooks/use-toast"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
+import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
 import type { RootState, AppDispatch } from "@/lib/redux/store"
 import {
@@ -21,15 +23,11 @@ import {
   moveUnfinishedIssuesToBacklog,
 } from "@/lib/redux/slices/issuesSlice"
 import { addSprint, updateSprint, startSprint, endSprint } from "@/lib/redux/slices/sprintsSlice"
-import {
-  setCurrentView,
-  setShowWhatsNew,
-  setShowQuickCapture,
-  setHasUnseenUpdates,
-} from "@/lib/redux/slices/uiSlice"
+import { setCurrentView, setShowWhatsNew, setShowQuickCapture, setHasUnseenUpdates } from "@/lib/redux/slices/uiSlice"
 
 export default function TaskFlowApp() {
   const dispatch: AppDispatch = useDispatch()
+  const { toast } = useToast()
   const { issues } = useSelector((state: RootState) => state.issues)
   const { sprints } = useSelector((state: RootState) => state.sprints)
   const {
@@ -44,21 +42,27 @@ export default function TaskFlowApp() {
     dispatch(setHasUnseenUpdates(shouldShow))
 
     if (shouldShow) {
-      // Delay to ensure smooth initial render
       const timer = setTimeout(() => {
         dispatch(setShowWhatsNew(true))
       }, 500)
       return () => clearTimeout(timer)
     }
+  }, [dispatch])
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only trigger if Q is pressed and no input is focused
+      // Check if any modal is open by checking for dialog elements
+      const hasOpenModal = document.querySelector('[role="dialog"]') !== null
+
+      // Only trigger if Q is pressed, no input is focused, and no modal is open
       if (
         e.key === "q" &&
         !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName) &&
-        !(e.target as HTMLElement).isContentEditable
+        !(e.target as HTMLElement).isContentEditable &&
+        !hasOpenModal
       ) {
         e.preventDefault()
+        telemetry.track("quick_capture_opened", { source: "shortcut" })
         dispatch(setShowQuickCapture(true))
       }
     }
@@ -107,7 +111,34 @@ export default function TaskFlowApp() {
   }
 
   const handleQuickCreateIssue = (issueData: Partial<Issue>) => {
-    dispatch(addIssue(issueData))
+    const createdIssue = dispatch(addIssue(issueData))
+
+    // Show toast with created issue details
+    if (createdIssue.payload) {
+      const issue = createdIssue.payload as Issue
+      const titlePreview = issue.title.length > 40 ? issue.title.substring(0, 40) + "..." : issue.title
+
+      toast({
+        title: "Issue Created",
+        description: (
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">
+              {issue.id} — {titlePreview}
+            </span>
+            <button
+              onClick={() => {
+                // Navigate to issues view and scroll to the issue
+                dispatch(setCurrentView("issues"))
+              }}
+              className="text-blue-500 hover:underline text-left"
+            >
+              Open →
+            </button>
+          </div>
+        ),
+        duration: 6000, // 6 seconds as per PRD
+      })
+    }
   }
 
   // Sprint management functions
@@ -130,6 +161,14 @@ export default function TaskFlowApp() {
 
   // Get current active sprint
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
+
+  const getSprintContext = (): string => {
+    if (currentView === "current-sprint" && activeSprint) {
+      return "currentSprint"
+    }
+    // For future: when editing a sprint, return "editing:<sprintId>"
+    return "none"
+  }
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -184,7 +223,10 @@ export default function TaskFlowApp() {
         sprints={sprints}
         hasUnseenUpdates={hasUnseen}
         onWhatsNewClick={() => dispatch(setShowWhatsNew(true))}
-        onQuickAddClick={() => dispatch(setShowQuickCapture(true))}
+        onQuickAddClick={() => {
+          telemetry.track("quick_capture_opened", { source: "button" })
+          dispatch(setShowQuickCapture(true))
+        }}
       />
       <main className="container mx-auto px-4 py-8">{renderCurrentView()}</main>
 
@@ -193,6 +235,7 @@ export default function TaskFlowApp() {
         onOpenChange={(open) => dispatch(setShowQuickCapture(open))}
         sprints={sprints}
         onSubmit={handleQuickCreateIssue}
+        sprintContext={getSprintContext()}
       />
 
       {latestRelease && (

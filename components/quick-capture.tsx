@@ -2,12 +2,13 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,15 +21,27 @@ import {
 } from "@/components/ui/alert-dialog"
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion } from "@/types"
 import { ISSUE_TEMPLATES, applyIssueTemplate } from "@/lib/data"
+import { telemetry } from "@/lib/telemetry"
+import { getCurrentUser } from "@/lib/user"
 
 interface QuickCaptureProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   sprints: Sprint[]
   onSubmit: (issueData: Partial<Issue>) => void
+  sprintContext?: string // "none" | "currentSprint" | "editing:<sprintId>"
+  onIssueCreated?: (issue: Issue) => void // Callback with created issue for toast
 }
 
-export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCaptureProps) {
+export function QuickCapture({
+  open,
+  onOpenChange,
+  sprints,
+  onSubmit,
+  sprintContext = "none",
+  onIssueCreated,
+}: QuickCaptureProps) {
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     title: "",
     templateId: "none" as "" | "bug" | "feature" | "request" | "none",
@@ -39,82 +52,111 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>([])
   const [showTemplateConfirm, setShowTemplateConfirm] = useState(false)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [pendingTemplateId, setPendingTemplateId] = useState<"bug" | "feature" | "request" | "none" | "">("")
   const [userModifiedFields, setUserModifiedFields] = useState({
     title: false,
     priority: false,
     status: false,
+    assignee: false,
   })
+  const [isDirty, setIsDirty] = useState(false)
+  const openTimeRef = useRef<number>(0)
 
-  // Reset form when modal opens
   useEffect(() => {
     if (open) {
+      openTimeRef.current = Date.now()
+      telemetry.track("quick_capture_opened", {
+        source: "button", // Will be updated by keyboard handler
+      })
+
+      let prefillSprintId = "0"
+      if (sprintContext === "currentSprint") {
+        const activeSprint = sprints.find((s) => s.status === "Active")
+        if (activeSprint) {
+          prefillSprintId = activeSprint.id
+        }
+      } else if (sprintContext.startsWith("editing:")) {
+        const sprintId = sprintContext.replace("editing:", "")
+        prefillSprintId = sprintId
+      }
+
       setFormData({
         title: "",
         templateId: "none",
         priority: "P3",
         status: "Todo",
         assignee: "",
-        sprintId: "0",
+        sprintId: prefillSprintId,
       })
       setAcceptanceCriteria([])
       setUserModifiedFields({
         title: false,
         priority: false,
         status: false,
+        assignee: false,
       })
+      setIsDirty(false)
     }
-  }, [open])
+  }, [open, sprintContext, sprints])
+
+  useEffect(() => {
+    const hasContent = formData.title.trim() !== "" || formData.assignee.trim() !== "" || acceptanceCriteria.length > 0
+    setIsDirty(hasContent)
+  }, [formData.title, formData.assignee, acceptanceCriteria])
 
   const handleTemplateChange = (templateId: "" | "bug" | "feature" | "request" | "none") => {
-    // If there are existing AC and switching to a different template, confirm
-    if (acceptanceCriteria.length > 0 && templateId && templateId !== formData.templateId) {
+    const hasConflicts =
+      userModifiedFields.title ||
+      userModifiedFields.priority ||
+      userModifiedFields.status ||
+      acceptanceCriteria.length > 0
+
+    if (hasConflicts && templateId && templateId !== "none" && templateId !== formData.templateId) {
       setPendingTemplateId(templateId)
       setShowTemplateConfirm(true)
       return
     }
 
-    applyTemplate(templateId)
+    applyTemplate(templateId, false)
   }
 
-  const applyTemplate = (templateId: "" | "bug" | "feature" | "request" | "none") => {
+  const applyTemplate = (templateId: "" | "bug" | "feature" | "request" | "none", forceOverwrite = false) => {
     if (!templateId || templateId === "none") {
-      setFormData({ ...formData, templateId: "" })
+      setFormData({ ...formData, templateId: "none" })
       setAcceptanceCriteria([])
       return
     }
+
+    telemetry.track("template_selected", { templateId })
 
     const templateData = applyIssueTemplate(templateId)
     const template = ISSUE_TEMPLATES[templateId]
 
     const newFormData = { ...formData, templateId }
 
-    // Apply prefix to title if title is empty or only contains previous prefix
-    if (
-      !userModifiedFields.title ||
-      formData.title === "" ||
-      (formData.templateId && formData.title.startsWith(ISSUE_TEMPLATES[formData.templateId].prefix))
-    ) {
+    if (forceOverwrite || !userModifiedFields.title || formData.title === "") {
       newFormData.title = template.prefix
     }
 
-    // Apply priority if user hasn't modified it
-    if (!userModifiedFields.priority) {
+    if (forceOverwrite || !userModifiedFields.priority) {
       newFormData.priority = templateData.priority as Priority
     }
 
-    // Apply status if user hasn't modified it
-    if (!userModifiedFields.status) {
+    if (forceOverwrite || !userModifiedFields.status) {
       newFormData.status = templateData.status as IssueStatus
     }
 
     setFormData(newFormData)
-    setAcceptanceCriteria(templateData.acceptanceCriteria || [])
+
+    if (forceOverwrite || acceptanceCriteria.length === 0) {
+      setAcceptanceCriteria(templateData.acceptanceCriteria || [])
+    }
   }
 
-  const handleConfirmTemplateSwitch = () => {
+  const handleConfirmTemplateSwitch = (overwrite: boolean) => {
     if (pendingTemplateId) {
-      applyTemplate(pendingTemplateId)
+      applyTemplate(pendingTemplateId, overwrite)
     }
     setShowTemplateConfirm(false)
     setPendingTemplateId("")
@@ -127,17 +169,73 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
       return
     }
 
-    onSubmit({
+    let finalAssignee = formData.assignee.trim()
+    if (!finalAssignee && formData.templateId && formData.templateId !== "none") {
+      const template = ISSUE_TEMPLATES[formData.templateId]
+      finalAssignee = template.defaults.defaultAssignee || ""
+    }
+    if (!finalAssignee) {
+      const currentUser = getCurrentUser()
+      finalAssignee = currentUser.name
+      telemetry.track("assignee_autofilled", { source: "currentUser" })
+    } else if (formData.templateId && formData.templateId !== "none") {
+      const template = ISSUE_TEMPLATES[formData.templateId]
+      if (template.defaults.defaultAssignee && finalAssignee === template.defaults.defaultAssignee) {
+        telemetry.track("assignee_autofilled", { source: "template" })
+      }
+    }
+
+    const issueData: Partial<Issue> = {
       title: formData.title,
       priority: formData.priority,
       status: formData.status,
-      assignee: formData.assignee || "",
+      assignee: finalAssignee,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
-      templateId: formData.templateId || undefined,
+      templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
       description: "",
+    }
+
+    const timeToCreateMs = Date.now() - openTimeRef.current
+    telemetry.track("issue_created_via_quick_capture", {
+      timeToCreateMs,
+      fieldsUsed: {
+        template: !!issueData.templateId,
+        assignee: !!issueData.assignee,
+        priority: issueData.priority !== "P3",
+        status: issueData.status !== "Todo",
+        sprint: !!issueData.sprintId,
+      },
+      acCount: acceptanceCriteria.length,
     })
 
+    onSubmit(issueData)
+
+    setFormData({
+      ...formData,
+      title: "",
+    })
+    setAcceptanceCriteria([])
+    setUserModifiedFields({
+      ...userModifiedFields,
+      title: false,
+    })
+    setIsDirty(false)
+
+    // Reset timer for next issue
+    openTimeRef.current = Date.now()
+  }
+
+  const handleClose = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true)
+    } else {
+      onOpenChange(false)
+    }
+  }
+
+  const handleConfirmDiscard = () => {
+    setShowDiscardConfirm(false)
     onOpenChange(false)
   }
 
@@ -145,8 +243,14 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[500px]">
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent
+          className="sm:max-w-[500px]"
+          onEscapeKeyDown={(e) => {
+            e.preventDefault()
+            handleClose()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Quick Capture</DialogTitle>
           </DialogHeader>
@@ -232,8 +336,11 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
               <Input
                 id="assignee"
                 value={formData.assignee}
-                onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
-                placeholder="Optional"
+                onChange={(e) => {
+                  setFormData({ ...formData, assignee: e.target.value })
+                  setUserModifiedFields({ ...userModifiedFields, assignee: true })
+                }}
+                placeholder="Optional (defaults to current user)"
               />
             </div>
 
@@ -275,7 +382,7 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
             )}
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={!formData.title.trim()}>
@@ -291,12 +398,36 @@ export function QuickCapture({ open, onOpenChange, sprints, onSubmit }: QuickCap
           <AlertDialogHeader>
             <AlertDialogTitle>Switch Template?</AlertDialogTitle>
             <AlertDialogDescription>
-              Switching template will replace the current acceptance criteria preview. Do you want to continue?
+              You have made changes to some fields. Do you want to overwrite them with the new template defaults, or
+              keep your current values?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingTemplateId("")}>Keep Current</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmTemplateSwitch}>Continue</AlertDialogAction>
+            <AlertDialogCancel
+              onClick={() => {
+                handleConfirmTemplateSwitch(false)
+              }}
+            >
+              Keep My Values
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleConfirmTemplateSwitch(true)}>
+              Overwrite with Template
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard Changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Are you sure you want to close without creating the issue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Editing</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDiscard}>Discard</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -36,6 +36,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     defaults: {
       priority: "P1",
       status: "Todo",
+      defaultAssignee: undefined, // Can be set per template
     },
     acceptanceCriteria: [
       "Steps to reproduce defined",
@@ -50,6 +51,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     defaults: {
       priority: "P3",
       status: "Todo",
+      defaultAssignee: undefined,
     },
     acceptanceCriteria: ["Acceptance scenarios listed", "Non-functional constraints noted", "UX mock agreed"],
   },
@@ -60,6 +62,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     defaults: {
       priority: "P2",
       status: "Todo",
+      defaultAssignee: undefined,
     },
     acceptanceCriteria: ["User impact clarified", "Success criteria measurable", "Approver identified"],
   },
@@ -79,6 +82,7 @@ export const applyIssueTemplate = (templateId: "bug" | "feature" | "request") =>
     templateId,
     priority: template.defaults.priority,
     status: template.defaults.status,
+    defaultAssignee: template.defaults.defaultAssignee,
     acceptanceCriteria: template.acceptanceCriteria.map((text) => ({
       id: generateACId(),
       text,

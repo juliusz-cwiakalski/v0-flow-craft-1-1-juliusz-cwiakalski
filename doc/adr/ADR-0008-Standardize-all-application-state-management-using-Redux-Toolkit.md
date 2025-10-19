@@ -97,13 +97,13 @@ migrate between storage layers without losing local state.
 
 1. **Install Redux Toolkit & React-Redux**
 
-   ```bash
+   \`\`\`bash
    npm install @reduxjs/toolkit react-redux
-   ```
+   \`\`\`
 
 2. **Create Global Store**
 
-   ```ts
+   \`\`\`ts
    // app/store.ts
    import { configureStore } from '@reduxjs/toolkit';
    import userProfileReducer from '../features/userProfile/userProfileSlice';
@@ -118,22 +118,22 @@ migrate between storage layers without losing local state.
 
    export type RootState = ReturnType<typeof store.getState>;
    export type AppDispatch = typeof store.dispatch;
-   ```
+   \`\`\`
 
 3. **Provide Store to App**
 
-   ```tsx
+   \`\`\`tsx
    import { Provider } from 'react-redux';
    import { store } from './app/store';
 
    <Provider store={store}>
      <App />
    </Provider>;
-   ```
+   \`\`\`
 
 4. **Slice Example: userProfileSlice.ts**
 
-   ```ts
+   \`\`\`ts
    import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
    interface UserProfileState {
@@ -161,18 +161,18 @@ migrate between storage layers without losing local state.
 
    export const { setProfile, updateLanguage } = userProfileSlice.actions;
    export default userProfileSlice.reducer;
-   ```
+   \`\`\`
 
 5. **Use in Component**
 
-   ```tsx
+   \`\`\`tsx
    const dispatch = useDispatch<AppDispatch>();
    const userProfile = useSelector((state: RootState) => state.userProfile);
 
    useEffect(() => {
      dispatch(updateLanguage('pl'));
    }, []);
-   ```
+   \`\`\`
 
 6. **Design Persistence Layer**
    - Create a `StorageAdapter` interface to support both local and backend storage.
@@ -181,12 +181,12 @@ migrate between storage layers without losing local state.
    - Store version alongside persisted data
    - Add migration logic per slice for version upgrades
    - Example:
-   ```ts
+   \`\`\`ts
    interface StorageAdapter {
      save: (key: string, data: unknown, version: number) => void;
      load: (key: string) => { version: number; data: unknown } | null;
    }
-   ```
+   \`\`\`
 
 ## Verification Criteria
 

@@ -18,6 +18,7 @@ import {
 import { IssueForm } from "./issue-form"
 import { IssueAssignmentDialog } from "./issue-assignment-dialog"
 import { priorityColors, statusColors } from "@/lib/data"
+import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint } from "@/types"
 
 interface IssueCardProps {
@@ -39,8 +40,14 @@ export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, 
       }
     : null
 
+  const handleCardView = () => {
+    if (acProgress && acProgress.total > 0) {
+      telemetry.track("ac_badge_viewed", { issueId: issue.id })
+    }
+  }
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow" onMouseEnter={handleCardView}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
