@@ -31,7 +31,7 @@ export interface Release {
 export const releases: Release[] = [
   {
     version: "0.2.0",
-    dateISO: "2025-01-18",
+    dateISO: "2025-11-18",
     items: [
       {
         id: "quick-capture",
@@ -75,7 +75,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.1.0",
-    dateISO: "2025-01-17",
+    dateISO: "2025-11-18",
     items: [
       {
         id: "initial-release",
