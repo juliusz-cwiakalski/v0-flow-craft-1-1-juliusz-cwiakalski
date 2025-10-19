@@ -39,7 +39,7 @@ Links
 - [Experiment 3: Full Data Export — see experiment-3-full-export.md](../changes/004-full-export/experiment-3-full-export.md)
 
 PRDs
-- PRD 0 — What’s New / Changelog — prd-experiment-0-changelog.md
-- PRD 1 — Quick Capture + Templates — prd-experiment-1-quick-capture-and-templates.md
-- PRD 3 — Full Data Export — prd-experiment-2-full-export.md
-- PRD 4 — Roll‑up Dashboard (Lite) — prd-experiment-3-rollup-dashboard-lite.md
+- PRD 0 — What’s New / Changelog — [prd-experiment-0-changelog.md](../changes/000-changelog/prd-experiment-0-changelog.md)
+- PRD 1 — Quick Capture + Templates — [prd-experiment-1-quick-capture-and-templates.md](../changes/001-quick-capture-and-templates/prd-experiment-1-quick-capture-and-templates.md)
+- PRD 3 — Roll‑up Dashboard (Lite) — [prd-change3-experiment-2-rollup-dashboard-lite.md](../changes/003-rollup-dashboard-lite/prd-change3-experiment-2-rollup-dashboard-lite.md)
+- PRD 4 — Full Data Export — [prd-change4-experiment-3-full-export.md](../changes/004-full-export/prd-change4-experiment-3-full-export.md)
