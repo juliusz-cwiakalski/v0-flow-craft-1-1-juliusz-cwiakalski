@@ -27,7 +27,7 @@ import { telemetry } from "@/lib/telemetry"
 interface IssueFormProps {
   issue?: Issue
   sprints: Sprint[]
-  onSubmit: (issueData: Partial<Issue>) => void
+  onSubmit: (issueData: Partial<Issue> | Issue) => void
   trigger?: React.ReactNode
 }
 
@@ -136,12 +136,15 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
       return
     }
 
-    onSubmit({
+    const submittedData = {
+      ...(issue ? { id: issue.id } : {}), // Include id when editing
       ...formData,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
       templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
-    })
+    }
+
+    onSubmit(submittedData as Issue)
 
     setOpen(false)
   }
