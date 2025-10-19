@@ -14,14 +14,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these action types
-        ignoredActions: [],
-        // Ignore these field paths in all actions
-        ignoredActionPaths: [],
-        // Ignore these paths in the state
-        ignoredPaths: [],
-      },
+      serializableCheck: false,
     }).concat(localStorageMiddleware),
   preloadedState,
 })

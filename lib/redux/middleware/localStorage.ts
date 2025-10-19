@@ -1,8 +1,9 @@
 import { Middleware } from "@reduxjs/toolkit"
 import { RootState } from "../store"
 
-const isDate = (value: any): value is string => {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)
+const isDate = (value: unknown): value is string => {
+  // ISO 8601 with optional milliseconds, ending with Z (UTC)
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)
 }
 
 const dateReviver = (key: string, value: any) => {
@@ -13,6 +14,7 @@ const dateReviver = (key: string, value: any) => {
 }
 
 export const loadState = (): RootState | undefined => {
+  if (typeof window === "undefined") return undefined
   try {
     const serializedState = localStorage.getItem("flowcraftState")
     if (serializedState === null) {
@@ -26,6 +28,7 @@ export const loadState = (): RootState | undefined => {
 }
 
 export const saveState = (state: RootState) => {
+  if (typeof window === "undefined") return
   try {
     const serializedState = JSON.stringify(state)
     localStorage.setItem("flowcraftState", serializedState)
