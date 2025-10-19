@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { ViewType, Issue, Sprint } from "@/types"
 
@@ -79,9 +78,9 @@ export function Navigation({
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
-                    <Badge variant="outline" className="ml-1 text-xs" suppressHydrationWarning>
+                    <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
                       {item.count}
-                    </Badge>
+                    </span>
                   </Button>
                 )
               })}
