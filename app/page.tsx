@@ -12,7 +12,7 @@ import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
 import { IssueForm } from "@/components/issue-form"
 import { useToast } from "@/hooks/use-toast"
-import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getLatestRelease } from "@/lib/changelog"
+import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getUnseenReleases } from "@/lib/changelog" // Import getUnseenReleases instead of getLatestRelease
 import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
 import type { RootState, AppDispatch } from "@/lib/redux/store"
@@ -261,7 +261,7 @@ export default function TaskFlowApp() {
     }
   }
 
-  const latestRelease = getLatestRelease()
+  const unseenReleases = getUnseenReleases() // Get all unseen releases instead of just the latest
 
   const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
     if (dontShowAgain) {
@@ -328,11 +328,11 @@ export default function TaskFlowApp() {
         />
       )}
 
-      {latestRelease && (
+      {unseenReleases.length > 0 && (
         <WhatsNewModal
           open={showWhatsNew}
           onOpenChange={(open) => dispatch(setShowWhatsNew(open))}
-          release={latestRelease}
+          releases={unseenReleases}
           onDismiss={handleWhatsNewDismiss}
           onNavigate={handleNavigateFromWhatsNew}
           onViewChangelog={handleViewChangelog}

@@ -151,3 +151,23 @@ export function hasUnseenUpdates(currentVersion: string): boolean {
 export function getLatestRelease(): Release | undefined {
   return releases[0]
 }
+
+export function getUnseenReleases(): Release[] {
+  const lastSeen = getLastSeenVersion()
+
+  // If no version has been seen, return all releases
+  if (!lastSeen) {
+    return releases
+  }
+
+  // Find the index of the last seen version
+  const lastSeenIndex = releases.findIndex((r) => r.version === lastSeen)
+
+  // If last seen version not found, return all releases
+  if (lastSeenIndex === -1) {
+    return releases
+  }
+
+  // Return all releases newer than the last seen version
+  return releases.slice(0, lastSeenIndex)
+}

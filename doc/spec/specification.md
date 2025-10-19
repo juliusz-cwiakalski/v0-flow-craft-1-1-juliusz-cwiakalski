@@ -216,12 +216,14 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 5. Changelog & What's New
 
-**Description**: Version tracking and feature announcement system with deep-linking support.
+**Description**: Version tracking and feature announcement system with deep-linking support and multi-version display.
 
 **Functionality**:
 
 - Auto-opening "What's New" modal on version updates
-- Display release notes with color-coded item types
+- Display ALL unseen release notes in a single scrollable modal
+- Show multiple versions when user hasn't seen updates (e.g., first-time users see all versions)
+- Color-coded item types for each release
 - Track last seen version in localStorage
 - Badge indicator on navigation for unseen updates
 - Dedicated changelog panel accessible from navigation
@@ -230,7 +232,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 **Components**:
 
-- `components/whats-new-modal.tsx` - Auto-opening modal for new releases with deep-link support
+- `components/whats-new-modal.tsx` - Auto-opening modal for new releases with deep-link support and multi-version display
 - `components/changelog-panel.tsx` - Full changelog history view with deep-link CTAs
 
 **Data Files**:
@@ -240,7 +242,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 **Data Types**:
 
 - `types/index.ts` - `ViewType` includes 'changelog'
-- `lib/changelog.ts` - `ReleaseItem` interface with `cta.href` for deep links
+- `lib/changelog.ts` - `ReleaseItem` interface with `cta.href` for deep links, `Release` interface
 
 **Release Item Types**:
 
@@ -252,6 +254,9 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 **Key Features**:
 
 - Automatic modal display on first load after version update
+- **Multi-version display** - Shows ALL unseen versions in a single scrollable modal
+- **First-time experience** - Users who have never seen the modal get all versions at once
+- Version headers separate each release when showing multiple versions
 - "Don't show again" option for current version
 - Badge indicator on "What's New" button when updates unseen
 - Deep-linking to relevant views from release items
@@ -259,6 +264,15 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - "How to find" instructions for each feature
 - Version history with dates
 - Query parameter handling - `?open=quick-capture` opens Quick Capture modal
+- Scrollable modal content (max-height: 80vh) to accommodate multiple versions
+
+**Multi-Version Display Logic**:
+
+- `getUnseenReleases()` returns array of all releases newer than last seen version
+- If no version has been seen (first-time user), returns ALL releases
+- Modal displays each release with version header, date, and items
+- User can scroll through all unseen versions in one session
+- Dismissing modal marks current version as seen, hiding all previous versions
 
 **Deep-Link Implementation**:
 
