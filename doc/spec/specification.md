@@ -344,6 +344,113 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Semantic design tokens (bg-background, text-foreground)
 - Responsive design patterns
 
+### 9. Roll-up Dashboard
+
+**Description**: Executive dashboard providing instant visibility into project health with key metrics, scope filtering, and time range controls.
+
+**Functionality**:
+
+- View 4 key metric cards in 2x2 grid layout
+- Filter data by Project and Team (cross-view scope filters)
+- Adjust time range (Last 7/14/30 days)
+- Pure derivation from existing issue/sprint data (no new storage)
+- Real-time metric updates based on filtered scope
+- Telemetry tracking for dashboard usage
+
+**Components**:
+
+- `components/dashboard/dashboard-view.tsx` - Main dashboard container with filters and grid
+- `components/dashboard/status-breakdown-card.tsx` - Issue counts by status (Todo/In Progress/In Review/Done)
+- `components/dashboard/active-sprint-progress-card.tsx` - Active sprint completion percentage
+- `components/dashboard/throughput-card.tsx` - Issues closed over time range
+- `components/dashboard/workload-by-assignee-card.tsx` - Top 5 assignees by issue count
+- `components/scope-filters.tsx` - Project/Team multi-select filters with Clear button
+
+**Data Types**:
+
+- `types/index.ts` - `Project`, `Team`, `DashboardTimeRange`, `TimeRangePreset`, `PreferencesState`
+- `lib/dashboard-utils.ts` - Metric derivation functions
+
+**Redux Slices**:
+
+- `lib/redux/slices/projectsSlice.ts` - Project entity management (seeded with "Main Project")
+- `lib/redux/slices/teamsSlice.ts` - Team entity management (seeded with "Main Team")
+- `lib/redux/slices/preferencesSlice.ts` - User preferences (selected filters, time range)
+- `lib/redux/slices/issuesSlice.ts` - Enhanced with `projectId`, `teamId`, `statusChangeHistory` fields
+
+**Metric Cards**:
+
+1. **Status Breakdown**
+   - Counts issues by status (Todo, In Progress, In Review, Done)
+   - Color-coded bars matching status colors
+   - Shows total issue count
+   - Derived from: `deriveCountsByStatus(scopedIssues)`
+
+2. **Active Sprint Progress**
+   - Shows completion % of active sprint
+   - Displays sprint name and date range
+   - Counts Done vs Total issues
+   - Empty state when no active sprint
+   - Derived from: `deriveActiveSprintProgress(scopedIssues, sprints)`
+
+3. **Throughput**
+   - Issues closed (moved to Done) within time range
+   - Respects selected time range preset (7d/14d/30d)
+   - Uses `statusChangeHistory` to track status transitions
+   - Derived from: `deriveThroughput(scopedIssues, timeRange)`
+
+4. **Workload by Assignee**
+   - Top 5 assignees by issue count
+   - Shows assignee name and count
+   - Sorted descending by count
+   - Derived from: `deriveWorkloadByAssignee(scopedIssues, 5)`
+
+**Scope Filtering**:
+
+- **Project Filter**: Multi-select dropdown, filters issues by `projectId`
+- **Team Filter**: Multi-select dropdown, filters issues by `teamId`
+- **Clear Filters**: Button to reset all filters at once
+- **Persistence**: Filter selections persist in Redux state across view navigation
+- **Cross-View**: Same filters apply to Issues, Current Sprint, and Dashboard views
+
+**Time Range Controls**:
+
+- **Presets**: Last 7 days, Last 14 days, Last 30 days
+- **Badge UI**: Clickable badges, active preset highlighted
+- **Persistence**: Selected range persists in Redux preferences
+- **Scope**: Only affects Throughput metric (status change history filtering)
+
+**Key Features**:
+
+- Pure derivation - no new data storage, all metrics computed from existing issues/sprints
+- Real-time updates - metrics recalculate on data changes
+- Scope filtering - Project/Team filters apply across all views
+- Time range control - Adjust throughput calculation window
+- Telemetry tracking - `dashboard_view_opened`, `dashboard_time_range_changed` events
+- Empty states - Graceful handling when no data or no active sprint
+- Responsive grid - 2x2 on desktop, stacks on mobile
+
+**Data Utilities** (in `lib/dashboard-utils.ts`):
+
+- `applyScopeFilters(issues, projectIds, teamIds)` - Filters issues by selected scope
+- `deriveCountsByStatus(issues)` - Counts issues by status
+- `deriveActiveSprintProgress(issues, sprints)` - Calculates active sprint completion %
+- `deriveThroughput(issues, timeRange)` - Counts issues closed in time range
+- `deriveWorkloadByAssignee(issues, topN)` - Top N assignees by issue count
+
+**Redux State**:
+
+- `projects` - Array of Project entities (seeded with default)
+- `teams` - Array of Team entities (seeded with default)
+- `preferences.selectedProjectIds` - Currently selected project IDs for filtering
+- `preferences.selectedTeamIds` - Currently selected team IDs for filtering
+- `preferences.dashboardTimeRange` - Current time range selection
+
+**Entry Points**:
+
+1. **Navigation**: Click "Dashboard" in top navigation
+2. **Changelog CTA**: Click "View Dashboard" in What's New modal or Changelog panel
+
 ## User Workflows
 
 ### Creating an Issue (Standard)
@@ -409,27 +516,52 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 4. Click "Don't show again" to dismiss for current version
 5. Access full changelog anytime via "What's New" button in navigation
 
+### Viewing Dashboard Metrics
+
+1. Navigate to Dashboard view via top navigation
+2. View 4 metric cards: Status Breakdown, Active Sprint Progress, Throughput, Workload
+3. Optionally filter by Project/Team using dropdowns
+4. Optionally adjust time range (7d/14d/30d) for Throughput metric
+5. Click "Clear Filters" to reset all filters
+6. Metrics update in real-time based on filters
+
+### Filtering Data Across Views
+
+1. Select Project(s) and/or Team(s) from filter dropdowns
+2. Navigate between Issues, Current Sprint, and Dashboard views
+3. Filters persist across views
+4. Click "Clear Filters" to reset all at once
+
 ## Data Flow
 
 ### State Management
 
 - Root state in `app/page.tsx` using React `useState`
-- Issues and sprints arrays maintained in root component
+- **Redux Toolkit** for centralized state management:
+  - `issuesSlice` - Issue entities with `projectId`, `teamId`, `statusChangeHistory`
+  - `sprintsSlice` - Sprint entities
+  - `projectsSlice` - Project entities (seeded with default)
+  - `teamsSlice` - Team entities (seeded with default)
+  - `preferencesSlice` - User preferences (filters, time range)
+  - `uiSlice` - UI state (current view, modals)
 - State passed down to child components via props
 - Callbacks passed down for state mutations
-- Immutable updates with new arrays/objects
-- Quick Capture modal state managed in root
-- What's New modal state managed in root with localStorage sync
+- Immutable updates with Redux Toolkit (Immer)
+- Quick Capture modal state managed in Redux
+- What's New modal state managed in Redux with localStorage sync
 - Last-used template persisted in localStorage (`flowcraft:lastUsedTemplate`)
 - Last seen version persisted in localStorage (`flowcraft:lastSeenVersion`)
+- **Scope filters** persisted in Redux preferences, apply across views
 
 ### Data Persistence
 
 - Currently in-memory only (resets on page refresh)
+- Redux state with localStorage sync for:
+  - Last seen version (`flowcraft:lastSeenVersion`)
+  - Last-used template (`flowcraft:lastUsedTemplate`)
 - Ready for backend integration (all CRUD operations defined)
 - Timestamps tracked for all entities (createdAt, updatedAt)
-- Last seen version persists across sessions
-- Last-used template persists across sessions
+- Status change history tracked for throughput metrics
 
 ## Validation Rules
 
@@ -470,6 +602,17 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
   - Tracks `issue_opened_via_deeplink` telemetry event
 
 ## Version History
+
+### v0.3.0 (2025-01-18)
+- Added Roll-up Dashboard with 4 key metrics
+- Added Project and Team entities with default seeding
+- Added cross-view scope filtering (Project/Team)
+- Added time range controls for dashboard (7d/14d/30d)
+- Added status change history tracking for throughput
+- Added dashboard metric derivation functions
+- Added Redux slices for projects, teams, and preferences
+- Enhanced issues with projectId, teamId, statusChangeHistory fields
+- Added telemetry for dashboard usage
 
 ### v0.2.0 (2025-01-18)
 - Added Quick Capture with keyboard shortcut (Q)

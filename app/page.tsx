@@ -7,6 +7,7 @@ import { IssuesList } from "@/components/issues-list"
 import { CurrentSprintView } from "@/components/current-sprint-view"
 import { SprintsView } from "@/components/sprints-view"
 import { ChangelogPanel } from "@/components/changelog-panel"
+import { DashboardView } from "@/components/dashboard/dashboard-view"
 import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
 import { IssueForm } from "@/components/issue-form"
@@ -25,6 +26,12 @@ import {
 } from "@/lib/redux/slices/issuesSlice"
 import { addSprint, updateSprint, startSprint, endSprint } from "@/lib/redux/slices/sprintsSlice"
 import { setCurrentView, setShowWhatsNew, setShowQuickCapture, setHasUnseenUpdates } from "@/lib/redux/slices/uiSlice"
+import {
+  setSelectedProjects,
+  setSelectedTeams,
+  clearFilters,
+  setDashboardTimeRange,
+} from "@/lib/redux/slices/preferencesSlice"
 
 export default function TaskFlowApp() {
   const dispatch: AppDispatch = useDispatch()
@@ -32,6 +39,11 @@ export default function TaskFlowApp() {
   const searchParams = useSearchParams()
   const { issues } = useSelector((state: RootState) => state.issues)
   const { sprints } = useSelector((state: RootState) => state.sprints)
+  const { projects } = useSelector((state: RootState) => state.projects)
+  const { teams } = useSelector((state: RootState) => state.teams)
+  const { selectedProjectIds, selectedTeamIds, dashboardTimeRange } = useSelector(
+    (state: RootState) => state.preferences,
+  )
   const {
     currentView,
     showWhatsNew,
@@ -224,6 +236,22 @@ export default function TaskFlowApp() {
             onEditSprint={handleEditSprint}
             onStartSprint={handleStartSprint}
             onEndSprint={handleEndSprint}
+          />
+        )
+      case "dashboard":
+        return (
+          <DashboardView
+            issues={issues}
+            sprints={sprints}
+            projects={projects}
+            teams={teams}
+            selectedProjectIds={selectedProjectIds}
+            selectedTeamIds={selectedTeamIds}
+            timeRange={dashboardTimeRange}
+            onProjectsChange={(ids) => dispatch(setSelectedProjects(ids))}
+            onTeamsChange={(ids) => dispatch(setSelectedTeams(ids))}
+            onClearFilters={() => dispatch(clearFilters())}
+            onTimeRangeChange={(range) => dispatch(setDashboardTimeRange(range))}
           />
         )
       case "changelog":

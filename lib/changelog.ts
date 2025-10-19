@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.2.0"
+export const APP_VERSION = "0.3.0"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -15,7 +15,7 @@ export interface ReleaseItem {
     href?: string
   }
   deeplink?: {
-    view: "issues" | "current-sprint" | "sprints" | "changelog"
+    view: "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard"
     query?: Record<string, string>
   }
   howToFind?: string
@@ -30,6 +30,34 @@ export interface Release {
 // Release content (newest first)
 export const releases: Release[] = [
   {
+    version: "0.3.0",
+    dateISO: "2025-01-18",
+    items: [
+      {
+        id: "dashboard",
+        kind: "New",
+        title: "Roll-up Dashboard",
+        summary:
+          "Get instant visibility into project health with 4 key metrics: Status Breakdown (Todo/In Progress/In Review/Done counts), Active Sprint Progress (completion %), Throughput (issues closed over time), and Workload by Assignee (top 5 contributors). Filter by Project/Team and adjust time range (7d/14d/30d).",
+        cta: {
+          label: "View Dashboard",
+        },
+        deeplink: {
+          view: "dashboard",
+        },
+        howToFind: 'Click "Dashboard" in the top navigation to see project metrics and insights',
+      },
+      {
+        id: "scope-filters",
+        kind: "New",
+        title: "Cross-View Scope Filters",
+        summary:
+          "Filter issues by Project and Team across all views (Issues, Current Sprint, Dashboard). Selections persist as you navigate, and a Clear Filters button resets all at once.",
+        howToFind: "Use the Project/Team dropdowns at the top of any view to filter your data",
+      },
+    ],
+  },
+  {
     version: "0.2.0",
     dateISO: "2025-01-18",
     items: [
@@ -41,7 +69,7 @@ export const releases: Release[] = [
           'Press Q or click "Quick Add" to create issues in ≤10 seconds. Choose Bug, Feature, or Request templates with pre-filled Acceptance Criteria to standardize task quality and reduce coordination overhead.',
         cta: {
           label: "Try Quick Capture",
-          href: "?open=quick-capture", // Add deep link
+          href: "?open=quick-capture",
         },
         deeplink: {
           view: "issues",
