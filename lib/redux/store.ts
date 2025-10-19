@@ -2,6 +2,9 @@ import { configureStore } from "@reduxjs/toolkit"
 import issuesReducer from "./slices/issuesSlice"
 import sprintsReducer from "./slices/sprintsSlice"
 import uiReducer from "./slices/uiSlice"
+import projectsReducer from "./slices/projectsSlice"
+import teamsReducer from "./slices/teamsSlice"
+import preferencesReducer from "./slices/preferencesSlice"
 import { localStorageMiddleware, loadState } from "./middleware/localStorage"
 
 const preloadedState = loadState()
@@ -11,6 +14,9 @@ export const store = configureStore({
     issues: issuesReducer,
     sprints: sprintsReducer,
     ui: uiReducer,
+    projects: projectsReducer,
+    teams: teamsReducer,
+    preferences: preferencesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

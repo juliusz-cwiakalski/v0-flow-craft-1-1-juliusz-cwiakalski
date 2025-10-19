@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ViewType, Issue, Sprint } from "@/types"
-import { useState, useEffect } from "react"
 
 interface NavigationProps {
   currentView: ViewType
@@ -12,7 +11,7 @@ interface NavigationProps {
   sprints: Sprint[]
   hasUnseenUpdates?: boolean
   onWhatsNewClick?: () => void
-  onQuickAddClick?: () => void // Added quick add handler
+  onQuickAddClick?: () => void
 }
 
 export function Navigation({
@@ -22,9 +21,8 @@ export function Navigation({
   sprints,
   hasUnseenUpdates = false,
   onWhatsNewClick,
-  onQuickAddClick, // Added quick add handler
+  onQuickAddClick,
 }: NavigationProps) {
-
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
   const activeSprintIssues = issues.filter((issue) => issue.sprintId === activeSprint?.id)
 
@@ -41,6 +39,12 @@ export function Navigation({
       icon: "📊",
       count: activeSprintIssues.length,
       disabled: !activeSprint,
+    },
+    {
+      id: "dashboard" as ViewType,
+      label: "Dashboard",
+      icon: "📈",
+      count: undefined,
     },
     {
       id: "sprints" as ViewType,
@@ -80,9 +84,11 @@ export function Navigation({
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
-                    <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
-                      {item.count}
-                    </span>
+                    {item.count !== undefined && (
+                      <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
+                        {item.count}
+                      </span>
+                    )}
                   </Button>
                 )
               })}

@@ -18,3 +18,7 @@ class TelemetryAdapter {
 }
 
 export const telemetry = new TelemetryAdapter()
+
+export function trackEvent(event: string, payload: Record<string, unknown> = {}) {
+  telemetry.track(event, payload)
+}

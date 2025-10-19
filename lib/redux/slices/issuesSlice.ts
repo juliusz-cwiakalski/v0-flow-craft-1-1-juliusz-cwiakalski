@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Issue, IssueStatus } from "@/types"
 import { initialIssues, generateTaskId } from "@/lib/data"
 
@@ -23,8 +23,17 @@ const issuesSlice = createSlice({
         status: action.payload.status || "Todo",
         assignee: action.payload.assignee || "",
         sprintId: action.payload.sprintId,
+        projectId: action.payload.projectId,
+        teamId: action.payload.teamId,
         templateId: action.payload.templateId,
         acceptanceCriteria: action.payload.acceptanceCriteria,
+        statusChangeHistory: [
+          {
+            from: "Created",
+            to: action.payload.status || "Todo",
+            atISO: new Date().toISOString(),
+          },
+        ],
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -33,9 +42,23 @@ const issuesSlice = createSlice({
     updateIssue(state, action: PayloadAction<Issue>) {
       const index = state.issues.findIndex((issue) => issue.id === action.payload.id)
       if (index !== -1) {
+        const oldIssue = state.issues[index]
+        const newIssue = action.payload
+
+        if (oldIssue.status !== newIssue.status) {
+          const history = oldIssue.statusChangeHistory || []
+          newIssue.statusChangeHistory = [
+            ...history,
+            {
+              from: oldIssue.status,
+              to: newIssue.status,
+              atISO: new Date().toISOString(),
+            },
+          ]
+        }
+
         state.issues[index] = {
-          ...state.issues[index],
-          ...action.payload,
+          ...newIssue,
           updatedAt: new Date(),
         }
       }
@@ -46,6 +69,15 @@ const issuesSlice = createSlice({
     updateIssueStatus(state, action: PayloadAction<{ issueId: string; newStatus: IssueStatus }>) {
       const issue = state.issues.find((issue) => issue.id === action.payload.issueId)
       if (issue) {
+        const history = issue.statusChangeHistory || []
+        issue.statusChangeHistory = [
+          ...history,
+          {
+            from: issue.status,
+            to: action.payload.newStatus,
+            atISO: new Date().toISOString(),
+          },
+        ]
         issue.status = action.payload.newStatus
         issue.updatedAt = new Date()
       }
@@ -69,6 +101,12 @@ const issuesSlice = createSlice({
   },
 })
 
-export const { addIssue, updateIssue, deleteIssue, updateIssueStatus, assignIssueToSprint, moveUnfinishedIssuesToBacklog } =
-  issuesSlice.actions
+export const {
+  addIssue,
+  updateIssue,
+  deleteIssue,
+  updateIssueStatus,
+  assignIssueToSprint,
+  moveUnfinishedIssuesToBacklog,
+} = issuesSlice.actions
 export default issuesSlice.reducer

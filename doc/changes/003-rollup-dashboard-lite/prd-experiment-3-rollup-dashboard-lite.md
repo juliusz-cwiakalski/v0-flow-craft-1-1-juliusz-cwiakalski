@@ -119,13 +119,13 @@ Implement **Change 003 — Roll‑up Dashboard Lite + Projects/Teams + Cross‑V
 
 ### Checkout Command
 
-```bash
+\`\`\`bash
 git checkout -b feat/rollup-dashboard-lite-projects-teams-cross-view-filters
-```
+\`\`\`
 
 ### Commit Message (used as MR title and description)
 
-```text
+\`\`\`text
 feat: roll‑up dashboard lite + projects/teams entities + cross‑view filters with persistence
 
 - Add Projects/Teams slices with default seeding and simple management panel
@@ -135,4 +135,4 @@ feat: roll‑up dashboard lite + projects/teams entities + cross‑view filters 
 - Persist filters and dashboard time range in Redux + local storage (ADR‑0008)
 - Telemetry: dashboard_view_opened, dashboard_time_range_changed, dashboard_scope_changed, filters_cleared, scope_changed_on_issues, scope_changed_on_current_sprint
 - Minimal unit tests for derivations and scope selectors
-```
+\`\`\`

@@ -10,8 +10,11 @@ export interface Issue {
   status: IssueStatus
   assignee: string
   sprintId?: string
+  projectId?: string
+  teamId?: string
   templateId?: "bug" | "feature" | "request"
   acceptanceCriteria?: AcceptanceCriterion[]
+  statusChangeHistory?: StatusChangeEntry[]
   createdAt: Date
   updatedAt: Date
 }
@@ -45,4 +48,38 @@ export interface Sprint {
   updatedAt: Date
 }
 
-export type ViewType = "issues" | "current-sprint" | "sprints" | "changelog"
+export interface StatusChangeEntry {
+  from: IssueStatus | "Created"
+  to: IssueStatus
+  atISO: string
+}
+
+export interface Project {
+  id: string
+  name: string
+  createdAt: Date
+}
+
+export interface Team {
+  id: string
+  name: string
+  createdAt: Date
+}
+
+export type TimeRangePreset = "7d" | "14d" | "30d" | "custom"
+
+export interface DashboardTimeRange {
+  preset: TimeRangePreset
+  fromISO?: string
+  toISO?: string
+}
+
+export interface PreferencesState {
+  selectedProjectIds: string[]
+  selectedTeamIds: string[]
+  lastUsedProjectId?: string
+  lastUsedTeamId?: string
+  dashboardTimeRange: DashboardTimeRange
+}
+
+export type ViewType = "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard"
