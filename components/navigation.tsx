@@ -24,11 +24,6 @@ export function Navigation({
   onWhatsNewClick,
   onQuickAddClick, // Added quick add handler
 }: NavigationProps) {
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
   const activeSprintIssues = issues.filter((issue) => issue.sprintId === activeSprint?.id)
@@ -85,11 +80,9 @@ export function Navigation({
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
-                    {isMounted && (
-                      <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
-                        {item.count}
-                      </span>
-                    )}
+                    <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
+                      {item.count}
+                    </span>
                   </Button>
                 )
               })}
@@ -121,7 +114,7 @@ export function Navigation({
             >
               <span className="text-lg">✨</span>
               <span className="hidden sm:inline">What's New</span>
-              {isMounted && hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
+              {hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
             </Button>
           </div>
         </div>
