@@ -1,4 +1,4 @@
-\`\`\`mermaid
+```mermaid
 ---
 config:
   layout: tidy-tree
@@ -37,4 +37,4 @@ mindmap
       s5.5 Proste wizualizacje wykresy kolorowanie statusy i Gantt szybka ocena statusu bez konieczności złożonych tabel
 
 
-\`\`\`
+```
