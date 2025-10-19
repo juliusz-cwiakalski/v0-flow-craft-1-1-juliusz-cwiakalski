@@ -78,7 +78,7 @@ export function Navigation({
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
-                    <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
+                    <span suppressHydrationWarning className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
                       {item.count}
                     </span>
                   </Button>
