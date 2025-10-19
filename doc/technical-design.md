@@ -13,6 +13,11 @@ The architecture follows a component-based design with unidirectional data flow 
 - React 18+ (Client Components)
 - TypeScript 5+
 
+**State Management**:
+
+- Redux Toolkit
+- React-Redux
+
 **Styling**:
 
 - Tailwind CSS 4
@@ -61,6 +66,13 @@ flowcraft/
 ├── types/ # TypeScript type definitions
 │ └── index.ts # Core types (Issue, Sprint, etc.)
 ├── lib/ # Utility functions and data
+│ ├── redux/ # Redux store and slices
+│ │ ├── store.ts
+│ │ ├── provider.tsx
+│ │ └── slices/
+│ │   ├── issuesSlice.ts
+│ │   ├── sprintsSlice.ts
+│ │   └── uiSlice.ts
 │ ├── data.ts # Initial data and utilities
 │ └── utils.ts # Helper functions (cn, etc.)
 ├── hooks/ # Custom React hooks
@@ -73,7 +85,7 @@ flowcraft/
 ### Component Hierarchy
 
 \`\`\`
-App (page.tsx)
+App (page.tsx) - Connects to Redux store
 ├── Navigation
 │ └── View tabs with counts
 ├── IssuesList (when view === "issues")
@@ -138,31 +150,40 @@ type ViewType = "issues" | "current-sprint" | "sprints"
 
 ### State Management
 
-**Root State** (in `app/page.tsx`):
+**Core Principle**: Adopted Redux Toolkit as the sole, centralized state management solution as per ADR-0008. This replaces the previous `useState`-based approach in the root component.
 
+**Store and Slices**:
+
+- A single global store (`lib/redux/store.ts`) is the source of truth.
+- State is organized into feature-based slices (`lib/redux/slices/`):
+  - `issuesSlice.ts`: Manages the `issues` array and related CRUD operations.
+  - `sprintsSlice.ts`: Manages the `sprints` array and sprint lifecycle actions.
+  - `uiSlice.ts`: Manages UI state like `currentView`, modal visibility, etc.
+
+**Data Flow**:
+
+1. The Redux `Provider` wraps the application in `app/layout.tsx`.
+2. Components use the `useSelector` hook to read data from the store.
+3. Components use the `useDispatch` hook to dispatch actions (e.g., `addIssue`, `startSprint`).
+4. Reducers in the slices handle these actions and produce new state immutably.
+5. The UI re-renders automatically in response to state changes.
+
+**Example Action Dispatch**:
 \`\`\`typescript
-const [currentView, setCurrentView] = useState<ViewType>("issues")
-const [issues, setIssues] = useState<Issue[]>(initialIssues)
-const [sprints, setSprints] = useState<Sprint[]>(initialSprints)
+// In a component
+import { useDispatch } from 'react-redux';
+import { deleteIssue } from '@/lib/redux/slices/issuesSlice';
+
+const dispatch = useDispatch();
+// ...
+dispatch(deleteIssue(issueId));
 \`\`\`
 
-**State Flow**:
+**State Persistence**:
 
-1. Root component maintains all application state
-2. State passed down to child components via props
-3. Mutation callbacks passed down for state updates
-4. Child components call callbacks to trigger state changes
-5. State updates flow back down through props
-
-**State Update Pattern**:
-\`\`\`typescript
-// Immutable update pattern used throughout
-setIssues(issues.map(issue =>
-issue.id === targetId
-? { ...issue, ...updates, updatedAt: new Date() }
-: issue
-))
-\`\`\`
+- Specific slices of the state (e.g., issues, sprints) will be persisted to `LocalStorage` to survive page reloads.
+- This is achieved via Redux middleware that saves state on changes and loads it on initialization.
+- This approach is designed to be extensible, allowing for a future migration to a backend API without losing local data (as per ADR-0008).
 
 ### Data Layer
 
@@ -358,16 +379,16 @@ User clicks "Create Issue"
 → IssueForm opens
 → User fills form
 → Form validates
-→ handleCreateIssue() called
-→ New issue added to state
+→ Dispatches `addIssue` action with form data
+→ Redux store updates
 → UI re-renders with new issue
 \`\`\`
 
 **Read**:
 \`\`\`
-Issues state
-→ Passed to IssuesList
-→ Filtered/sorted
+Component connects to Redux store
+→ Reads `issues` state using `useSelector`
+→ Filtered/sorted in the component
 → Mapped to IssueCard components
 → Rendered in UI
 \`\`\`
@@ -378,16 +399,16 @@ User clicks "Edit" on IssueCard
 → IssueForm opens with issue data
 → User modifies form
 → Form validates
-→ handleEditIssue() called
-→ Issue updated in state
+→ Dispatches `updateIssue` action with updated data
+→ Redux store updates
 → UI re-renders with updated issue
 \`\`\`
 
 **Delete**:
 \`\`\`
 User clicks "Delete" on IssueCard
-→ handleDeleteIssue() called
-→ Issue removed from state
+→ Dispatches `deleteIssue` action with issue ID
+→ Redux store updates
 → UI re-renders without issue
 \`\`\`
 
@@ -396,24 +417,25 @@ User clicks "Delete" on IssueCard
 **Creation**:
 \`\`\`
 User creates sprint
-→ Status: "Planned"
-→ Added to sprints state
+→ Dispatches `addSprint` action with sprint data
+→ Reducer sets status to "Planned"
+→ Redux store updates
 \`\`\`
 
 **Activation**:
 \`\`\`
 User clicks "Start Sprint"
-→ handleStartSprint() called
-→ Status changed to "Active"
-→ Only one sprint can be active
+→ Dispatches `startSprint` action with sprint ID
+→ Reducer changes status to "Active"
+→ Only one sprint can be active (enforced in reducer logic)
 \`\`\`
 
 **Completion**:
 \`\`\`
 User clicks "End Sprint"
-→ handleEndSprint() called
-→ Unfinished issues moved to backlog
-→ Status changed to "Completed"
+→ Dispatches actions to end sprint and move issues
+→ `sprints` reducer changes status to "Completed"
+→ `issues` reducer moves unfinished issues to backlog
 \`\`\`
 
 ## Performance Considerations
