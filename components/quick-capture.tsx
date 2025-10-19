@@ -245,17 +245,42 @@ export function QuickCapture({
 
     onSubmit(issueData)
 
-    setFormData({
-      ...formData,
-      title: "",
-    })
-    setAcceptanceCriteria([])
+    const currentTemplateId = formData.templateId
+
+    if (currentTemplateId && currentTemplateId !== "none") {
+      // Re-apply the same template to get fresh defaults
+      const templateData = applyIssueTemplate(currentTemplateId)
+      const template = ISSUE_TEMPLATES[currentTemplateId]
+
+      setFormData({
+        title: template.prefix,
+        templateId: currentTemplateId,
+        priority: templateData.priority as Priority,
+        status: templateData.status as IssueStatus,
+        assignee: "",
+        sprintId: formData.sprintId, // Keep the same sprint context
+      })
+      setAcceptanceCriteria(templateData.acceptanceCriteria || [])
+    } else {
+      // No template, just clear the title
+      setFormData({
+        ...formData,
+        title: "",
+        assignee: "",
+      })
+      setAcceptanceCriteria([])
+    }
+
+    // Reset user modification tracking
     setUserModifiedFields({
-      ...userModifiedFields,
       title: false,
+      priority: false,
+      status: false,
+      assignee: false,
     })
     setIsDirty(false)
 
+    // Reset timer for next issue
     openTimeRef.current = Date.now()
   }
 
