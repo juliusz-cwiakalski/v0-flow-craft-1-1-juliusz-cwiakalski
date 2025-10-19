@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IssueCard } from "./issue-card"
 import { IssueForm } from "./issue-form"
-import type { Issue, Sprint, Priority, IssueStatus } from "@/types"
+import type { Issue, Sprint, Priority, IssueStatus, Project, Team } from "@/types"
 
 interface IssuesListProps {
   issues: Issue[]
   sprints: Sprint[]
+  projects?: Project[] // Added projects prop
+  teams?: Team[] // Added teams prop
   onCreateIssue: (issueData: Partial<Issue>) => void
   onEditIssue: (issue: Issue) => void
   onDeleteIssue: (issueId: string) => void
@@ -20,6 +22,8 @@ interface IssuesListProps {
 export function IssuesList({
   issues,
   sprints,
+  projects = [], // Default to empty array
+  teams = [], // Default to empty array
   onCreateIssue,
   onEditIssue,
   onDeleteIssue,
@@ -50,6 +54,8 @@ export function IssuesList({
         <h1 className="text-2xl font-semibold">Issues</h1>
         <IssueForm
           sprints={sprints}
+          projects={projects} // Pass projects prop
+          teams={teams} // Pass teams prop
           onSubmit={onCreateIssue}
           trigger={
             <Button>

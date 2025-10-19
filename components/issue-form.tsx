@@ -20,19 +20,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion } from "@/types"
+import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion, Project, Team } from "@/types"
 import { ISSUE_TEMPLATES, applyIssueTemplate, generateACId } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
 
 interface IssueFormProps {
   issue?: Issue
   sprints: Sprint[]
+  projects?: Project[] // Made optional with default
+  teams?: Team[] // Made optional with default
   onSubmit: (issueData: Partial<Issue> | Issue) => void
   trigger?: React.ReactNode
+  open?: boolean // Added open prop for controlled mode
+  onOpenChange?: (open: boolean) => void // Added onOpenChange for controlled mode
 }
 
-export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps) {
-  const [open, setOpen] = useState(false)
+export function IssueForm({
+  issue,
+  sprints,
+  projects = [], // Default to empty array
+  teams = [], // Default to empty array
+  onSubmit,
+  trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: IssueFormProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = controlledOnOpenChange || setInternalOpen
+
   const [formData, setFormData] = useState({
     title: issue?.title || "",
     description: issue?.description || "",
@@ -40,6 +57,8 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
     status: issue?.status || ("Todo" as IssueStatus),
     assignee: issue?.assignee || "",
     sprintId: issue?.sprintId || "0",
+    projectId: issue?.projectId || "0", // Added projectId
+    teamId: issue?.teamId || "0", // Added teamId
     templateId: issue?.templateId || ("none" as "none" | "bug" | "feature" | "request"),
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(issue?.acceptanceCriteria || [])
@@ -56,6 +75,8 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
         status: issue?.status || "Todo",
         assignee: issue?.assignee || "",
         sprintId: issue?.sprintId || "0",
+        projectId: issue?.projectId || "0", // Added projectId
+        teamId: issue?.teamId || "0", // Added teamId
         templateId: issue?.templateId || "none",
       })
       setAcceptanceCriteria(issue?.acceptanceCriteria || [])
@@ -140,6 +161,8 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
       ...(issue ? { id: issue.id } : {}), // Include id when editing
       ...formData,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
+      projectId: formData.projectId === "0" ? undefined : formData.projectId, // Added projectId
+      teamId: formData.teamId === "0" ? undefined : formData.teamId, // Added teamId
       templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
     }
@@ -233,6 +256,45 @@ export function IssueForm({ issue, sprints, onSubmit, trigger }: IssueFormProps)
                     <SelectItem value="In Progress">In Progress</SelectItem>
                     <SelectItem value="In Review">In Review</SelectItem>
                     <SelectItem value="Done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="project">Project (Optional)</Label>
+                <Select
+                  value={formData.projectId}
+                  onValueChange={(value) => setFormData({ ...formData, projectId: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">No Project</SelectItem>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="team">Team (Optional)</Label>
+                <Select value={formData.teamId} onValueChange={(value) => setFormData({ ...formData, teamId: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">No Team</SelectItem>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

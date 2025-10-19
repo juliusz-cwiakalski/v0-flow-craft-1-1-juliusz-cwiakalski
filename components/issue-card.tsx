@@ -19,18 +19,29 @@ import { IssueForm } from "./issue-form"
 import { IssueAssignmentDialog } from "./issue-assignment-dialog"
 import { priorityColors, statusColors } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
-import type { Issue, Sprint } from "@/types"
+import type { Issue, Sprint, Project, Team } from "@/types"
 
 interface IssueCardProps {
   issue: Issue
   sprints: Sprint[]
+  projects?: Project[] // Added projects prop
+  teams?: Team[] // Added teams prop
   onEdit: (issue: Issue) => void
   onDelete: (issueId: string) => void
   onAssignToSprint: (issueId: string, sprintId: string | undefined) => void
   showSprint?: boolean
 }
 
-export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, showSprint = true }: IssueCardProps) {
+export function IssueCard({
+  issue,
+  sprints,
+  projects = [], // Default to empty array
+  teams = [], // Default to empty array
+  onEdit,
+  onDelete,
+  onAssignToSprint,
+  showSprint = true,
+}: IssueCardProps) {
   const sprint = sprints.find((s) => s.id === issue.sprintId)
 
   const acProgress = issue.acceptanceCriteria
@@ -82,6 +93,8 @@ export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, 
               <IssueForm
                 issue={issue}
                 sprints={sprints}
+                projects={projects} // Pass projects prop
+                teams={teams} // Pass teams prop
                 onSubmit={onEdit}
                 trigger={
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -130,10 +143,30 @@ export function IssueCard({ issue, sprints, onEdit, onDelete, onAssignToSprint, 
       <CardContent className="pt-0">
         {issue.description && <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{issue.description}</p>}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge className={statusColors[issue.status]} variant="outline">
               {issue.status}
             </Badge>
+            {issue.projectId && (
+              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                📁 {issue.projectId}
+              </Badge>
+            )}
+            {!issue.projectId && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                📁 Unassigned
+              </Badge>
+            )}
+            {issue.teamId && (
+              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                👥 {issue.teamId}
+              </Badge>
+            )}
+            {!issue.teamId && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                👥 Unassigned
+              </Badge>
+            )}
             {showSprint && sprint && (
               <Badge variant="secondary" className="text-xs">
                 {sprint.name}

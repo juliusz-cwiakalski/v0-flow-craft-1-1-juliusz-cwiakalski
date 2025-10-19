@@ -321,6 +321,8 @@ export default function TaskFlowApp() {
           open={showIssueEditModal}
           onOpenChange={handleCloseIssueEditModal}
           sprints={sprints}
+          projects={projects} // Added projects prop
+          teams={teams} // Added teams prop
           onSubmit={handleSaveEditedIssue}
           issue={issueToEdit}
         />

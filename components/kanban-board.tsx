@@ -19,12 +19,14 @@ import {
 } from "@/components/ui/alert-dialog"
 import { IssueForm } from "./issue-form"
 import { priorityColors } from "@/lib/data"
-import type { Issue, IssueStatus, Sprint } from "@/types"
+import type { Issue, IssueStatus, Sprint, Project, Team } from "@/types"
 
 interface KanbanBoardProps {
   sprint: Sprint
   issues: Issue[]
   sprints: Sprint[]
+  projects?: Project[] // Added projects prop
+  teams?: Team[] // Added teams prop
   onUpdateIssueStatus: (issueId: string, newStatus: IssueStatus) => void
   onEdit: (issue: Issue) => void
   onDelete: (issueId: string) => void
@@ -37,7 +39,16 @@ const columns: { id: IssueStatus; title: string; color: string }[] = [
   { id: "Done", title: "Done", color: "bg-green-50 border-green-200" },
 ]
 
-export function KanbanBoard({ sprint, issues, sprints, onUpdateIssueStatus, onEdit, onDelete }: KanbanBoardProps) {
+export function KanbanBoard({
+  sprint,
+  issues,
+  sprints,
+  projects = [], // Default to empty array
+  teams = [], // Default to empty array
+  onUpdateIssueStatus,
+  onEdit,
+  onDelete,
+}: KanbanBoardProps) {
   const [mounted, setMounted] = useState(false)
   const [sprintIssues, setSprintIssues] = useState<Issue[]>([])
 
@@ -124,6 +135,8 @@ export function KanbanBoard({ sprint, issues, sprints, onUpdateIssueStatus, onEd
                                 <IssueForm
                                   issue={issue}
                                   sprints={sprints}
+                                  projects={projects} // Pass projects prop
+                                  teams={teams} // Pass teams prop
                                   onSubmit={onEdit}
                                   trigger={
                                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
