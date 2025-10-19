@@ -79,7 +79,7 @@ export function Navigation({
                   >
                     <span>{item.icon}</span>
                     <span>{item.label}</span>
-                    <Badge variant="outline" className="ml-1 text-xs">
+                    <Badge variant="outline" className="ml-1 text-xs" suppressHydrationWarning>
                       {item.count}
                     </Badge>
                   </Button>
