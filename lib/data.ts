@@ -33,6 +33,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     id: "bug",
     name: "Bug",
     prefix: "[Bug] ",
+    isDefault: false,
     defaults: {
       priority: "P1",
       status: "Todo",
@@ -48,6 +49,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     id: "feature",
     name: "Feature",
     prefix: "[Feature] ",
+    isDefault: true, // Default template
     defaults: {
       priority: "P3",
       status: "Todo",
@@ -59,6 +61,7 @@ export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
     id: "request",
     name: "Request",
     prefix: "[Request] ",
+    isDefault: false,
     defaults: {
       priority: "P2",
       status: "Todo",
@@ -89,6 +92,31 @@ export const applyIssueTemplate = (templateId: "bug" | "feature" | "request") =>
       done: false,
     })),
   }
+}
+
+// Utilities for last-used template management
+export function getLastUsedTemplate(): string | null {
+  if (typeof window === "undefined") return null
+  try {
+    return localStorage.getItem("flowcraft:lastUsedTemplate")
+  } catch {
+    return null
+  }
+}
+
+export function setLastUsedTemplate(templateId: string): void {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem("flowcraft:lastUsedTemplate", templateId)
+  } catch {
+    // Silently fail if localStorage is not available
+  }
+}
+
+export function getDefaultTemplate(): string {
+  // Find the template marked as default, fallback to "feature"
+  const defaultTemplate = Object.values(ISSUE_TEMPLATES).find((t) => t.isDefault)
+  return defaultTemplate?.id || "feature"
 }
 
 // Sample data

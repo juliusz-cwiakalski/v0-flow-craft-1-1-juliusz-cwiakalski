@@ -47,7 +47,11 @@ export function WhatsNewModal({
   }
 
   const handleCTA = (item: Release["items"][0]) => {
-    if (item.deeplink) {
+    if (item.cta?.href) {
+      // Navigate to the href (deep link)
+      window.location.href = item.cta.href
+      onOpenChange(false)
+    } else if (item.deeplink) {
       onNavigate(item.deeplink.view)
       onOpenChange(false)
     }
@@ -79,7 +83,7 @@ export function WhatsNewModal({
                   <p className="text-sm text-muted-foreground leading-relaxed">{item.summary}</p>
                   <div className="flex items-center gap-3 pt-2">
                     {item.cta && (
-                      <Button size="sm" onClick={() => handleCTA(item)} disabled={!item.deeplink}>
+                      <Button size="sm" onClick={() => handleCTA(item)} disabled={!item.deeplink && !item.cta.href}>
                         {item.cta.label}
                       </Button>
                     )}

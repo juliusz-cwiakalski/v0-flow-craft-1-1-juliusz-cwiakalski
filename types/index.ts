@@ -26,10 +26,11 @@ export interface IssueTemplate {
   id: "bug" | "feature" | "request"
   name: string
   prefix: string
+  isDefault?: boolean // Added isDefault flag
   defaults: {
     priority: Priority
     status: IssueStatus
-    defaultAssignee?: string // Added optional default assignee
+    defaultAssignee?: string
   }
   acceptanceCriteria: string[]
 }

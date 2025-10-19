@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { useSearchParams } from "next/navigation"
 import { Navigation } from "@/components/navigation"
 import { IssuesList } from "@/components/issues-list"
 import { CurrentSprintView } from "@/components/current-sprint-view"
@@ -28,6 +29,7 @@ import { setCurrentView, setShowWhatsNew, setShowQuickCapture, setHasUnseenUpdat
 export default function TaskFlowApp() {
   const dispatch: AppDispatch = useDispatch()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
   const { issues } = useSelector((state: RootState) => state.issues)
   const { sprints } = useSelector((state: RootState) => state.sprints)
   const {
@@ -36,6 +38,25 @@ export default function TaskFlowApp() {
     showQuickCapture,
     hasUnseenUpdates: hasUnseen,
   } = useSelector((state: RootState) => state.ui)
+
+  useEffect(() => {
+    const openParam = searchParams?.get("open")
+    if (openParam === "quick-capture") {
+      // Check if any modal is already open
+      const hasOpenModal = document.querySelector('[role="dialog"]') !== null
+      if (!hasOpenModal) {
+        telemetry.track("quick_capture_opened", { source: "deeplink" })
+        dispatch(setShowQuickCapture(true))
+
+        // Clear the query parameter after opening
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href)
+          url.searchParams.delete("open")
+          window.history.replaceState({}, "", url.toString())
+        }
+      }
+    }
+  }, [searchParams, dispatch])
 
   useEffect(() => {
     const shouldShow = hasUnseenUpdates(APP_VERSION)
@@ -51,10 +72,8 @@ export default function TaskFlowApp() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Check if any modal is open by checking for dialog elements
       const hasOpenModal = document.querySelector('[role="dialog"]') !== null
 
-      // Only trigger if Q is pressed, no input is focused, and no modal is open
       if (
         e.key === "q" &&
         !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName) &&
@@ -71,25 +90,6 @@ export default function TaskFlowApp() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [dispatch])
 
-  const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
-    if (dontShowAgain) {
-      setLastSeenVersion(APP_VERSION)
-      dispatch(setHasUnseenUpdates(false))
-    }
-  }
-
-  const handleNavigateFromWhatsNew = (view: string) => {
-    if (view === "issues" || view === "current-sprint" || view === "sprints" || view === "changelog") {
-      dispatch(setCurrentView(view as ViewType))
-    }
-  }
-
-  const handleViewChangelog = () => {
-    dispatch(setCurrentView("changelog"))
-    dispatch(setShowWhatsNew(false))
-  }
-
-  // Issue management functions
   const handleCreateIssue = (issueData: Partial<Issue>) => {
     dispatch(addIssue(issueData))
   }
@@ -113,7 +113,6 @@ export default function TaskFlowApp() {
   const handleQuickCreateIssue = (issueData: Partial<Issue>) => {
     const createdIssue = dispatch(addIssue(issueData))
 
-    // Show toast with created issue details
     if (createdIssue.payload) {
       const issue = createdIssue.payload as Issue
       const titlePreview = issue.title.length > 40 ? issue.title.substring(0, 40) + "..." : issue.title
@@ -127,7 +126,6 @@ export default function TaskFlowApp() {
             </span>
             <button
               onClick={() => {
-                // Navigate to issues view and scroll to the issue
                 dispatch(setCurrentView("issues"))
               }}
               className="text-blue-500 hover:underline text-left"
@@ -136,12 +134,11 @@ export default function TaskFlowApp() {
             </button>
           </div>
         ),
-        duration: 6000, // 6 seconds as per PRD
+        duration: 6000,
       })
     }
   }
 
-  // Sprint management functions
   const handleCreateSprint = (sprintData: Partial<Sprint>) => {
     dispatch(addSprint(sprintData))
   }
@@ -159,14 +156,12 @@ export default function TaskFlowApp() {
     dispatch(endSprint(sprintId))
   }
 
-  // Get current active sprint
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
 
   const getSprintContext = (): string => {
     if (currentView === "current-sprint" && activeSprint) {
       return "currentSprint"
     }
-    // For future: when editing a sprint, return "editing:<sprintId>"
     return "none"
   }
 
@@ -214,6 +209,24 @@ export default function TaskFlowApp() {
 
   const latestRelease = getLatestRelease()
 
+  const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
+    if (dontShowAgain) {
+      setLastSeenVersion(APP_VERSION)
+      dispatch(setHasUnseenUpdates(false))
+    }
+  }
+
+  const handleNavigateFromWhatsNew = (view: string) => {
+    if (view === "issues" || view === "current-sprint" || view === "sprints" || view === "changelog") {
+      dispatch(setCurrentView(view as ViewType))
+    }
+  }
+
+  const handleViewChangelog = () => {
+    dispatch(setCurrentView("changelog"))
+    dispatch(setShowWhatsNew(false))
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation
@@ -236,6 +249,7 @@ export default function TaskFlowApp() {
         sprints={sprints}
         onSubmit={handleQuickCreateIssue}
         sprintContext={getSprintContext()}
+        source="button"
       />
 
       {latestRelease && (

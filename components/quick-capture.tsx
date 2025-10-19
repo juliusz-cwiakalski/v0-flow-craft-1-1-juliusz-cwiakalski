@@ -20,7 +20,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion } from "@/types"
-import { ISSUE_TEMPLATES, applyIssueTemplate } from "@/lib/data"
+import {
+  ISSUE_TEMPLATES,
+  applyIssueTemplate,
+  getLastUsedTemplate,
+  setLastUsedTemplate,
+  getDefaultTemplate,
+} from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
 import { getCurrentUser } from "@/lib/user"
 
@@ -31,6 +37,7 @@ interface QuickCaptureProps {
   onSubmit: (issueData: Partial<Issue>) => void
   sprintContext?: string // "none" | "currentSprint" | "editing:<sprintId>"
   onIssueCreated?: (issue: Issue) => void // Callback with created issue for toast
+  source?: "button" | "shortcut" | "deeplink" // Add source prop for telemetry
 }
 
 export function QuickCapture({
@@ -40,6 +47,7 @@ export function QuickCapture({
   onSubmit,
   sprintContext = "none",
   onIssueCreated,
+  source = "button",
 }: QuickCaptureProps) {
   const { toast } = useToast()
   const [formData, setFormData] = useState({
@@ -67,8 +75,14 @@ export function QuickCapture({
     if (open) {
       openTimeRef.current = Date.now()
       telemetry.track("quick_capture_opened", {
-        source: "button", // Will be updated by keyboard handler
+        source,
       })
+
+      const lastUsed = getLastUsedTemplate()
+      const initialTemplate =
+        lastUsed && (lastUsed === "bug" || lastUsed === "feature" || lastUsed === "request")
+          ? lastUsed
+          : getDefaultTemplate()
 
       let prefillSprintId = "0"
       if (sprintContext === "currentSprint") {
@@ -83,13 +97,29 @@ export function QuickCapture({
 
       setFormData({
         title: "",
-        templateId: "none",
+        templateId: initialTemplate as "bug" | "feature" | "request",
         priority: "P3",
         status: "Todo",
         assignee: "",
         sprintId: prefillSprintId,
       })
-      setAcceptanceCriteria([])
+
+      if (initialTemplate !== "none") {
+        const templateData = applyIssueTemplate(initialTemplate as "bug" | "feature" | "request")
+        const template = ISSUE_TEMPLATES[initialTemplate]
+        setFormData({
+          title: template.prefix,
+          templateId: initialTemplate as "bug" | "feature" | "request",
+          priority: templateData.priority as Priority,
+          status: templateData.status as IssueStatus,
+          assignee: "",
+          sprintId: prefillSprintId,
+        })
+        setAcceptanceCriteria(templateData.acceptanceCriteria || [])
+      } else {
+        setAcceptanceCriteria([])
+      }
+
       setUserModifiedFields({
         title: false,
         priority: false,
@@ -98,7 +128,7 @@ export function QuickCapture({
       })
       setIsDirty(false)
     }
-  }, [open, sprintContext, sprints])
+  }, [open, sprintContext, sprints, source])
 
   useEffect(() => {
     const hasContent = formData.title.trim() !== "" || formData.assignee.trim() !== "" || acceptanceCriteria.length > 0
@@ -169,6 +199,10 @@ export function QuickCapture({
       return
     }
 
+    if (formData.templateId && formData.templateId !== "none") {
+      setLastUsedTemplate(formData.templateId)
+    }
+
     let finalAssignee = formData.assignee.trim()
     if (!finalAssignee && formData.templateId && formData.templateId !== "none") {
       const template = ISSUE_TEMPLATES[formData.templateId]
@@ -222,7 +256,6 @@ export function QuickCapture({
     })
     setIsDirty(false)
 
-    // Reset timer for next issue
     openTimeRef.current = Date.now()
   }
 

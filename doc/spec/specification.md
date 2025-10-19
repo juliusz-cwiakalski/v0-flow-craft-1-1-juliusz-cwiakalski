@@ -19,8 +19,8 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - View all issues in a list format with filtering and sorting
 - Assign issues to sprints or keep them in the backlog
 - Track issue status through workflow stages (Todo → In Progress → In Review → Done)
-- **NEW**: Manage Acceptance Criteria (AC) for each issue with completion tracking
-- **NEW**: Use issue templates (Bug, Feature, Request) with pre-filled AC
+- Manage Acceptance Criteria (AC) for each issue with completion tracking
+- Use issue templates (Bug, Feature, Request) with pre-filled AC
 
 **Components**:
 
@@ -62,7 +62,9 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Each issue can have multiple AC items
 - AC items have text description and completion status
 - Issue cards display AC progress badge (e.g., "AC 2/3")
+- Badge is green when all AC completed, hidden when no AC
 - AC can be added, edited, removed, and checked off in Issue Form
+- No maximum limit on AC items per issue
 
 ### 2. Sprint Management
 
@@ -112,8 +114,8 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Real-time issue count per column
 - Visual progress tracking
 - Empty state when no active sprint
-- **NEW**: Edit and delete issues directly from kanban cards
-- **NEW**: View AC progress badges on kanban cards
+- Edit and delete issues directly from kanban cards
+- View AC progress badges on kanban cards
 
 **Components**:
 
@@ -134,42 +136,79 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 4. Quick Capture
 
-**Description**: Rapid issue creation with keyboard shortcut and template support.
+**Description**: Rapid issue creation with keyboard shortcut, deep-linking, and template support with last-used memory.
 
 **Functionality**:
 
 - Press Q key (when no input focused) to open Quick Capture modal
 - Click "Quick Add" button in navigation to open modal
+- Deep-link support: Visit `?open=quick-capture` to open modal automatically
 - Select from three issue templates (Bug, Feature, Request)
 - Templates pre-fill priority, status, and acceptance criteria
+- Remembers last-used template across sessions (localStorage)
+- Default template (Feature) used on first use
 - Create issues in under 10 seconds
 - Streamlined form with only essential fields
+- Modal stays open after creation for rapid multi-add
+- Dirty state confirmation when closing with unsaved changes
+- Template conflict resolution - asks to overwrite or keep user values
+- Contextual sprint prefill based on current view
+- 6-second toast notification with issue link after creation
+- Telemetry tracking for usage analytics (console-logged)
 
 **Components**:
 
-- `components/quick-capture.tsx` - Quick Capture modal with template selection
+- `components/quick-capture.tsx` - Quick Capture modal with template selection and state management
 
 **Data Types**:
 
-- `types/index.ts` - `IssueTemplate` interface
+- `types/index.ts` - `IssueTemplate` interface (with `isDefault` flag)
 
 **Templates**:
 
 - **Bug Template**: P1 priority, Todo status, includes reproduction steps AC
-- **Feature Template**: P2 priority, Todo status, includes acceptance scenarios AC
-- **Request Template**: P3 priority, Todo status, includes impact clarification AC
+- **Feature Template** (Default): P3 priority, Todo status, includes acceptance scenarios AC
+- **Request Template**: P2 priority, Todo status, includes impact clarification AC
 
 **Key Features**:
 
-- Global keyboard shortcut (Q key)
-- Template-based issue creation
-- Pre-filled acceptance criteria
-- Automatic assignee and sprint selection
-- Instant issue creation
+- Global keyboard shortcut (Q key) - guarded against input focus and open modals
+- Deep-link activation - `?open=quick-capture` query parameter opens modal
+- Template-based issue creation with smart defaults
+- Last-used template memory - persisted in localStorage as `flowcraft:lastUsedTemplate`
+- Default template fallback - Feature template marked with `isDefault: true`
+- Pre-filled acceptance criteria from templates (preview-only in modal)
+- Automatic assignee resolution: user input → template default → current user → empty
+- Contextual sprint prefill: Issues view → none, Current Sprint → active sprint
+- Multi-add workflow - modal stays open after creation
+- Dirty state protection - confirms before closing with unsaved changes
+- Template switching - asks to overwrite or keep when conflicts exist
+- Toast notifications - 6-second duration with issue key, truncated title, and "Open" link
+- Time-to-create tracking - measures from modal open to issue creation
+- Telemetry events: `quick_capture_opened`, `template_selected`, `assignee_autofilled`, `issue_created_via_quick_capture`
+
+**Entry Points**:
+
+1. **Keyboard shortcut**: Press Q (when no input focused, no modal open)
+2. **Navigation button**: Click "Quick Add ⌨ Q" in top navigation
+3. **Deep link**: Visit any URL with `?open=quick-capture` parameter
+4. **Changelog CTA**: Click "Try Quick Capture" in What's New modal or Changelog panel
+
+**Data Utilities** (in `lib/data.ts`):
+
+- `getLastUsedTemplate()` - Retrieves last-used template from localStorage
+- `setLastUsedTemplate(templateId)` - Saves last-used template to localStorage
+- `getDefaultTemplate()` - Returns default template ID (Feature)
+- `ISSUE_TEMPLATES` - Template definitions with `isDefault` flag
+
+**Telemetry** (in `lib/telemetry.ts`):
+
+- Console-based tracking adapter for prototype
+- Events: modal open (with source), template selection, assignee autofill, issue creation (with metrics)
 
 ### 5. Changelog & What's New
 
-**Description**: Version tracking and feature announcement system.
+**Description**: Version tracking and feature announcement system with deep-linking support.
 
 **Functionality**:
 
@@ -179,11 +218,12 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Badge indicator on navigation for unseen updates
 - Dedicated changelog panel accessible from navigation
 - Deep-linking to specific views from changelog items
+- Deep-link CTAs - "Try Quick Capture" uses `?open=quick-capture` to open modal instantly
 
 **Components**:
 
-- `components/whats-new-modal.tsx` - Auto-opening modal for new releases
-- `components/changelog-panel.tsx` - Full changelog history view
+- `components/whats-new-modal.tsx` - Auto-opening modal for new releases with deep-link support
+- `components/changelog-panel.tsx` - Full changelog history view with deep-link CTAs
 
 **Data Files**:
 
@@ -192,11 +232,12 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 **Data Types**:
 
 - `types/index.ts` - `ViewType` includes 'changelog'
+- `lib/changelog.ts` - `ReleaseItem` interface with `cta.href` for deep links
 
 **Release Item Types**:
 
-- **New** (Blue) - New features
-- **Improved** (Green) - Enhancements
+- **New** (Green) - New features
+- **Improved** (Blue) - Enhancements
 - **Fixed** (Orange) - Bug fixes
 - **Notice** (Purple) - Important announcements
 
@@ -206,8 +247,18 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - "Don't show again" option for current version
 - Badge indicator on "What's New" button when updates unseen
 - Deep-linking to relevant views from release items
+- Deep-link CTAs - clickable links that open features directly (e.g., Quick Capture)
 - "How to find" instructions for each feature
 - Version history with dates
+- Query parameter handling - `?open=quick-capture` opens Quick Capture modal
+
+**Deep-Link Implementation**:
+
+- URL query parameter: `?open=quick-capture`
+- Handled in `app/page.tsx` on mount and navigation
+- Guards: checks for existing open modals before triggering
+- Auto-clears parameter after opening to allow re-use
+- Telemetry tracking with `source: "deeplink"`
 
 ### 6. Navigation System
 
@@ -219,8 +270,8 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Display real-time counts for issues and sprints
 - Highlight active view
 - Show active sprint count in Current Sprint tab
-- **NEW**: Quick Add button for Quick Capture
-- **NEW**: What's New button with badge indicator for unseen updates
+- Quick Add button for Quick Capture
+- What's New button with badge indicator for unseen updates
 
 **Components**:
 
@@ -243,7 +294,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Generate auto-incrementing task IDs (TSK-001, TSK-002, etc.)
 - Define color mappings for priorities and statuses
 - Maintain data consistency across views
-- **NEW**: Issue template definitions with pre-filled AC
+- Issue template definitions with pre-filled AC
 
 **Files**:
 
@@ -361,14 +412,16 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Immutable updates with new arrays/objects
 - Quick Capture modal state managed in root
 - What's New modal state managed in root with localStorage sync
+- Last-used template persisted in localStorage (`flowcraft:lastUsedTemplate`)
+- Last seen version persisted in localStorage (`flowcraft:lastSeenVersion`)
 
 ### Data Persistence
 
 - Currently in-memory only (resets on page refresh)
 - Ready for backend integration (all CRUD operations defined)
 - Timestamps tracked for all entities (createdAt, updatedAt)
-- Last seen version persisted in localStorage
-- Version tracking survives page refreshes
+- Last seen version persists across sessions
+- Last-used template persists across sessions
 
 ## Validation Rules
 
@@ -391,16 +444,32 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ## Keyboard Shortcuts
 
-- **Q** - Open Quick Capture modal (when no input is focused)
+- **Q** - Open Quick Capture modal (when no input is focused and no modal is open)
+
+## Deep Links
+
+- **`?open=quick-capture`** - Opens Quick Capture modal automatically
+  - Used in changelog CTAs ("Try Quick Capture")
+  - Shareable URL for direct access to feature
+  - Guards against multiple modals and input focus
+  - Auto-clears parameter after opening
 
 ## Version History
 
 ### v0.2.0 (2025-01-18)
 - Added Quick Capture with keyboard shortcut (Q)
+- Added deep-link support (`?open=quick-capture`)
 - Added Issue Templates (Bug, Feature, Request)
+- Added last-used template memory (localStorage)
+- Added default template configuration (Feature)
 - Added Acceptance Criteria management
 - Added AC progress badges on issue cards
 - Added edit/delete actions in Current Sprint kanban view
+- Added toast notifications for issue creation
+- Added telemetry tracking (console-based)
+- Added contextual sprint prefill
+- Added dirty state confirmation
+- Added template conflict resolution
 
 ### v0.1.0 (2025-01-17)
 - Added Changelog & What's New system

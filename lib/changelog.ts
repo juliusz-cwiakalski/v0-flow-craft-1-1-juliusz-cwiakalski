@@ -31,7 +31,7 @@ export interface Release {
 export const releases: Release[] = [
   {
     version: "0.2.0",
-    dateISO: "2025-11-18",
+    dateISO: "2025-01-18",
     items: [
       {
         id: "quick-capture",
@@ -41,6 +41,7 @@ export const releases: Release[] = [
           'Press Q or click "Quick Add" to create issues in ≤10 seconds. Choose Bug, Feature, or Request templates with pre-filled Acceptance Criteria to standardize task quality and reduce coordination overhead.',
         cta: {
           label: "Try Quick Capture",
+          href: "?open=quick-capture", // Add deep link
         },
         deeplink: {
           view: "issues",
@@ -75,7 +76,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.1.0",
-    dateISO: "2025-11-18",
+    dateISO: "2025-01-17",
     items: [
       {
         id: "initial-release",

@@ -18,7 +18,10 @@ const kindColors: Record<ReleaseItemKind, string> = {
 
 export function ChangelogPanel({ onNavigate }: ChangelogPanelProps) {
   const handleCTA = (item: (typeof releases)[0]["items"][0]) => {
-    if (item.deeplink) {
+    if (item.cta?.href) {
+      // Navigate to the href (deep link)
+      window.location.href = item.cta.href
+    } else if (item.deeplink) {
       onNavigate(item.deeplink.view)
     }
   }
@@ -73,7 +76,7 @@ export function ChangelogPanel({ onNavigate }: ChangelogPanelProps) {
                               size="sm"
                               variant="outline"
                               onClick={() => handleCTA(item)}
-                              disabled={!item.deeplink}
+                              disabled={!item.deeplink && !item.cta.href}
                             >
                               {item.cta.label}
                             </Button>
