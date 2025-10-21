@@ -2,7 +2,7 @@
 
 ## SUMMARY
 
-Introduce a **Roll‑up Dashboard (Lite)** that provides portfolio‑level visibility (status breakdown, active sprint progress, rolling throughput, workload by assignee) and a **cross‑view filtering model** for **Projects** and **Teams** (multi‑select). Persist user‑scoped filters and dashboard time range in Redux + local storage (per ADR‑0008). Add **Issue status‑change history** (store + issue details view) to improve throughput accuracy over time. Include minimal **Projects & Teams management** (seed one default each). Track key **telemetry** events. Keep scope **frontend‑only V0**, derived from Redux state. fileciteturn0file1 fileciteturn0file2 fileciteturn0file3 fileciteturn1file0
+Introduce a **Roll‑up Dashboard (Lite)** that provides portfolio‑level visibility (status breakdown, active sprint progress, rolling throughput, workload by assignee) and a **cross‑view filtering model** for **Projects** and **Teams** (multi‑select). Persist user‑scoped filters and dashboard time range in Redux + local storage (per ADR‑0008). Add **Issue status‑change history** (store + issue details view) to improve throughput accuracy over time. Include minimal **Projects & Teams management** (seed one default each). Track key **telemetry** events. Keep scope **frontend‑only V0**, derived from Redux state. Extend configuration with: **Projects** include start and end dates and current status; **Teams** and **Projects** support assigning members from a new **Users** directory slice via autocomplete. Prevent adding the same user twice to the same project (excluded from suggestions); allow the same user to be added to multiple projects. fileciteturn0file1 fileciteturn0file2 fileciteturn0file3 fileciteturn1file0
 
 ## GOAL
 
@@ -46,12 +46,13 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * [MODIFY] **Issues View** — Add Project(s)/Team(s) multi‑select filters (+ Clear) and apply to list/metrics. Defaults new issues to last used scope. fileciteturn0file1
 * [MODIFY] **Current Sprint View** — Add the same scope controls (+ Clear) and filter board content accordingly. fileciteturn0file1
 * [MODIFY] **Redux — Issues state** — Add `projectId`, `teamId`, `statusChangeHistory: Array<{ from,to,atISO }>`; update history and `updatedAt` on status changes.
-* [CREATE] **Redux — Projects state** — Minimal entity store with seed **“Main Project”** on first run (CRUD for management panel).
-* [CREATE] **Redux — Teams state** — Minimal entity store with seed **“Main Team”** (CRUD for management panel).
+* [CREATE] **Redux — Projects state** — Minimal entity store with fields: `name`, `startDate`, `endDate`, `status` (Planned | Active | On Hold | Completed), and optional `members: string[]` (user IDs); seed **“Main Project”** on first run (CRUD for management panel).
+* [CREATE] **Redux — Teams state** — Minimal entity store with `name` and `members: string[]` (user IDs); seed **“Main Team”** (CRUD for management panel).
+* [CREATE] **Redux — Users state** — User directory slice with CRUD and search selectors; used by Teams/Projects membership pickers and autocomplete inputs.
 * [MODIFY/CREATE] **Redux — Preferences/UI state** — Persist: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
 * [MODIFY] **Issue Creation (standard & quick capture)** — Initialize `projectId`/`teamId` from **Preferences/UI**; update preferences after creation. fileciteturn0file1
 * [MODIFY] **Issue Details View** — Add **Status History** panel (read‑only V0).
-* [CREATE] **Settings Panel (Projects & Teams Management)** — Simple CRUD UI to define Projects/Teams; stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
+* [CREATE] **Settings Panel (Projects & Teams Management)** — Extend Projects to capture `startDate`, `endDate`, and `status`; optionally manage Project members (Users). Teams manage member assignment (Users) using autocomplete powered by the Users slice. Suggestions exclude already‑assigned users for the current entity; prevent adding the same user twice to the same project (duplicates also prevented within a single team); allow the same user across multiple projects. Stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
 * [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter.
 
 ## DECISIONS
@@ -67,6 +68,10 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * **Telemetry** — Add `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`. ✅
 * **Testing** — Minimal unit tests for **pure derivations** (status counts/%, sprint progress, throughput window (history + fallback), workload grouping) and **filter application**. Skip complex UI tests for speed. ✅
 * **Projects & Teams** — Introduce simple entities and management panel; seed one default each; **sprints remain shared** across projects/teams; filters scope the data shown. ✅ fileciteturn0file1
+* **Users directory** — Add Users slice as canonical user list used by Teams/Projects membership pickers; supports search/autocomplete. ✅
+* **Project statuses** — Planned, Active, On Hold, Completed; default Planned; end date optional until completion. ✅
+* **Membership constraints** — Prevent duplicate assignments within a project (exclude from suggestions); allow the same user across multiple projects; prevent duplicates within a single team. ✅
+* **Autocomplete UX** — Filter‑as‑you‑type; keyboard navigation; show name and optional email; selection adds a chip/badge; removal via “x”. ✅
 
 ## IMPLEMENTATION INSTRUCTIONS
 
@@ -89,9 +94,19 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
     * **Issues** — Add Project(s)/Team(s) multi‑select chips/menus + **Clear filters** button; apply scope to list. On issue creation success, set preferences `lastUsedProjectId/TeamId` to the chosen values (and keep existing defaults for next time).
     * **Current Sprint** — Same controls; board shows only scoped issues within active sprint; **Clear filters** resets scope.
     * **Dashboard** — Header with scope + time controls; render 4 cards in 2×2 grid. Cards consume **scoped** issues/sprints and selected time window.
+* **Users directory (Redux slice):**
+    * Structure: `{ id: string, name: string, email?: string, createdAt: number, updatedAt: number }`.
+    * Provide CRUD reducers/selectors and a `searchUsers(query: string)` selector for autocomplete.
+    * Persist to local storage per ADR‑0008; no backend in V0.
 * **Projects & Teams management panel (Settings):**
 
     * Minimal CRUD lists (name, createdAt). Prevent deletion if referenced by any issue (V0 constraint). Seed **Main Project**/**Main Team** on first run via bootstrap effect.
+    * Projects configuration:
+        * Fields: `name`, `startDate`, `endDate`, `status` (Planned | Active | On Hold | Completed), optional `members: string[]` (user IDs).
+        * Validation: `endDate` must be after `startDate`; default `status` to Planned.
+        * Members UI: autocomplete input backed by Users slice; suggestions exclude users already assigned to this project; allow the same user to be in multiple projects; chips/badges show assigned members; removal via “x”.
+    * Teams configuration:
+        * Manage `members: string[]` (user IDs) via autocomplete backed by Users slice; suggestions exclude users already in this team; prevent duplicates within the team.
     * Accessible via a top‑level **Settings** entry in the app navigation.
     * Stored entirely in UI via Redux + local storage per **ADR‑0008**; no backend calls in V0.
 * **Telemetry wiring (examples):**
@@ -106,7 +121,8 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
 ## IMPLEMENTATION CHECKLIST
 
-- Redux slices exist for **Projects** and **Teams** with CRUD reducers/selectors; state is persisted to local storage per **ADR‑0008**.
+- Redux slices exist for **Projects**, **Teams**, and **Users** with CRUD reducers/selectors; state is persisted to local storage per **ADR‑0008**.
+- **Projects** capture `startDate`, `endDate`, `status` (Planned|Active|On Hold|Completed), and optional `members: string[]` (user IDs). **Teams** capture `members: string[]`. Membership pickers use autocomplete; duplicate users are prevented within a single project or team; the same user can be added to multiple projects.
 - On first run, app seeds one default of each: **Main Project** and **Main Team**.
 - A top‑level **Settings** panel is accessible from navigation with simple CRUD UIs for Projects and Teams:
   - Create/Edit with name validation; show `createdAt`.
@@ -125,6 +141,10 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
 - Managing Projects/Teams:
   - User can create, edit, and delete Projects and Teams in **Settings**; data persists across reloads.
+  - Projects include `startDate`, `endDate`, and `status` (Planned | Active | On Hold | Completed); `endDate` must be after `startDate`; default status Planned.
+  - Projects support members selected from the Users directory via autocomplete; cannot add the same user twice to the same project (excluded from suggestions); the same user can be added to multiple different projects.
+  - Teams support members selected via autocomplete; duplicates within the same team are prevented.
+  - Users directory supports create/edit/delete and search‑as‑you‑type for autocomplete pickers.
   - Attempting to delete a Project/Team that is referenced by any Issue is prevented with a clear message.
 - Global filtering:
   - Selecting Projects/Teams in any of the three views updates the others after navigation; clearing filters resets all views to “All”.
@@ -142,7 +162,8 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
 Implement **Change 003 — Roll‑up Dashboard Lite + Projects/Teams + Cross‑View Filters** in the frontend using the existing FlowCraft patterns:
 
-* Add **Projects** and **Teams** entity slices (Redux, persisted), seeded with one default each; create a simple **management panel** (CRUD). Sprints remain shared.
+* Add **Projects** and **Teams** entity slices (Redux, persisted), seeded with one default each; Projects include `startDate`, `endDate`, `status` (Planned|Active|On Hold|Completed) and optional `members: string[]`; Teams include `members: string[]`. Create a **management panel** (CRUD + membership assignment) with autocomplete membership pickers powered by the Users slice; exclude already assigned users; prevent duplicates per project/team; allow same user across different projects. Sprints remain shared.
+* Add a **Users** slice (Redux, persisted) with CRUD and selectors for search/autocomplete; use it as the source for membership pickers in Projects and Teams.
 * Extend **Issues state** with `projectId`, `teamId`, and `statusChangeHistory`. On every status change, append a `{ from,to,atISO }` entry and update `updatedAt`.
 * Add a **Preferences/UI** state that persists: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
 * Update **Issue creation flows** (standard & quick capture) to default `projectId`/`teamId` from last used; update those preferences after each creation.
