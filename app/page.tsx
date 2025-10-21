@@ -11,6 +11,7 @@ import { DashboardView } from "@/components/dashboard/dashboard-view"
 import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
 import { IssueForm } from "@/components/issue-form"
+import { Footer } from "@/components/footer"
 import { useToast } from "@/hooks/use-toast"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getUnseenReleases } from "@/lib/changelog" // Import getUnseenReleases instead of getLatestRelease
 import { telemetry } from "@/lib/telemetry"
@@ -304,7 +305,7 @@ export default function TaskFlowApp() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation
         currentView={currentView}
         onViewChange={(view) => dispatch(setCurrentView(view))}
@@ -317,7 +318,9 @@ export default function TaskFlowApp() {
           dispatch(setShowQuickCapture(true))
         }}
       />
-      <main className="container mx-auto px-4 py-8">{renderCurrentView()}</main>
+      <main className="container mx-auto px-4 py-8 flex-1">{renderCurrentView()}</main>
+
+      <Footer />
 
       <QuickCapture
         open={showQuickCapture}

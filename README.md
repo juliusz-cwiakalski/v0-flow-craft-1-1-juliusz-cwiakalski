@@ -1,26 +1,41 @@
-# FlowCraft 1.1 [Juliusz Ćwiąkals
+# FlowCraft 1.1
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A modern task management application prototype built with Next.js, Redux Toolkit, and v0.app.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/juliusz-9835s-projects/v0-flow-craft-1-1-juliusz-cwiakals)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/ej5zKITdGsg)
+## Live Application
 
-## Overview
+**[https://v0-flow-craft-1-1-juliusz-cwiakals.vercel.app/](https://v0-flow-craft-1-1-juliusz-cwiakals.vercel.app/)**
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## About This Project
 
-## Deployment
+This is a prototype created for the [AI Product Heroes](https://www.aiproductheroes.pl/) certification task, demonstrating modern web application development with AI-assisted tools.
 
-Your project is live at:
+**Created by:** [Juliusz Ćwiąkalski](https://www.linkedin.com/in/juliusz-cwiakalski/)
 
-**[https://vercel.com/juliusz-9835s-projects/v0-flow-craft-1-1-juliusz-cwiakals](https://vercel.com/juliusz-9835s-projects/v0-flow-craft-1-1-juliusz-cwiakals)**
+**Source Code:** [GitHub Repository](https://github.com/juliusz-cwiakalski/v0-flow-craft-1-1-juliusz-cwiakalski)
 
-## Build your app
+## Features
 
-Continue building your app on:
+- **Issue Management** - Create, edit, and track issues with priorities, statuses, and acceptance criteria
+- **Sprint Planning** - Organize work into sprints with kanban boards and progress tracking
+- **Quick Capture** - Rapid issue creation with keyboard shortcuts and templates
+- **Dashboard** - Real-time metrics and insights with project/team filtering
+- **Changelog** - Built-in version tracking and feature announcements
+- **Settings** - Manage projects and teams with full CRUD operations
 
-**[https://v0.app/chat/projects/ej5zKITdGsg](https://v0.app/chat/projects/ej5zKITdGsg)**
+## Technology Stack
+
+- **Framework:** Next.js 15 with App Router
+- **State Management:** Redux Toolkit with localStorage persistence
+- **Styling:** Tailwind CSS v4
+- **UI Components:** Custom component library
+- **Deployment:** Vercel
+
+## Development
+
+This project is built and maintained using [v0.app](https://v0.app), an AI-powered development platform.
+
+**Continue building:** [https://v0.app/chat/projects/ej5zKITdGsg](https://v0.app/chat/projects/ej5zKITdGsg)
 
 ## How It Works
 
@@ -28,3 +43,14 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## Documentation
+
+- **Specification:** `doc/spec/specification.md`
+- **Technical Design:** `doc/technical-design.md`
+- **Architecture Decisions:** `doc/adr/`
+- **Change Specifications:** `doc/changes/`
+
+## License
+
+This is a prototype project for educational purposes.
