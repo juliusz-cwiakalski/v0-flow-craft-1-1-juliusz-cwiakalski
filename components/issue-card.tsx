@@ -20,6 +20,9 @@ import { IssueAssignmentDialog } from "./issue-assignment-dialog"
 import { priorityColors, statusColors } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint, Project, Team } from "@/types"
+import { useSelector } from "react-redux"
+import { selectUserById } from "@/lib/redux/slices/usersSlice"
+import type { RootState } from "@/lib/redux/store"
 
 interface IssueCardProps {
   issue: Issue
@@ -43,6 +46,9 @@ export function IssueCard({
   showSprint = true,
 }: IssueCardProps) {
   const sprint = sprints.find((s) => s.id === issue.sprintId)
+  const assignee = useSelector((state: RootState) =>
+    issue.assigneeUserId ? selectUserById(state, issue.assigneeUserId) : undefined,
+  )
 
   const acProgress = issue.acceptanceCriteria
     ? {
@@ -95,7 +101,7 @@ export function IssueCard({
                 sprints={sprints}
                 projects={projects} // Pass projects prop
                 teams={teams} // Pass teams prop
-                onSubmit={onEdit}
+                onSubmit={(data) => onEdit(data as Issue)}
                 trigger={
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <span className="mr-2">✏️</span>
@@ -178,7 +184,7 @@ export function IssueCard({
               </Badge>
             )}
           </div>
-          <span className="text-xs text-muted-foreground">{issue.assignee}</span>
+          <span className="text-xs text-muted-foreground">{assignee?.name || "Unassigned"}</span>
         </div>
       </CardContent>
     </Card>

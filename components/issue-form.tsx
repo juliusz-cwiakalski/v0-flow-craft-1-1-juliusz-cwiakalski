@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -23,23 +24,25 @@ import {
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion, Project, Team } from "@/types"
 import { ISSUE_TEMPLATES, applyIssueTemplate, generateACId } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
+import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
+import type { RootState } from "@/lib/redux/store"
 
 interface IssueFormProps {
   issue?: Issue
   sprints: Sprint[]
-  projects?: Project[] // Made optional with default
-  teams?: Team[] // Made optional with default
+  projects?: Project[]
+  teams?: Team[]
   onSubmit: (issueData: Partial<Issue> | Issue) => void
   trigger?: React.ReactNode
-  open?: boolean // Added open prop for controlled mode
-  onOpenChange?: (open: boolean) => void // Added onOpenChange for controlled mode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function IssueForm({
   issue,
   sprints,
-  projects = [], // Default to empty array
-  teams = [], // Default to empty array
+  projects = [],
+  teams = [],
   onSubmit,
   trigger,
   open: controlledOpen,
@@ -50,16 +53,18 @@ export function IssueForm({
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = controlledOnOpenChange || setInternalOpen
 
+  const users = useSelector((state: RootState) => selectAllUsers(state))
+
   const [formData, setFormData] = useState({
     title: issue?.title || "",
     description: issue?.description || "",
-    priority: issue?.priority || ("P3" as Priority),
-    status: issue?.status || ("Todo" as IssueStatus),
-    assignee: issue?.assignee || "",
+    priority: (issue?.priority || "P3") as Priority,
+    status: (issue?.status || "Todo") as IssueStatus,
+    assigneeUserId: issue?.assigneeUserId || "0",
     sprintId: issue?.sprintId || "0",
-    projectId: issue?.projectId || "0", // Added projectId
-    teamId: issue?.teamId || "0", // Added teamId
-    templateId: issue?.templateId || ("none" as "none" | "bug" | "feature" | "request"),
+    projectId: issue?.projectId || "0",
+    teamId: issue?.teamId || "0",
+    templateId: (issue?.templateId || "none") as "none" | "bug" | "feature" | "request",
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(issue?.acceptanceCriteria || [])
   const [newACText, setNewACText] = useState("")
@@ -71,13 +76,13 @@ export function IssueForm({
       setFormData({
         title: issue?.title || "",
         description: issue?.description || "",
-        priority: issue?.priority || "P3",
-        status: issue?.status || "Todo",
-        assignee: issue?.assignee || "",
+        priority: (issue?.priority || "P3") as Priority,
+        status: (issue?.status || "Todo") as IssueStatus,
+        assigneeUserId: issue?.assigneeUserId || "0",
         sprintId: issue?.sprintId || "0",
-        projectId: issue?.projectId || "0", // Added projectId
-        teamId: issue?.teamId || "0", // Added teamId
-        templateId: issue?.templateId || "none",
+        projectId: issue?.projectId || "0",
+        teamId: issue?.teamId || "0",
+        templateId: (issue?.templateId || "none") as "none" | "bug" | "feature" | "request",
       })
       setAcceptanceCriteria(issue?.acceptanceCriteria || [])
       setNewACText("")
@@ -100,6 +105,7 @@ export function IssueForm({
       title: formData.title || template.prefix,
       priority: templateData.priority as Priority,
       status: templateData.status as IssueStatus,
+      assigneeUserId: formData.assigneeUserId === "0" ? templateData.defaultAssigneeUserId || "0" : formData.assigneeUserId,
     })
     setAcceptanceCriteria(templateData.acceptanceCriteria || [])
   }
@@ -142,9 +148,6 @@ export function IssueForm({
     if (!formData.title.trim()) {
       newErrors.title = "Title is required"
     }
-    if (!formData.assignee.trim()) {
-      newErrors.assignee = "Assignee is required"
-    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -158,11 +161,12 @@ export function IssueForm({
     }
 
     const submittedData = {
-      ...(issue ? { id: issue.id } : {}), // Include id when editing
+      ...(issue ? { id: issue.id } : {}),
       ...formData,
+      assigneeUserId: formData.assigneeUserId === "0" ? undefined : formData.assigneeUserId,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
-      projectId: formData.projectId === "0" ? undefined : formData.projectId, // Added projectId
-      teamId: formData.teamId === "0" ? undefined : formData.teamId, // Added teamId
+      projectId: formData.projectId === "0" ? undefined : formData.projectId,
+      teamId: formData.teamId === "0" ? undefined : formData.teamId,
       templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
     }
@@ -301,23 +305,28 @@ export function IssueForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignee">Assignee</Label>
-              <Input
-                id="assignee"
-                value={formData.assignee}
-                onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
-                placeholder="Enter assignee name"
-                className={errors.assignee ? "border-red-500" : ""}
-              />
-              {errors.assignee && <p className="text-sm text-red-500">{errors.assignee}</p>}
+              <Label htmlFor="assignee">Assignee (Optional)</Label>
+              <Select
+                value={formData.assigneeUserId}
+                onValueChange={(value) => setFormData({ ...formData, assigneeUserId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select assignee" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Unassigned</SelectItem>
+                  {users.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="sprint">Sprint (Optional)</Label>
-              <Select
-                value={formData.sprintId}
-                onValueChange={(value) => setFormData({ ...formData, sprintId: value })}
-              >
+              <Select value={formData.sprintId} onValueChange={(value) => setFormData({ ...formData, sprintId: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select sprint" />
                 </SelectTrigger>
@@ -325,7 +334,8 @@ export function IssueForm({
                   <SelectItem value="0">No Sprint (Backlog)</SelectItem>
                   {sprints.map((sprint) => (
                     <SelectItem key={sprint.id} value={sprint.id} disabled={sprint.status === "Completed"}>
-                      {sprint.name} ({sprint.status}){sprint.status === "Completed" && " - Cannot assign"}
+                      {sprint.name} ({sprint.status})
+                      {sprint.status === "Completed" && " - Cannot assign"}
                     </SelectItem>
                   ))}
                 </SelectContent>

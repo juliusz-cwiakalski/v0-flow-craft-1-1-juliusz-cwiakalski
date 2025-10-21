@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.4.0"
+export const APP_VERSION = "0.4.1"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -29,6 +29,27 @@ export interface Release {
 
 // Release content (newest first)
 export const releases: Release[] = [
+  {
+    version: "0.4.1",
+    dateISO: "2025-01-21",
+    items: [
+      {
+        id: "assignee-search-fix",
+        kind: "Fixed",
+        title: "Search matches assignee names in Issues",
+        summary:
+          "Issue search now includes assignee names and avoids duplicate user mapping, ensuring reliable results when filtering by assignee.",
+        cta: {
+          label: "Try Search",
+          href: "?open=issues",
+        },
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Open Issues and search by an assignee's name to filter.",
+      },
+    ],
+  },
   {
     version: "0.4.0",
     dateISO: "2025-01-21",

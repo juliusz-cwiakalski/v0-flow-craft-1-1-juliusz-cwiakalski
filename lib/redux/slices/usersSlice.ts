@@ -28,6 +28,19 @@ const initialState: UsersState = {
       createdAt: new Date("2025-01-01"),
       updatedAt: new Date("2025-01-01"),
     },
+    {
+      id: "user-4",
+      name: "Charlie Brown",
+      createdAt: new Date("2025-01-01"),
+      updatedAt: new Date("2025-01-01"),
+    },
+    {
+      id: "user-5",
+      name: "Diana Prince",
+      email: "diana@example.com",
+      createdAt: new Date("2025-01-01"),
+      updatedAt: new Date("2025-01-01"),
+    },
   ],
 }
 

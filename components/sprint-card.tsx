@@ -68,7 +68,7 @@ export function SprintCard({ sprint, issues, onEdit, onStart, onEnd, canStart }:
             <DropdownMenuContent align="end">
               <SprintForm
                 sprint={sprint}
-                onSubmit={onEdit}
+                onSubmit={(data) => onEdit({ ...sprint, ...data })}
                 trigger={
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <span className="mr-2">✏️</span>
