@@ -2,18 +2,18 @@
 
 ## SUMMARY
 
-Introduce a **Roll‑up Dashboard (Lite)** that provides portfolio‑level visibility (status breakdown, active sprint progress, rolling throughput, workload by assignee) and a **cross‑view filtering model** for **Projects** and **Teams** (multi‑select). Persist user‑scoped filters and dashboard time range in Redux + local storage (per ADR‑0008). Add **Issue status‑change history** (store + issue details view) to improve throughput accuracy over time. Include minimal **Projects & Teams management** (seed one default each). Track key **telemetry** events. Keep scope **frontend‑only V0**, derived from Redux state. Extend configuration with: **Projects** include start and end dates and current status; **Teams** and **Projects** support assigning members from a new **Users** directory slice via autocomplete. Prevent adding the same user twice to the same project (excluded from suggestions); allow the same user to be added to multiple projects. fileciteturn0file1 fileciteturn0file2 fileciteturn0file3 fileciteturn1file0
+Introduce a **Roll‑up Dashboard (Lite)** that provides portfolio‑level visibility (status breakdown, active sprint progress, rolling throughput, workload by assignee) and a **cross‑view filtering model** for **Projects** and **Teams** (multi‑select). Persist user‑scoped filters and dashboard time range in Redux + local storage (per ADR‑0008). Add **Issue status‑change history** (store + issue details view) to improve throughput accuracy over time. Include minimal **Projects & Teams management** (seed one default each). Track key **telemetry** events. Keep scope **frontend‑only V0**, derived from Redux state. Extend configuration with: **Projects** include start and end dates and current status; **Teams** and **Projects** support assigning members from a new **Users** directory slice via autocomplete. Prevent adding the same user twice to the same project (excluded from suggestions); allow the same user to be added to multiple projects. 
 
 ## GOAL
 
-Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs and PMs by (1) aggregating progress in a single dashboard and (2) letting users focus on the subset of **Projects/Teams** they oversee, with filters that persist across **Issues**, **Current Sprint**, and **Dashboard**. Lay foundations for true flow metrics by recording **status‑change history**. fileciteturn0file2
+Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs and PMs by (1) aggregating progress in a single dashboard and (2) letting users focus on the subset of **Projects/Teams** they oversee, with filters that persist across **Issues**, **Current Sprint**, and **Dashboard**. Lay foundations for true flow metrics by recording **status‑change history**. 
 
 ## USER INPUT/OUTPUT FLOW
 
 * **Global scope controls (user‑scoped):**
 
     * Users select one or more **Projects** and/or **Teams** from multi‑select controls available in: **Issues**, **Current Sprint**, and **Dashboard**.
-    * Selections are persisted in Redux + local storage and applied consistently when navigating between these views. A **Clear filters** action resets scope to “All”. (Per ADR‑0008 persistence standard.) fileciteturn0file0
+    * Selections are persisted in Redux + local storage and applied consistently when navigating between these views. A **Clear filters** action resets scope to “All”. (Per ADR‑0008 persistence standard.) 
 * **Dashboard (Lite):**
 
     * **Header controls:** Project(s), Team(s), **Time Range** presets (7/14/30 days) + **Custom** (date pickers). Default: **Last 7 days (rolling)**.
@@ -21,7 +21,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
         1. **Issues by Status** — counts + % across Todo/In Progress/In Review/Done.
         2. **Active Sprint Progress** — Done/Total + %. Shows sprint name and date range; empty state when no active sprint.
-        3. **Throughput (rolling)** — count of issues that entered **Done** within the time window (prefer status history; fallback to `updatedAt` approximation). Tooltip clarifies approximation when in fallback. fileciteturn0file2
+        3. **Throughput (rolling)** — count of issues that entered **Done** within the time window (prefer status history; fallback to `updatedAt` approximation). Tooltip clarifies approximation when in fallback.
         4. **Workload by Assignee** — Top‑N (default 5) assignees by count of **non‑Done** issues; includes **Unassigned** bucket.
 * **Issues view:**
 
@@ -40,34 +40,34 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 
 > Use **logical names**, not repository paths.
 
-* [MODIFY] **Navigation** — Add **Dashboard** tab (placed after **Current Sprint**, before **Sprints**) for prominent discovery without disrupting daily flow. fileciteturn0file1
-* [CREATE] **Dashboard View (container)** — Hosts scope/time controls and composes cards (StatusBreakdown, ActiveSprintProgress, Throughput, WorkloadByAssignee). fileciteturn0file2
-* [CREATE] **Dashboard Subcomponents** — `StatusBreakdownCard`, `ActiveSprintProgressCard`, `ThroughputCard`, `WorkloadByAssigneeCard` (pure, memoizable derivations). fileciteturn0file2
-* [MODIFY] **Issues View** — Add Project(s)/Team(s) multi‑select filters (+ Clear) and apply to list/metrics. Defaults new issues to last used scope. fileciteturn0file1
-* [MODIFY] **Current Sprint View** — Add the same scope controls (+ Clear) and filter board content accordingly. fileciteturn0file1
+* [MODIFY] **Navigation** — Add **Dashboard** tab (placed after **Current Sprint**, before **Sprints**) for prominent discovery without disrupting daily flow. 
+* [CREATE] **Dashboard View (container)** — Hosts scope/time controls and composes cards (StatusBreakdown, ActiveSprintProgress, Throughput, WorkloadByAssignee). 
+* [CREATE] **Dashboard Subcomponents** — `StatusBreakdownCard`, `ActiveSprintProgressCard`, `ThroughputCard`, `WorkloadByAssigneeCard` (pure, memoizable derivations). 
+* [MODIFY] **Issues View** — Add Project(s)/Team(s) multi‑select filters (+ Clear) and apply to list/metrics. Defaults new issues to last used scope. 
+* [MODIFY] **Current Sprint View** — Add the same scope controls (+ Clear) and filter board content accordingly. 
 * [MODIFY] **Redux — Issues state** — Add `projectId`, `teamId`, `statusChangeHistory: Array<{ from,to,atISO }>`; update history and `updatedAt` on status changes.
 * [CREATE] **Redux — Projects state** — Minimal entity store with fields: `name`, `startDate`, `endDate`, `status` (Planned | Active | On Hold | Completed), and optional `members: string[]` (user IDs); seed **“Main Project”** on first run (CRUD for management panel).
 * [CREATE] **Redux — Teams state** — Minimal entity store with `name` and `members: string[]` (user IDs); seed **“Main Team”** (CRUD for management panel).
 * [CREATE] **Redux — Users state** — User directory slice with CRUD and search selectors; used by Teams/Projects membership pickers and autocomplete inputs.
 * [MODIFY/CREATE] **Redux — Preferences/UI state** — Persist: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
-* [MODIFY] **Issue Creation (standard & quick capture)** — Initialize `projectId`/`teamId` from **Preferences/UI**; update preferences after creation. fileciteturn0file1
+* [MODIFY] **Issue Creation (standard & quick capture)** — Initialize `projectId`/`teamId` from **Preferences/UI**; update preferences after creation. 
 * [MODIFY] **Issue Details View** — Add **Status History** panel (read‑only V0).
 * [CREATE] **Settings Panel (Projects & Teams Management)** — Extend Projects to capture `startDate`, `endDate`, and `status`; optionally manage Project members (Users). Teams manage member assignment (Users) using autocomplete powered by the Users slice. Suggestions exclude already‑assigned users for the current entity; prevent adding the same user twice to the same project (duplicates also prevented within a single team); allow the same user across multiple projects. Stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
 * [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter.
 
 ## DECISIONS
 
-* **State & Persistence** — Use **Redux Toolkit + local storage** per ADR‑0008 for all new slices and preferences. ✅ fileciteturn0file0
+* **State & Persistence** — Use **Redux Toolkit + local storage** per ADR‑0008 for all new slices and preferences. ✅ 
 * **Dashboard placement** — After **Current Sprint**, before **Sprints**. ✅
-* **Component granularity** — Split dashboard into subcomponents for maintainability; container coordinates scope/time controls. ✅ fileciteturn0file2
-* **Styling** — Reuse existing tokens/components; responsive 2×2 card layout (stack on small screens). ✅ fileciteturn0file1
+* **Component granularity** — Split dashboard into subcomponents for maintainability; container coordinates scope/time controls. ✅ 
+* **Styling** — Reuse existing tokens/components; responsive 2×2 card layout (stack on small screens). ✅ 
 * **Time window** — Default **Last 7 days (rolling)**; presets 7/14/30 + Custom; display in **user locale**. ✅
-* **Throughput** — Prefer **statusChangeHistory** (`to==='Done'` within window); fallback to PRD approximation using `updatedAt` when absent; tooltip clarifies approximation. ✅ fileciteturn0file2
-* **Workload** — Include Top‑5 non‑Done issues per assignee; show **Unassigned**; static in V0 (no click‑through) to minimize scope. ✅ fileciteturn0file2
+* **Throughput** — Prefer **statusChangeHistory** (`to==='Done'` within window); fallback to PRD approximation using `updatedAt` when absent; tooltip clarifies approximation. ✅ 
+* **Workload** — Include Top‑5 non‑Done issues per assignee; show **Unassigned**; static in V0 (no click‑through) to minimize scope. ✅ 
 * **Accessibility** — Skip ARIA for prototype; note for future. ✅
 * **Telemetry** — Add `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`. ✅
 * **Testing** — Minimal unit tests for **pure derivations** (status counts/%, sprint progress, throughput window (history + fallback), workload grouping) and **filter application**. Skip complex UI tests for speed. ✅
-* **Projects & Teams** — Introduce simple entities and management panel; seed one default each; **sprints remain shared** across projects/teams; filters scope the data shown. ✅ fileciteturn0file1
+* **Projects & Teams** — Introduce simple entities and management panel; seed one default each; **sprints remain shared** across projects/teams; filters scope the data shown. ✅ 
 * **Users directory** — Add Users slice as canonical user list used by Teams/Projects membership pickers; supports search/autocomplete. ✅
 * **Project statuses** — Planned, Active, On Hold, Completed; default Planned; end date optional until completion. ✅
 * **Membership constraints** — Prevent duplicate assignments within a project (exclude from suggestions); allow the same user across multiple projects; prevent duplicates within a single team. ✅
