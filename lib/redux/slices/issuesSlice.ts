@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Issue, IssueStatus } from "@/types"
-import { initialIssues, generateTaskId } from "@/lib/data"
+import { generateTaskId } from "@/lib/data"
+import { demoIssues as initialIssues } from "@/lib/demo-data"
 
 interface IssuesState {
   issues: Issue[]

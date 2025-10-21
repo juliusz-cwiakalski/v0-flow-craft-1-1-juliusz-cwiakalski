@@ -1,47 +1,14 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { User } from "@/types"
 import type { RootState } from "../store"
+import { demoUsers } from "@/lib/demo-data"
 
 interface UsersState {
   users: User[]
 }
 
 const initialState: UsersState = {
-  users: [
-    {
-      id: "user-1",
-      name: "Alice Johnson",
-      email: "alice@example.com",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    },
-    {
-      id: "user-2",
-      name: "Bob Smith",
-      email: "bob@example.com",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    },
-    {
-      id: "user-3",
-      name: "Carol Williams",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    },
-    {
-      id: "user-4",
-      name: "Charlie Brown",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    },
-    {
-      id: "user-5",
-      name: "Diana Prince",
-      email: "diana@example.com",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    },
-  ],
+  users: demoUsers,
 }
 
 const usersSlice = createSlice({

@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { Sprint } from "@/types"
-import { initialSprints } from "@/lib/data"
+import { demoSprints } from "@/lib/demo-data"
 
 interface SprintsState {
   sprints: Sprint[]
 }
 
 const initialState: SprintsState = {
-  sprints: initialSprints,
+  sprints: demoSprints,
 }
 
 const sprintsSlice = createSlice({
