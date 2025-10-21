@@ -12,6 +12,7 @@ import { WhatsNewModal } from "@/components/whats-new-modal"
 import { QuickCapture } from "@/components/quick-capture"
 import { IssueForm } from "@/components/issue-form"
 import { Footer } from "@/components/footer"
+import { SettingsView } from "@/components/settings-view"
 import { useToast } from "@/hooks/use-toast"
 import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getUnseenReleases } from "@/lib/changelog" // Import getUnseenReleases instead of getLatestRelease
 import { telemetry } from "@/lib/telemetry"
@@ -54,12 +55,29 @@ export default function TaskFlowApp() {
 
   const [issueToEdit, setIssueToEdit] = useState<Issue | null>(null)
   const [showIssueEditModal, setShowIssueEditModal] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<"projects" | "teams" | "users">("projects")
 
   useEffect(() => {
     const openParam = searchParams?.get("open")
     const idParam = searchParams?.get("id")
+    const tabParam = searchParams?.get("tab")
 
-    if (openParam === "dashboard") {
+    if (openParam === "settings") {
+      const hasOpenModal = document.querySelector('[role="dialog"]') !== null
+      if (!hasOpenModal) {
+        const validTab = tabParam === "teams" || tabParam === "users" ? tabParam : "projects"
+        setSettingsTab(validTab)
+        telemetry.track("settings_opened_via_deeplink", { tab: validTab })
+        dispatch(setCurrentView("settings"))
+
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href)
+          url.searchParams.delete("open")
+          url.searchParams.delete("tab")
+          window.history.replaceState({}, "", url.toString())
+        }
+      }
+    } else if (openParam === "dashboard") {
       const hasOpenModal = document.querySelector('[role="dialog"]') !== null
       if (!hasOpenModal) {
         telemetry.track("dashboard_opened_via_deeplink", {})
@@ -267,6 +285,8 @@ export default function TaskFlowApp() {
             onTimeRangeChange={(range) => dispatch(setDashboardTimeRange(range))}
           />
         )
+      case "settings":
+        return <SettingsView initialTab={settingsTab} />
       case "changelog":
         return <ChangelogPanel onNavigate={handleNavigateFromWhatsNew} />
       default:
@@ -284,7 +304,13 @@ export default function TaskFlowApp() {
   }
 
   const handleNavigateFromWhatsNew = (view: string) => {
-    if (view === "issues" || view === "current-sprint" || view === "sprints" || view === "changelog") {
+    if (
+      view === "issues" ||
+      view === "current-sprint" ||
+      view === "sprints" ||
+      view === "changelog" ||
+      view === "settings"
+    ) {
       dispatch(setCurrentView(view as ViewType))
     }
   }

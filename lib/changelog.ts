@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.3.0"
+export const APP_VERSION = "0.4.0"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -15,7 +15,7 @@ export interface ReleaseItem {
     href?: string
   }
   deeplink?: {
-    view: "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard"
+    view: "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard" | "settings"
     query?: Record<string, string>
   }
   howToFind?: string
@@ -29,6 +29,43 @@ export interface Release {
 
 // Release content (newest first)
 export const releases: Release[] = [
+  {
+    version: "0.4.0",
+    dateISO: "2025-01-21",
+    items: [
+      {
+        id: "settings-management",
+        kind: "New",
+        title: "Projects, Teams & Users Management",
+        summary:
+          "Manage your organization structure with dedicated settings panels. Create and configure Projects (with start/end dates, status, and members), Teams (with member assignments), and Users (directory for all team members). All data is stored locally and persists across sessions.",
+        cta: {
+          label: "Open Settings",
+          href: "?open=settings&tab=projects",
+        },
+        deeplink: {
+          view: "settings",
+          query: { tab: "projects" },
+        },
+        howToFind: 'Click "Settings" in the top navigation to manage Projects, Teams, and Users',
+      },
+      {
+        id: "project-team-filtering",
+        kind: "Improved",
+        title: "Enhanced Project & Team Assignment",
+        summary:
+          "Issue cards now display Project and Team badges. Easily change assignments in Issue Details with dropdown selectors. New issues default to your last-used Project/Team for faster workflow.",
+        cta: {
+          label: "View Issues",
+          href: "?open=issues",
+        },
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Create or edit any issue to assign Projects and Teams; badges appear on all issue cards",
+      },
+    ],
+  },
   {
     version: "0.3.0",
     dateISO: "2025-01-18",

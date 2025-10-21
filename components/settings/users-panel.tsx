@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,18 +17,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import type { User, Project, Team } from "@/types"
+import type { User } from "@/types"
+import type { RootState, AppDispatch } from "@/lib/redux/store"
+import { addUser, updateUser, deleteUser } from "@/lib/redux/slices/usersSlice"
 
-interface UsersPanelProps {
-  users: User[]
-  projects: Project[]
-  teams: Team[]
-  onAddUser: (name: string, email?: string) => void
-  onUpdateUser: (id: string, name: string, email?: string) => void
-  onDeleteUser: (id: string) => void
-}
+export function UsersPanel() {
+  const dispatch = useDispatch<AppDispatch>()
+  const users = useSelector((state: RootState) => state.users.users)
+  const projects = useSelector((state: RootState) => state.projects.projects)
+  const teams = useSelector((state: RootState) => state.teams.teams)
 
-export function UsersPanel({ users, projects, teams, onAddUser, onUpdateUser, onDeleteUser }: UsersPanelProps) {
   const [userName, setUserName] = useState("")
   const [userEmail, setUserEmail] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -44,14 +43,25 @@ export function UsersPanel({ users, projects, teams, onAddUser, onUpdateUser, on
 
   const handleAddUser = () => {
     if (!userName.trim()) return
-    onAddUser(userName.trim(), userEmail.trim() || undefined)
+    dispatch(
+      addUser({
+        name: userName.trim(),
+        email: userEmail.trim() || undefined,
+      }),
+    )
     setUserName("")
     setUserEmail("")
   }
 
   const handleUpdateUser = () => {
     if (!editingUser || !userName.trim()) return
-    onUpdateUser(editingUser.id, userName.trim(), userEmail.trim() || undefined)
+    dispatch(
+      updateUser({
+        ...editingUser,
+        name: userName.trim(),
+        email: userEmail.trim() || undefined,
+      }),
+    )
     setEditingUser(null)
     setUserName("")
     setUserEmail("")
@@ -69,7 +79,7 @@ export function UsersPanel({ users, projects, teams, onAddUser, onUpdateUser, on
       return
     }
 
-    onDeleteUser(deleteTarget.id)
+    dispatch(deleteUser(deleteTarget.id))
     setDeleteTarget(null)
   }
 

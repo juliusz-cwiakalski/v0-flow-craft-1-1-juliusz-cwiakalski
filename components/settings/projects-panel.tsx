@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,29 +19,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import type { Project, ProjectStatus, Issue, User } from "@/types"
+import type { Project, ProjectStatus } from "@/types"
+import type { RootState, AppDispatch } from "@/lib/redux/store"
+import {
+  addProject,
+  updateProject,
+  deleteProject,
+  addProjectMember,
+  removeProjectMember,
+} from "@/lib/redux/slices/projectsSlice"
 
-interface ProjectsPanelProps {
-  projects: Project[]
-  issues: Issue[]
-  users: User[]
-  onAddProject: (name: string, status: ProjectStatus, startDate?: string, endDate?: string) => void
-  onUpdateProject: (project: Project) => void
-  onDeleteProject: (id: string) => void
-  onAddMember: (projectId: string, userId: string) => void
-  onRemoveMember: (projectId: string, userId: string) => void
-}
+export function ProjectsPanel() {
+  const dispatch = useDispatch<AppDispatch>()
+  const projects = useSelector((state: RootState) => state.projects.projects)
+  const issues = useSelector((state: RootState) => state.issues.issues)
+  const users = useSelector((state: RootState) => state.users.users)
 
-export function ProjectsPanel({
-  projects,
-  issues,
-  users,
-  onAddProject,
-  onUpdateProject,
-  onDeleteProject,
-  onAddMember,
-  onRemoveMember,
-}: ProjectsPanelProps) {
   const [projectName, setProjectName] = useState("")
   const [projectStatus, setProjectStatus] = useState<ProjectStatus>("Planned")
   const [startDate, setStartDate] = useState("")
@@ -51,7 +45,14 @@ export function ProjectsPanel({
 
   const handleAddProject = () => {
     if (!projectName.trim()) return
-    onAddProject(projectName.trim(), projectStatus, startDate || undefined, endDate || undefined)
+    dispatch(
+      addProject({
+        name: projectName.trim(),
+        status: projectStatus,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      }),
+    )
     setProjectName("")
     setProjectStatus("Planned")
     setStartDate("")
@@ -60,13 +61,15 @@ export function ProjectsPanel({
 
   const handleUpdateProject = () => {
     if (!editingProject || !projectName.trim()) return
-    onUpdateProject({
-      ...editingProject,
-      name: projectName.trim(),
-      status: projectStatus,
-      startDate: startDate || undefined,
-      endDate: endDate || undefined,
-    })
+    dispatch(
+      updateProject({
+        ...editingProject,
+        name: projectName.trim(),
+        status: projectStatus,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      }),
+    )
     setEditingProject(null)
     setProjectName("")
     setProjectStatus("Planned")
@@ -83,7 +86,7 @@ export function ProjectsPanel({
       setDeleteTarget(null)
       return
     }
-    onDeleteProject(deleteTarget.id)
+    dispatch(deleteProject(deleteTarget.id))
     setDeleteTarget(null)
   }
 
@@ -229,7 +232,10 @@ export function ProjectsPanel({
                     return user ? (
                       <Badge key={userId} variant="outline" className="gap-1">
                         {user.name}
-                        <button onClick={() => onRemoveMember(project.id, userId)} className="ml-1 hover:text-red-500">
+                        <button
+                          onClick={() => dispatch(removeProjectMember({ projectId: project.id, userId }))}
+                          className="ml-1 hover:text-red-500"
+                        >
                           ×
                         </button>
                       </Badge>
@@ -250,7 +256,7 @@ export function ProjectsPanel({
                       <button
                         key={user.id}
                         onClick={() => {
-                          onAddMember(project.id, user.id)
+                          dispatch(addProjectMember({ projectId: project.id, userId: user.id }))
                           setMemberSearch("")
                         }}
                         className="w-full text-left px-2 py-1 hover:bg-accent rounded text-sm"

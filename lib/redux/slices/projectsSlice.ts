@@ -66,4 +66,8 @@ const projectsSlice = createSlice({
 
 export const { addProject, updateProject, deleteProject, addMemberToProject, removeMemberFromProject } =
   projectsSlice.actions
+
+export const addProjectMember = addMemberToProject
+export const removeProjectMember = removeMemberFromProject
+
 export default projectsSlice.reducer

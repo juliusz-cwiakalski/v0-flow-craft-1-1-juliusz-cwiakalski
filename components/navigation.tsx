@@ -52,6 +52,12 @@ export function Navigation({
       icon: "📅",
       count: sprints.length,
     },
+    {
+      id: "settings" as ViewType,
+      label: "Settings",
+      icon: "⚙️",
+      count: undefined,
+    },
   ]
 
   return (
