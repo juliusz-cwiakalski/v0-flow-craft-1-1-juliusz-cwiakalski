@@ -14,7 +14,7 @@ import { IssueForm } from "@/components/issue-form"
 import { Footer } from "@/components/footer"
 import { SettingsView } from "@/components/settings-view"
 import { useToast } from "@/hooks/use-toast"
-import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getUnseenReleases } from "@/lib/changelog" // Import getUnseenReleases instead of getLatestRelease
+import { APP_VERSION, hasUnseenUpdates, setLastSeenVersion, getUnseenReleases, releases } from "@/lib/changelog" // Import getUnseenReleases instead of getLatestRelease
 import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint, ViewType, IssueStatus } from "@/types"
 import type { RootState, AppDispatch } from "@/lib/redux/store"
@@ -56,6 +56,7 @@ export default function TaskFlowApp() {
   const [issueToEdit, setIssueToEdit] = useState<Issue | null>(null)
   const [showIssueEditModal, setShowIssueEditModal] = useState(false)
   const [settingsTab, setSettingsTab] = useState<"projects" | "teams" | "users">("projects")
+  const [isManualOpen, setIsManualOpen] = useState(false)
 
   useEffect(() => {
     const openParam = searchParams?.get("open")
@@ -127,13 +128,13 @@ export default function TaskFlowApp() {
     const shouldShow = hasUnseenUpdates(APP_VERSION)
     dispatch(setHasUnseenUpdates(shouldShow))
 
-    if (shouldShow) {
+    if (shouldShow && !isManualOpen) {
       const timer = setTimeout(() => {
         dispatch(setShowWhatsNew(true))
       }, 500)
       return () => clearTimeout(timer)
     }
-  }, [dispatch])
+  }, [dispatch, isManualOpen])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -295,12 +296,14 @@ export default function TaskFlowApp() {
   }
 
   const unseenReleases = getUnseenReleases() // Get all unseen releases instead of just the latest
+  const allReleases = releases // Import releases from lib/changelog
 
   const handleWhatsNewDismiss = (dontShowAgain: boolean) => {
     if (dontShowAgain) {
       setLastSeenVersion(APP_VERSION)
       dispatch(setHasUnseenUpdates(false))
     }
+    setIsManualOpen(false)
   }
 
   const handleNavigateFromWhatsNew = (view: string) => {
@@ -330,6 +333,11 @@ export default function TaskFlowApp() {
     handleCloseIssueEditModal()
   }
 
+  const handleWhatsNewClick = () => {
+    setIsManualOpen(true)
+    dispatch(setShowWhatsNew(true))
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navigation
@@ -338,7 +346,7 @@ export default function TaskFlowApp() {
         issues={issues}
         sprints={sprints}
         hasUnseenUpdates={hasUnseen}
-        onWhatsNewClick={() => dispatch(setShowWhatsNew(true))}
+        onWhatsNewClick={handleWhatsNewClick}
         onQuickAddClick={() => {
           telemetry.track("quick_capture_opened", { source: "button" })
           dispatch(setShowQuickCapture(true))
@@ -362,18 +370,21 @@ export default function TaskFlowApp() {
           open={showIssueEditModal}
           onOpenChange={handleCloseIssueEditModal}
           sprints={sprints}
-          projects={projects} // Added projects prop
-          teams={teams} // Added teams prop
+          projects={projects}
+          teams={teams}
           onSubmit={handleSaveEditedIssue}
           issue={issueToEdit}
         />
       )}
 
-      {unseenReleases.length > 0 && (
+      {(isManualOpen ? allReleases.length > 0 : unseenReleases.length > 0) && (
         <WhatsNewModal
           open={showWhatsNew}
-          onOpenChange={(open) => dispatch(setShowWhatsNew(open))}
-          releases={unseenReleases}
+          onOpenChange={(open) => {
+            dispatch(setShowWhatsNew(open))
+            if (!open) setIsManualOpen(false)
+          }}
+          releases={isManualOpen ? allReleases : unseenReleases}
           onDismiss={handleWhatsNewDismiss}
           onNavigate={handleNavigateFromWhatsNew}
           onViewChangelog={handleViewChangelog}
