@@ -1,6 +1,7 @@
 export type Priority = "P0" | "P1" | "P2" | "P3" | "P4" | "P5"
 export type IssueStatus = "Todo" | "In Progress" | "In Review" | "Done"
 export type SprintStatus = "Planned" | "Active" | "Completed"
+export type ProjectStatus = "Planned" | "Active" | "On Hold" | "Completed"
 
 export interface Issue {
   id: string
@@ -57,13 +58,28 @@ export interface StatusChangeEntry {
 export interface Project {
   id: string
   name: string
+  startDate?: string // ISO date string
+  endDate?: string // ISO date string
+  status: ProjectStatus
+  members?: string[] // User IDs
   createdAt: Date
+  updatedAt: Date
 }
 
 export interface Team {
   id: string
   name: string
+  members?: string[] // User IDs
   createdAt: Date
+  updatedAt: Date
+}
+
+export interface User {
+  id: string
+  name: string
+  email?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type TimeRangePreset = "7d" | "14d" | "30d" | "custom"
@@ -82,4 +98,4 @@ export interface PreferencesState {
   dashboardTimeRange: DashboardTimeRange
 }
 
-export type ViewType = "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard"
+export type ViewType = "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard" | "settings"

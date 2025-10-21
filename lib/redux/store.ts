@@ -5,6 +5,7 @@ import uiReducer from "./slices/uiSlice"
 import projectsReducer from "./slices/projectsSlice"
 import teamsReducer from "./slices/teamsSlice"
 import preferencesReducer from "./slices/preferencesSlice"
+import usersReducer from "./slices/usersSlice"
 import { localStorageMiddleware, loadState } from "./middleware/localStorage"
 
 const preloadedState = loadState()
@@ -17,6 +18,7 @@ export const store = configureStore({
     projects: projectsReducer,
     teams: teamsReducer,
     preferences: preferencesReducer,
+    users: usersReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
