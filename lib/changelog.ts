@@ -41,6 +41,7 @@ export const releases: Release[] = [
           "Get instant visibility into project health with 4 key metrics: Status Breakdown (Todo/In Progress/In Review/Done counts), Active Sprint Progress (completion %), Throughput (issues closed over time), and Workload by Assignee (top 5 contributors). Filter by Project/Team and adjust time range (7d/14d/30d).",
         cta: {
           label: "View Dashboard",
+          href: "?open=dashboard", // Added href for deeplink
         },
         deeplink: {
           view: "dashboard",

@@ -58,7 +58,19 @@ export default function TaskFlowApp() {
     const openParam = searchParams?.get("open")
     const idParam = searchParams?.get("id")
 
-    if (openParam === "quick-capture") {
+    if (openParam === "dashboard") {
+      const hasOpenModal = document.querySelector('[role="dialog"]') !== null
+      if (!hasOpenModal) {
+        telemetry.track("dashboard_opened_via_deeplink", {})
+        dispatch(setCurrentView("dashboard"))
+
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href)
+          url.searchParams.delete("open")
+          window.history.replaceState({}, "", url.toString())
+        }
+      }
+    } else if (openParam === "quick-capture") {
       const hasOpenModal = document.querySelector('[role="dialog"]') !== null
       if (!hasOpenModal) {
         telemetry.track("quick_capture_opened", { source: "deeplink" })
