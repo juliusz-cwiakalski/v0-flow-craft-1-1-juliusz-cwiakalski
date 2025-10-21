@@ -53,6 +53,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * [MODIFY] **Issue Creation (standard & quick capture)** — Initialize `projectId`/`teamId` from **Preferences/UI**; update preferences after creation. 
 * [MODIFY] **Issue Details View** — Add **Status History** panel (read‑only V0).
 * [CREATE] **Settings Panel (Projects & Teams Management)** — Extend Projects to capture `startDate`, `endDate`, and `status`; optionally manage Project members (Users). Teams manage member assignment (Users) using autocomplete powered by the Users slice. Suggestions exclude already‑assigned users for the current entity; prevent adding the same user twice to the same project (duplicates also prevented within a single team); allow the same user across multiple projects. Stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
+* [CREATE] **Settings Panel (Users Management)** — Manage Users directory (CRUD + search/autocomplete) used by Projects/Teams membership pickers; accessible from **Settings**. Documented here; implementation deferred from this change.
 * [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter.
 
 ## DECISIONS
@@ -71,6 +72,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * **Users directory** — Add Users slice as canonical user list used by Teams/Projects membership pickers; supports search/autocomplete. ✅
 * **Project statuses** — Planned, Active, On Hold, Completed; default Planned; end date optional until completion. ✅
 * **Membership constraints** — Prevent duplicate assignments within a project (exclude from suggestions); allow the same user across multiple projects; prevent duplicates within a single team. ✅
+* **Users Management Panel** — Dedicated Settings panel for Users (CRUD + search/autocomplete) used by Projects/Teams membership pickers; implementation deferred in this change. ✅
 * **Autocomplete UX** — Filter‑as‑you‑type; keyboard navigation; show name and optional email; selection adds a chip/badge; removal via “x”. ✅
 
 ## IMPLEMENTATION INSTRUCTIONS
@@ -109,6 +111,12 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
         * Manage `members: string[]` (user IDs) via autocomplete backed by Users slice; suggestions exclude users already in this team; prevent duplicates within the team.
     * Accessible via a top‑level **Settings** entry in the app navigation.
     * Stored entirely in UI via Redux + local storage per **ADR‑0008**; no backend calls in V0.
+* **Users management panel (Settings):**
+    * Purpose: Manage the Users directory used by Projects/Teams membership pickers.
+    * Capabilities: Create, edit (name; optional email), delete users; search‑as‑you‑type over name/email.
+    * UX: Simple list with add/edit dialog; keyboard navigation; show name and optional email; no bulk import in V0.
+    * Scope: Documentation only — not implemented as part of Change 003; to be delivered in a future iteration.
+
 * **Telemetry wiring (examples):**
 
     * On Dashboard mount: `dashboard_view_opened({ projectIds, teamIds, timeRange })`.
@@ -127,6 +135,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 - A top‑level **Settings** panel is accessible from navigation with simple CRUD UIs for Projects and Teams:
   - Create/Edit with name validation; show `createdAt`.
   - Prevent delete when referenced by any Issue.
+- Documentation-only: A **Users Management** panel is specified (CRUD + search/autocomplete) under **Settings** to manage users powering Projects/Teams membership pickers; implementation is deferred from this change.
 - A persisted **Preferences/UI** slice contains: `selectedProjectIds[]`, `selectedTeamIds[]`, `lastUsedProjectId`, `lastUsedTeamId`, `dashboardTimeRange`.
 - Scope controls (Projects/Teams multi‑select) exist on: **Issues**, **Current Sprint**, and **Dashboard**; include a working **Clear filters** action.
 - Global scope selections persist across page reloads and are applied consistently to all selectors and derived data.
@@ -146,6 +155,10 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
   - Teams support members selected via autocomplete; duplicates within the same team are prevented.
   - Users directory supports create/edit/delete and search‑as‑you‑type for autocomplete pickers.
   - Attempting to delete a Project/Team that is referenced by any Issue is prevented with a clear message.
+- Users management (documentation only; not implemented in this change):
+  - A Users management panel exists under Settings to create, edit, delete, and search users (name; optional email).
+  - The panel’s user list powers the Projects/Teams membership pickers via autocomplete.
+  - This change only documents the panel; no UI implementation is delivered.
 - Global filtering:
   - Selecting Projects/Teams in any of the three views updates the others after navigation; clearing filters resets all views to “All”.
 - Issue presentation and editing:
