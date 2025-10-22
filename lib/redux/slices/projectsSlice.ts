@@ -1,13 +1,22 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { Project } from "@/types"
-import { demoProjects } from "@/lib/demo-data"
+import type { Project, ProjectStatus } from "@/types"
 
 interface ProjectsState {
   projects: Project[]
 }
 
 const initialState: ProjectsState = {
-  projects: demoProjects,
+  projects: [
+    {
+      id: "proj-1",
+      name: "Main Project",
+      status: "Active" as ProjectStatus,
+      startDate: "2025-01-01",
+      members: [],
+      createdAt: new Date("2025-01-01"),
+      updatedAt: new Date("2025-01-01"),
+    },
+  ],
 }
 
 const projectsSlice = createSlice({

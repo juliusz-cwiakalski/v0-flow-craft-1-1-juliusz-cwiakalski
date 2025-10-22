@@ -100,7 +100,7 @@ export function deriveThroughput(issues: Issue[], timeRange: DashboardTimeRange)
 }
 
 export interface WorkloadEntry {
-  assigneeId: string // "unassigned" sentinel or userId
+  assigneeLabel: string
   count: number
 }
 
@@ -110,12 +110,12 @@ export function deriveWorkloadByAssignee(issues: Issue[], topN = 5): WorkloadEnt
   const assigneeCounts = new Map<string, number>()
 
   for (const issue of nonDoneIssues) {
-    const key = issue.assigneeUserId && issue.assigneeUserId !== "" ? issue.assigneeUserId : "unassigned"
-    assigneeCounts.set(key, (assigneeCounts.get(key) || 0) + 1)
+    const label = issue.assignee || "Unassigned"
+    assigneeCounts.set(label, (assigneeCounts.get(label) || 0) + 1)
   }
 
-  const entries: WorkloadEntry[] = Array.from(assigneeCounts.entries()).map(([assigneeId, count]) => ({
-    assigneeId,
+  const entries: WorkloadEntry[] = Array.from(assigneeCounts.entries()).map(([assigneeLabel, count]) => ({
+    assigneeLabel,
     count,
   }))
 

@@ -48,13 +48,8 @@ export function DashboardView({
     trackEvent("dashboard_view_opened", {
       projectIds: selectedProjectIds,
       teamIds: selectedTeamIds,
-      timeRange: {
-        preset: timeRange.preset,
-        fromISO: timeRange.fromISO,
-        toISO: timeRange.toISO,
-      },
+      timeRange,
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Apply scope filters
@@ -69,7 +64,7 @@ export function DashboardView({
   const handlePresetChange = (preset: TimeRangePreset) => {
     const newRange: DashboardTimeRange = { preset }
     onTimeRangeChange(newRange)
-    trackEvent("dashboard_time_range_changed", { preset: newRange.preset })
+    trackEvent("dashboard_time_range_changed", newRange)
   }
 
   return (

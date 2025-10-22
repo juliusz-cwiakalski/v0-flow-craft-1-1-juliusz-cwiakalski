@@ -1,9 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { useSelector } from "react-redux"
-import type { RootState } from "@/lib/redux/store"
-import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -54,8 +51,6 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const [mounted, setMounted] = useState(false)
   const [sprintIssues, setSprintIssues] = useState<Issue[]>([])
-  const users = useSelector((state: RootState) => selectAllUsers(state))
-  const userNameById = useMemo(() => Object.fromEntries(users.map((u) => [u.id, u.name])), [users])
 
   useEffect(() => {
     setMounted(true)
@@ -142,7 +137,7 @@ export function KanbanBoard({
                                   sprints={sprints}
                                   projects={projects} // Pass projects prop
                                   teams={teams} // Pass teams prop
-                                  onSubmit={(data) => onEdit(data as Issue)}
+                                  onSubmit={onEdit}
                                   trigger={
                                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                       <span className="mr-2">✏️</span>
@@ -184,9 +179,8 @@ export function KanbanBoard({
                             <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{issue.description}</p>
                           )}
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-muted-foreground">{userNameById[issue.assigneeUserId || ""] || "Unassigned"}</span>
+                            <span className="text-xs text-muted-foreground">{issue.assignee}</span>
                           </div>
-
                           <Select
                             value={issue.status}
                             onValueChange={(newStatus: IssueStatus) => onUpdateIssueStatus(issue.id, newStatus)}

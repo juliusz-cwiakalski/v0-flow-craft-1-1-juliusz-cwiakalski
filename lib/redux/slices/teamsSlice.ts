@@ -1,13 +1,20 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Team } from "@/types"
-import { demoTeams } from "@/lib/demo-data"
 
 interface TeamsState {
   teams: Team[]
 }
 
 const initialState: TeamsState = {
-  teams: demoTeams,
+  teams: [
+    {
+      id: "team-1",
+      name: "Main Team",
+      members: [],
+      createdAt: new Date("2025-01-01"),
+      updatedAt: new Date("2025-01-01"),
+    },
+  ],
 }
 
 const teamsSlice = createSlice({

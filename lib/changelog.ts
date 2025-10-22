@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.4.1"
+export const APP_VERSION = "0.4.0"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -30,44 +30,8 @@ export interface Release {
 // Release content (newest first)
 export const releases: Release[] = [
   {
-    version: "0.4.1",
-    dateISO: "2025-10-23",
-    items: [
-      {
-        id: "assignee-search-fix",
-        kind: "Fixed",
-        title: "Search matches assignee names in Issues",
-        summary:
-          "Issue search now includes assignee names and avoids duplicate user mapping, ensuring reliable results when filtering by assignee.",
-        cta: {
-          label: "Try Search",
-          href: "?open=issues",
-        },
-        deeplink: {
-          view: "issues",
-        },
-        howToFind: "Open Issues and search by an assignee's name to filter.",
-      },
-      {
-        id: "project-team-selectors-badge-fix",
-        kind: "Fixed",
-        title: "Project/Team selectors and badges fixed",
-        summary:
-          "Issue creation/edit forms now always show available Projects and Teams, even if not passed as props. Issue cards display Project and Team names instead of IDs.",
-        cta: {
-          label: "Try Issue Form",
-          href: "?open=issues",
-        },
-        deeplink: {
-          view: "issues",
-        },
-        howToFind: "Open any Issue form or card to see correct Project/Team names and selectors.",
-      },
-    ],
-  },
-  {
     version: "0.4.0",
-    dateISO: "2025-10-22",
+    dateISO: "2025-01-21",
     items: [
       {
         id: "settings-management",
@@ -104,7 +68,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.3.0",
-    dateISO: "2025-10-19",
+    dateISO: "2025-01-18",
     items: [
       {
         id: "dashboard",
@@ -133,7 +97,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.2.0",
-    dateISO: "2025-10-18",
+    dateISO: "2025-01-18",
     items: [
       {
         id: "quick-capture",
@@ -178,7 +142,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.1.0",
-    dateISO: "2025-10-18",
+    dateISO: "2025-01-17",
     items: [
       {
         id: "initial-release",

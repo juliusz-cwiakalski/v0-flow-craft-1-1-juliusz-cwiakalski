@@ -30,5 +30,3 @@ next-env.d.ts
 tmp/
 .aider*
 !.aider.*.yml
-
-doc/**/tmp

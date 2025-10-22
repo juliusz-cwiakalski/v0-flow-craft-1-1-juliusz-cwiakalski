@@ -1,21 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IssueCard } from "./issue-card"
 import { IssueForm } from "./issue-form"
 import type { Issue, Sprint, Priority, IssueStatus, Project, Team } from "@/types"
-import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
-import type { RootState } from "@/lib/redux/store"
 
 interface IssuesListProps {
   issues: Issue[]
   sprints: Sprint[]
-  projects?: Project[]
-  teams?: Team[]
+  projects?: Project[] // Added projects prop
+  teams?: Team[] // Added teams prop
   onCreateIssue: (issueData: Partial<Issue>) => void
   onEditIssue: (issue: Issue) => void
   onDeleteIssue: (issueId: string) => void
@@ -25,8 +22,8 @@ interface IssuesListProps {
 export function IssuesList({
   issues,
   sprints,
-  projects = [],
-  teams = [],
+  projects = [], // Default to empty array
+  teams = [], // Default to empty array
   onCreateIssue,
   onEditIssue,
   onDeleteIssue,
@@ -37,16 +34,11 @@ export function IssuesList({
   const [statusFilter, setStatusFilter] = useState<IssueStatus | "all">("all")
   const [sprintFilter, setSprintFilter] = useState<string>("all")
 
-  const users = useSelector((state: RootState) => selectAllUsers(state))
-  const userNameById: Record<string, string> = Object.fromEntries(users.map((u) => [u.id, u.name]))
-
   const filteredIssues = issues.filter((issue) => {
-    const assigneeName = issue.assigneeUserId ? userNameById[issue.assigneeUserId] || "Unassigned" : "Unassigned"
-    const lowerSearch = searchTerm.toLowerCase()
     const matchesSearch =
-      issue.title.toLowerCase().includes(lowerSearch) ||
-      issue.description.toLowerCase().includes(lowerSearch) ||
-      assigneeName.toLowerCase().includes(lowerSearch)
+      issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.assignee.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesPriority = priorityFilter === "all" || issue.priority === priorityFilter
     const matchesStatus = statusFilter === "all" || issue.status === statusFilter
@@ -62,8 +54,8 @@ export function IssuesList({
         <h1 className="text-2xl font-semibold">Issues</h1>
         <IssueForm
           sprints={sprints}
-          projects={projects}
-          teams={teams}
+          projects={projects} // Pass projects prop
+          teams={teams} // Pass teams prop
           onSubmit={onCreateIssue}
           trigger={
             <Button>
