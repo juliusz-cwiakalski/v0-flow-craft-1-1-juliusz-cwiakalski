@@ -28,6 +28,7 @@ export interface Release {
 }
 
 // Release content (newest first)
+// set date to the moment of adding the change
 export const releases: Release[] = [
   {
     version: "0.4.1",
@@ -129,6 +130,14 @@ export const releases: Release[] = [
           "Filter issues by Project and Team across all views (Issues, Current Sprint, Dashboard). Selections persist as you navigate, and a Clear Filters button resets all at once.",
         howToFind: "Use the Project/Team dropdowns at the top of any view to filter your data",
       },
+      {
+        id: "persistence-between-reloads",
+        kind: "Improved",
+        title: "Seamless Data Persistence Across Sessions",
+        summary:
+          "All your project data, settings, and progress are now automatically saved and restored, so you can continue your work without interruption after closing or refreshing the browser.",
+        howToFind: "Make changes to your projects, teams, or issues, then reload the app to see your data persist.",
+      }
     ],
   },
   {

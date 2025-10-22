@@ -1,5 +1,14 @@
 import type { User, Project, Team, Sprint, Issue, ProjectStatus } from "@/types"
 
+// Helper functions for dynamic date generation
+const today = new Date()
+const daysAgo = (n: number) => {
+  const d = new Date(today)
+  d.setDate(d.getDate() - n)
+  return d
+}
+const isoDaysAgo = (n: number) => daysAgo(n).toISOString()
+
 // Centralized demo data for initial hydration
 
 export const demoUsers: User[] = [
@@ -7,34 +16,34 @@ export const demoUsers: User[] = [
     id: "user-1",
     name: "Alice Johnson",
     email: "alice@example.com",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
   {
     id: "user-2",
     name: "Bob Smith",
     email: "bob@example.com",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
   {
     id: "user-3",
     name: "Carol Williams",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
   {
     id: "user-4",
     name: "Charlie Brown",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
   {
     id: "user-5",
     name: "Diana Prince",
     email: "diana@example.com",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
 ]
 
@@ -48,8 +57,8 @@ export const demoProjects: Project[] = [
     status: "Active" as ProjectStatus,
     startDate: "2025-01-01",
     members: referencedUserIds.slice(),
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
 ]
 
@@ -58,8 +67,8 @@ export const demoTeams: Team[] = [
     id: "team-1",
     name: "Main Team",
     members: referencedUserIds.slice(),
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
+    createdAt: daysAgo(30),
+    updatedAt: daysAgo(30),
   },
 ]
 
@@ -68,28 +77,28 @@ export const demoSprints: Sprint[] = [
     id: "sprint-1",
     name: "Sprint 1 - Foundation",
     status: "Completed",
-    startDate: new Date("2024-01-01"),
-    endDate: new Date("2024-01-14"),
-    createdAt: new Date("2023-12-28"),
-    updatedAt: new Date("2024-01-14"),
+    startDate: daysAgo(28),
+    endDate: daysAgo(21),
+    createdAt: daysAgo(29),
+    updatedAt: daysAgo(21),
   },
   {
     id: "sprint-2",
     name: "Sprint 2 - Core Features",
     status: "Active",
-    startDate: new Date("2024-01-15"),
-    endDate: new Date("2024-01-28"),
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-15"),
+    startDate: daysAgo(20),
+    endDate: daysAgo(7),
+    createdAt: daysAgo(22),
+    updatedAt: daysAgo(20),
   },
   {
     id: "sprint-3",
     name: "Sprint 3 - Polish & Testing",
     status: "Planned",
-    startDate: new Date("2024-01-29"),
-    endDate: new Date("2024-02-11"),
-    createdAt: new Date("2024-01-20"),
-    updatedAt: new Date("2024-01-20"),
+    startDate: daysAgo(6),
+    endDate: daysAgo(0),
+    createdAt: daysAgo(6),
+    updatedAt: daysAgo(6),
   },
 ]
 
@@ -105,8 +114,14 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-1",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2023-12-28"),
-    updatedAt: new Date("2024-01-05"),
+    createdAt: daysAgo(29),
+    updatedAt: daysAgo(25),
+    statusChangeHistory: [
+      { from: "Created", to: "Todo", atISO: isoDaysAgo(29) },
+      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(28) },
+      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(27) },
+      { from: "In Review", to: "Done", atISO: isoDaysAgo(25) },
+    ],
   },
   {
     id: "TSK-002",
@@ -118,8 +133,14 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-1",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2023-12-29"),
-    updatedAt: new Date("2024-01-08"),
+    createdAt: daysAgo(28),
+    updatedAt: daysAgo(22),
+    statusChangeHistory: [
+      { from: "Created", to: "Todo", atISO: isoDaysAgo(28) },
+      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(27) },
+      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(25) },
+      { from: "In Review", to: "Done", atISO: isoDaysAgo(22) },
+    ],
   },
   {
     id: "TSK-003",
@@ -131,8 +152,14 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-1",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2023-12-30"),
-    updatedAt: new Date("2024-01-10"),
+    createdAt: daysAgo(27),
+    updatedAt: daysAgo(20),
+    statusChangeHistory: [
+      { from: "Created", to: "Todo", atISO: isoDaysAgo(27) },
+      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(26) },
+      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(23) },
+      { from: "In Review", to: "Done", atISO: isoDaysAgo(20) },
+    ],
   },
 
   // Active sprint issues
@@ -146,8 +173,12 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-2",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-18"),
+    createdAt: daysAgo(19),
+    updatedAt: daysAgo(15),
+    statusChangeHistory: [
+      { from: "Created", to: "Todo", atISO: isoDaysAgo(19) },
+      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(15) },
+    ],
   },
   {
     id: "TSK-005",
@@ -159,8 +190,13 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-2",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-11"),
-    updatedAt: new Date("2024-01-19"),
+    createdAt: daysAgo(18),
+    updatedAt: daysAgo(14),
+    statusChangeHistory: [
+      { from: "Created", to: "Todo", atISO: isoDaysAgo(18) },
+      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(16) },
+      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(14) },
+    ],
   },
   {
     id: "TSK-006",
@@ -172,8 +208,8 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-2",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-12"),
-    updatedAt: new Date("2024-01-12"),
+    createdAt: daysAgo(17),
+    updatedAt: daysAgo(17),
   },
   {
     id: "TSK-007",
@@ -185,8 +221,8 @@ export const demoIssues: Issue[] = [
     sprintId: "sprint-2",
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-13"),
-    updatedAt: new Date("2024-01-13"),
+    createdAt: daysAgo(16),
+    updatedAt: daysAgo(16),
   },
 
   // Planned sprint issues
@@ -228,8 +264,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
+    createdAt: daysAgo(14),
+    updatedAt: daysAgo(14),
   },
   {
     id: "TSK-011",
@@ -241,8 +277,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-16"),
-    updatedAt: new Date("2024-01-16"),
+    createdAt: daysAgo(13),
+    updatedAt: daysAgo(13),
   },
   {
     id: "TSK-012",
@@ -254,8 +290,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-17"),
-    updatedAt: new Date("2024-01-17"),
+    createdAt: daysAgo(12),
+    updatedAt: daysAgo(12),
   },
   {
     id: "TSK-013",
@@ -267,8 +303,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-18"),
-    updatedAt: new Date("2024-01-18"),
+    createdAt: daysAgo(11),
+    updatedAt: daysAgo(11),
   },
   {
     id: "TSK-014",
@@ -280,8 +316,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-19"),
-    updatedAt: new Date("2024-01-19"),
+    createdAt: daysAgo(10),
+    updatedAt: daysAgo(10),
   },
   {
     id: "TSK-015",
@@ -293,8 +329,8 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-20"),
-    updatedAt: new Date("2024-01-20"),
+    createdAt: daysAgo(9),
+    updatedAt: daysAgo(9),
   },
   {
     id: "TSK-016",
@@ -306,7 +342,7 @@ export const demoIssues: Issue[] = [
     sprintId: undefined,
     projectId: "proj-1",
     teamId: "team-1",
-    createdAt: new Date("2024-01-21"),
-    updatedAt: new Date("2024-01-21"),
+    createdAt: daysAgo(8),
+    updatedAt: daysAgo(8),
   },
 ]
