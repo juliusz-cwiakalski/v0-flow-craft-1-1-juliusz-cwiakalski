@@ -135,7 +135,7 @@ export function QuickCapture({
       })
       setIsDirty(false)
     }
-  }, [open, sprintContext, sprints, source])
+  }, [open, sprintContext, sprints, source, defaultTemplate?.id, lastUsedTemplateId, templates])
 
   useEffect(() => {
     const hasContent = formData.title.trim() !== "" || acceptanceCriteria.length > 0

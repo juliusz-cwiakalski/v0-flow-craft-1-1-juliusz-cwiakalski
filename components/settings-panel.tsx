@@ -294,7 +294,7 @@ export function SettingsPanel({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleteTarget?.type === "project" ? "Project" : "Team"}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
               {deleteTarget && (
                 <span className="block mt-2 text-sm">
                   Note: You cannot delete a {deleteTarget.type} that is referenced by any issues.

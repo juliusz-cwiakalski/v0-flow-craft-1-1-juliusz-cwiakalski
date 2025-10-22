@@ -133,7 +133,7 @@ export function WhatsNewModal({
               onCheckedChange={(checked) => setDontShowAgain(checked === true)}
             />
             <Label htmlFor="dont-show" className="text-sm text-muted-foreground cursor-pointer">
-              Don't show again for this version
+              Don&apos;t show again for this version
             </Label>
           </div>
           <div className="flex gap-2">

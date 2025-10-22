@@ -125,7 +125,7 @@ export function Navigation({
               title="What's New"
             >
               <span className="text-lg">✨</span>
-              <span className="hidden sm:inline">What's New</span>
+              <span className="hidden sm:inline">What&apos;s New</span>
               {hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
             </Button>
           </div>

@@ -138,7 +138,7 @@ export function IssueCard({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Issue</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete "{issue.title}"? This action cannot be undone.
+                      Are you sure you want to delete &quot;{issue.title}&quot;? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

@@ -200,7 +200,7 @@ export function UsersPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete User?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
               <span className="block mt-2 text-sm">
                 Note: You cannot delete a user that is assigned to any projects or teams.
               </span>
