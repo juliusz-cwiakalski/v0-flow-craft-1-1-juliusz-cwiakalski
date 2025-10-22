@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { Issue, IssueStatus } from "@/types"
-import { initialIssues, generateTaskId } from "@/lib/data"
+import { generateTaskId } from "@/lib/data"
+import { demoIssues as initialIssues } from "@/lib/demo-data"
 
 interface IssuesState {
   issues: Issue[]
@@ -21,7 +22,7 @@ const issuesSlice = createSlice({
         description: action.payload.description || "",
         priority: action.payload.priority || "P3",
         status: action.payload.status || "Todo",
-        assignee: action.payload.assignee || "",
+        assigneeUserId: action.payload.assigneeUserId,
         sprintId: action.payload.sprintId,
         projectId: action.payload.projectId,
         teamId: action.payload.teamId,

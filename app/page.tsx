@@ -328,8 +328,8 @@ export default function TaskFlowApp() {
     setIssueToEdit(null)
   }
 
-  const handleSaveEditedIssue = (updatedIssue: Issue) => {
-    dispatch(updateIssue(updatedIssue))
+  const handleSaveEditedIssue = (updatedIssue: Issue | Partial<Issue>) => {
+    dispatch(updateIssue(updatedIssue as Issue))
     handleCloseIssueEditModal()
   }
 

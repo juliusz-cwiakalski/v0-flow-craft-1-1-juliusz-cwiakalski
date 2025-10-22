@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
+import { useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -29,6 +30,8 @@ import {
 } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
 import { getCurrentUser } from "@/lib/user"
+import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
+import type { RootState } from "@/lib/redux/store"
 
 interface QuickCaptureProps {
   open: boolean
@@ -50,23 +53,24 @@ export function QuickCapture({
   source = "button",
 }: QuickCaptureProps) {
   const { toast } = useToast()
+  const users = useSelector((state: RootState) => selectAllUsers(state))
   const [formData, setFormData] = useState({
     title: "",
-    templateId: "none" as "" | "bug" | "feature" | "request" | "none",
+    templateId: "none" as "bug" | "feature" | "request" | "none",
     priority: "P3" as Priority,
     status: "Todo" as IssueStatus,
-    assignee: "",
+    assigneeUserId: "0",
     sprintId: "0",
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>([])
   const [showTemplateConfirm, setShowTemplateConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
-  const [pendingTemplateId, setPendingTemplateId] = useState<"bug" | "feature" | "request" | "none" | "">("")
+  const [pendingTemplateId, setPendingTemplateId] = useState<"bug" | "feature" | "request" | "none">("none")
   const [userModifiedFields, setUserModifiedFields] = useState({
     title: false,
     priority: false,
     status: false,
-    assignee: false,
+    assigneeUserId: false,
   })
   const [isDirty, setIsDirty] = useState(false)
   const openTimeRef = useRef<number>(0)
@@ -97,10 +101,10 @@ export function QuickCapture({
 
       setFormData({
         title: "",
-        templateId: initialTemplate as "bug" | "feature" | "request",
+        templateId: initialTemplate as "bug" | "feature" | "request" | "none",
         priority: "P3",
         status: "Todo",
-        assignee: "",
+        assigneeUserId: "0",
         sprintId: prefillSprintId,
       })
 
@@ -112,7 +116,7 @@ export function QuickCapture({
           templateId: initialTemplate as "bug" | "feature" | "request",
           priority: templateData.priority as Priority,
           status: templateData.status as IssueStatus,
-          assignee: "",
+          assigneeUserId: templateData.defaultAssigneeUserId || "0",
           sprintId: prefillSprintId,
         })
         setAcceptanceCriteria(templateData.acceptanceCriteria || [])
@@ -124,25 +128,25 @@ export function QuickCapture({
         title: false,
         priority: false,
         status: false,
-        assignee: false,
+        assigneeUserId: false,
       })
       setIsDirty(false)
     }
   }, [open, sprintContext, sprints, source])
 
   useEffect(() => {
-    const hasContent = formData.title.trim() !== "" || formData.assignee.trim() !== "" || acceptanceCriteria.length > 0
+    const hasContent = formData.title.trim() !== "" || acceptanceCriteria.length > 0
     setIsDirty(hasContent)
-  }, [formData.title, formData.assignee, acceptanceCriteria])
+  }, [formData.title, acceptanceCriteria])
 
-  const handleTemplateChange = (templateId: "" | "bug" | "feature" | "request" | "none") => {
+  const handleTemplateChange = (templateId: "bug" | "feature" | "request" | "none") => {
     const hasConflicts =
       userModifiedFields.title ||
       userModifiedFields.priority ||
       userModifiedFields.status ||
       acceptanceCriteria.length > 0
 
-    if (hasConflicts && templateId && templateId !== "none" && templateId !== formData.templateId) {
+    if (hasConflicts && templateId !== "none" && templateId !== formData.templateId) {
       setPendingTemplateId(templateId)
       setShowTemplateConfirm(true)
       return
@@ -151,8 +155,8 @@ export function QuickCapture({
     applyTemplate(templateId, false)
   }
 
-  const applyTemplate = (templateId: "" | "bug" | "feature" | "request" | "none", forceOverwrite = false) => {
-    if (!templateId || templateId === "none") {
+  const applyTemplate = (templateId: "bug" | "feature" | "request" | "none", forceOverwrite = false) => {
+    if (templateId === "none") {
       setFormData({ ...formData, templateId: "none" })
       setAcceptanceCriteria([])
       return
@@ -177,6 +181,10 @@ export function QuickCapture({
       newFormData.status = templateData.status as IssueStatus
     }
 
+    if ((forceOverwrite || !userModifiedFields.assigneeUserId) && formData.assigneeUserId === "0") {
+      newFormData.assigneeUserId = templateData.defaultAssigneeUserId || "0"
+    }
+
     setFormData(newFormData)
 
     if (forceOverwrite || acceptanceCriteria.length === 0) {
@@ -185,11 +193,11 @@ export function QuickCapture({
   }
 
   const handleConfirmTemplateSwitch = (overwrite: boolean) => {
-    if (pendingTemplateId) {
+    if (pendingTemplateId !== "none") {
       applyTemplate(pendingTemplateId, overwrite)
     }
     setShowTemplateConfirm(false)
-    setPendingTemplateId("")
+    setPendingTemplateId("none")
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -199,31 +207,29 @@ export function QuickCapture({
       return
     }
 
-    if (formData.templateId && formData.templateId !== "none") {
+    if (formData.templateId !== "none") {
       setLastUsedTemplate(formData.templateId)
     }
 
-    let finalAssignee = formData.assignee.trim()
-    if (!finalAssignee && formData.templateId && formData.templateId !== "none") {
+    let finalAssigneeUserId = formData.assigneeUserId !== "0" ? formData.assigneeUserId : ""
+    if (!finalAssigneeUserId && formData.templateId !== "none") {
       const template = ISSUE_TEMPLATES[formData.templateId]
-      finalAssignee = template.defaults.defaultAssignee || ""
-    }
-    if (!finalAssignee) {
-      const currentUser = getCurrentUser()
-      finalAssignee = currentUser.name
-      telemetry.track("assignee_autofilled", { source: "currentUser" })
-    } else if (formData.templateId && formData.templateId !== "none") {
-      const template = ISSUE_TEMPLATES[formData.templateId]
-      if (template.defaults.defaultAssignee && finalAssignee === template.defaults.defaultAssignee) {
+      finalAssigneeUserId = template.defaults.defaultAssigneeUserId || ""
+      if (finalAssigneeUserId) {
         telemetry.track("assignee_autofilled", { source: "template" })
       }
+    }
+    if (!finalAssigneeUserId) {
+      const currentUser = getCurrentUser()
+      finalAssigneeUserId = currentUser.id
+      telemetry.track("assignee_autofilled", { source: "currentUser" })
     }
 
     const issueData: Partial<Issue> = {
       title: formData.title,
       priority: formData.priority,
       status: formData.status,
-      assignee: finalAssignee,
+      assigneeUserId: finalAssigneeUserId || undefined,
       sprintId: formData.sprintId === "0" ? undefined : formData.sprintId,
       templateId: formData.templateId === "none" ? undefined : formData.templateId,
       acceptanceCriteria: acceptanceCriteria.length > 0 ? acceptanceCriteria : undefined,
@@ -235,7 +241,7 @@ export function QuickCapture({
       timeToCreateMs,
       fieldsUsed: {
         template: !!issueData.templateId,
-        assignee: !!issueData.assignee,
+        assignee: !!issueData.assigneeUserId,
         priority: issueData.priority !== "P3",
         status: issueData.status !== "Todo",
         sprint: !!issueData.sprintId,
@@ -247,17 +253,16 @@ export function QuickCapture({
 
     const currentTemplateId = formData.templateId
 
-    if (currentTemplateId && currentTemplateId !== "none") {
+    if (currentTemplateId !== "none") {
       // Re-apply the same template to get fresh defaults
       const templateData = applyIssueTemplate(currentTemplateId)
-      const template = ISSUE_TEMPLATES[currentTemplateId]
 
       setFormData({
-        title: template.prefix,
+        title: templateData ? ISSUE_TEMPLATES[currentTemplateId].prefix : "",
         templateId: currentTemplateId,
         priority: templateData.priority as Priority,
         status: templateData.status as IssueStatus,
-        assignee: "",
+        assigneeUserId: "0",
         sprintId: formData.sprintId, // Keep the same sprint context
       })
       setAcceptanceCriteria(templateData.acceptanceCriteria || [])
@@ -266,7 +271,7 @@ export function QuickCapture({
       setFormData({
         ...formData,
         title: "",
-        assignee: "",
+        assigneeUserId: "0",
       })
       setAcceptanceCriteria([])
     }
@@ -276,7 +281,7 @@ export function QuickCapture({
       title: false,
       priority: false,
       status: false,
-      assignee: false,
+      assigneeUserId: false,
     })
     setIsDirty(false)
 
@@ -390,16 +395,26 @@ export function QuickCapture({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="assignee">Assignee</Label>
-              <Input
-                id="assignee"
-                value={formData.assignee}
-                onChange={(e) => {
-                  setFormData({ ...formData, assignee: e.target.value })
-                  setUserModifiedFields({ ...userModifiedFields, assignee: true })
+              <Label htmlFor="assigneeUserId">Assignee</Label>
+              <Select
+                value={formData.assigneeUserId}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, assigneeUserId: value })
+                  setUserModifiedFields({ ...userModifiedFields, assigneeUserId: true })
                 }}
-                placeholder="Optional (defaults to current user)"
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Optional (defaults to current user)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Unassigned</SelectItem>
+                  {users.map((u) => (
+                    <SelectItem key={u.id} value={u.id}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {availableSprints.length > 0 ? (

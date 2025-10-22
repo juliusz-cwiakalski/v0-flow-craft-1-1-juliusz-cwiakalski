@@ -9,7 +9,7 @@ export interface Issue {
   description: string
   priority: Priority
   status: IssueStatus
-  assignee: string
+  assigneeUserId?: string
   sprintId?: string
   projectId?: string
   teamId?: string
@@ -34,7 +34,7 @@ export interface IssueTemplate {
   defaults: {
     priority: Priority
     status: IssueStatus
-    defaultAssignee?: string
+    defaultAssigneeUserId?: string
   }
   acceptanceCriteria: string[]
 }
