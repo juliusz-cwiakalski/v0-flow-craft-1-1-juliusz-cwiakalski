@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { ViewType, Issue, Sprint } from "@/types"
 
+
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { MenuIcon } from "lucide-react"
+
+
 interface NavigationProps {
   currentView: ViewType
   onViewChange: (view: ViewType) => void
@@ -14,6 +19,8 @@ interface NavigationProps {
   onQuickAddClick?: () => void
 }
 
+import { useState } from "react"
+
 export function Navigation({
   currentView,
   onViewChange,
@@ -23,6 +30,8 @@ export function Navigation({
   onWhatsNewClick,
   onQuickAddClick,
 }: NavigationProps) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+
   const activeSprint = sprints.find((sprint) => sprint.status === "Active")
   const activeSprintIssues = issues.filter((issue) => issue.sprintId === activeSprint?.id)
 
@@ -61,76 +70,159 @@ export function Navigation({
   ]
 
   return (
-    <nav className="border-b bg-background">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">⚡</span>
-              <h1 className="text-xl font-semibold">FlowCraft</h1>
+    <>
+      {/* Desktop Navigation */}
+      <nav className="border-b bg-background hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">⚡</span>
+                <h1 className="text-xl font-semibold">FlowCraft</h1>
+              </div>
+              <div className="flex items-center space-x-1">
+                {navItems.map((item) => {
+                  const isActive = currentView === item.id
+                  const isDisabled = item.disabled
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={isActive ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => !isDisabled && onViewChange(item.id)}
+                      disabled={isDisabled}
+                      className={cn(
+                        "flex items-center gap-2",
+                        isActive && "bg-secondary text-secondary-foreground",
+                        isDisabled && "opacity-50 cursor-not-allowed",
+                      )}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                      {item.count !== undefined && (
+                        <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
+                          {item.count}
+                        </span>
+                      )}
+                    </Button>
+                  )
+                })}
+              </div>
             </div>
-
-            <div className="flex items-center space-x-1">
-              {navItems.map((item) => {
-                const isActive = currentView === item.id
-                const isDisabled = item.disabled
-
-                return (
-                  <Button
-                    key={item.id}
-                    variant={isActive ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => !isDisabled && onViewChange(item.id)}
-                    disabled={isDisabled}
-                    className={cn(
-                      "flex items-center gap-2",
-                      isActive && "bg-secondary text-secondary-foreground",
-                      isDisabled && "opacity-50 cursor-not-allowed",
-                    )}
-                  >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
-                    {item.count !== undefined && (
-                      <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
-                        {item.count}
-                      </span>
-                    )}
-                  </Button>
-                )
-              })}
+            <div className="flex items-center gap-4">
+              {!activeSprint && currentView === "current-sprint" && (
+                <div className="text-sm text-muted-foreground">No active sprint</div>
+              )}
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onQuickAddClick}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                title="Quick Add (Q)"
+              >
+                <span className="text-lg">⚡</span>
+                <span className="hidden sm:inline">Quick Add</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onWhatsNewClick}
+                className="relative flex items-center gap-2"
+                title="What's New"
+              >
+                <span className="text-lg">✨</span>
+                <span className="hidden sm:inline">What&apos;s New</span>
+                {hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
+              </Button>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {!activeSprint && currentView === "current-sprint" && (
-              <div className="text-sm text-muted-foreground">No active sprint</div>
-            )}
-
-            <Button
-              variant="default"
-              size="sm"
-              onClick={onQuickAddClick}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-              title="Quick Add (Q)"
-            >
-              <span className="text-lg">⚡</span>
-              <span className="hidden sm:inline">Quick Add</span>
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onWhatsNewClick}
-              className="relative flex items-center gap-2"
-              title="What's New"
-            >
-              <span className="text-lg">✨</span>
-              <span className="hidden sm:inline">What&apos;s New</span>
-              {hasUnseenUpdates && <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full" />}
-            </Button>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <nav className="border-b bg-background flex md:hidden h-16 items-center px-4 justify-between">
+        <div className="flex items-center gap-2">
+          <Dialog open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu" onClick={() => setMobileNavOpen(true)}>
+                <MenuIcon className="w-6 h-6" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="p-0 max-w-xs">
+              <div className="flex flex-col gap-2 p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-2xl">⚡</span>
+                  <h1 className="text-xl font-semibold">FlowCraft</h1>
+                </div>
+                {navItems.map((item) => {
+                  const isActive = currentView === item.id
+                  const isDisabled = item.disabled
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={isActive ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => {
+                        if (!isDisabled) {
+                          onViewChange(item.id)
+                          setMobileNavOpen(false)
+                        }
+                      }}
+                      disabled={isDisabled}
+                      className={cn(
+                        "w-full justify-start gap-2 mb-1",
+                        isActive && "bg-secondary text-secondary-foreground",
+                        isDisabled && "opacity-50 cursor-not-allowed",
+                      )}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                      {item.count !== undefined && (
+                        <span className="ml-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs">
+                          {item.count}
+                        </span>
+                      )}
+                    </Button>
+                  )
+                })}
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => {
+                    onQuickAddClick?.()
+                    setMobileNavOpen(false)
+                  }}
+                  className="w-full justify-start gap-2 bg-blue-600 hover:bg-blue-700 mt-2"
+                  title="Quick Add (Q)"
+                >
+                  <span className="text-lg">⚡</span>
+                  <span>Quick Add</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    onWhatsNewClick?.()
+                    setMobileNavOpen(false)
+                  }}
+                  className="w-full justify-start gap-2 mt-2"
+                  title="What's New"
+                >
+                  <span className="text-lg">✨</span>
+                  <span>What's New</span>
+                  {hasUnseenUpdates && <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full" />}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <span className="text-2xl">⚡</span>
+          <h1 className="text-xl font-semibold">FlowCraft</h1>
+        </div>
+        {/* Optionally show current sprint status on mobile */}
+        {!activeSprint && currentView === "current-sprint" && (
+          <div className="text-sm text-muted-foreground">No active sprint</div>
+        )}
+      </nav>
+    </>
   )
 }
