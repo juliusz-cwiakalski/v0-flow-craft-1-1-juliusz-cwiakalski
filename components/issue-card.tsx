@@ -45,6 +45,13 @@ export function IssueCard({
   onAssignToSprint,
   showSprint = true,
 }: IssueCardProps) {
+  // Source projects/teams from Redux if not provided or empty
+  const reduxProjects = useSelector((state: RootState) => state.projects.projects)
+  const reduxTeams = useSelector((state: RootState) => state.teams.teams)
+  const effectiveProjects = projects.length > 0 ? projects : reduxProjects
+  const effectiveTeams = teams.length > 0 ? teams : reduxTeams
+  const projectNameById = Object.fromEntries(effectiveProjects.map(p => [p.id, p.name]))
+  const teamNameById = Object.fromEntries(effectiveTeams.map(t => [t.id, t.name]))
   const sprint = sprints.find((s) => s.id === issue.sprintId)
   const assignee = useSelector((state: RootState) =>
     issue.assigneeUserId ? selectUserById(state, issue.assigneeUserId) : undefined,
@@ -153,21 +160,21 @@ export function IssueCard({
             <Badge className={statusColors[issue.status]} variant="outline">
               {issue.status}
             </Badge>
-            {issue.projectId && (
-              <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                📁 {issue.projectId}
-              </Badge>
-            )}
+{issue.projectId && (
+  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+    📁 {projectNameById[issue.projectId] || issue.projectId}
+  </Badge>
+)}
             {!issue.projectId && (
               <Badge variant="outline" className="text-xs text-muted-foreground">
                 📁 Unassigned
               </Badge>
             )}
-            {issue.teamId && (
-              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                👥 {issue.teamId}
-              </Badge>
-            )}
+{issue.teamId && (
+  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+    👥 {teamNameById[issue.teamId] || issue.teamId}
+  </Badge>
+)}
             {!issue.teamId && (
               <Badge variant="outline" className="text-xs text-muted-foreground">
                 👥 Unassigned

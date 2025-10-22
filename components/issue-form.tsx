@@ -48,6 +48,11 @@ export function IssueForm({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
 }: IssueFormProps) {
+  // Source projects/teams from Redux if not provided or empty
+  const reduxProjects = useSelector((state: RootState) => state.projects.projects)
+  const reduxTeams = useSelector((state: RootState) => state.teams.teams)
+  const effectiveProjects = projects.length > 0 ? projects : reduxProjects
+  const effectiveTeams = teams.length > 0 ? teams : reduxTeams
   const [internalOpen, setInternalOpen] = useState(false)
 
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
@@ -277,11 +282,11 @@ export function IssueForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">No Project</SelectItem>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.name}
-                      </SelectItem>
-                    ))}
+{effectiveProjects.map((project) => (
+  <SelectItem key={project.id} value={project.id}>
+    {project.name}
+  </SelectItem>
+))}
                   </SelectContent>
                 </Select>
               </div>
@@ -294,11 +299,11 @@ export function IssueForm({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">No Team</SelectItem>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
+{effectiveTeams.map((team) => (
+  <SelectItem key={team.id} value={team.id}>
+    {team.name}
+  </SelectItem>
+))}
                   </SelectContent>
                 </Select>
               </div>

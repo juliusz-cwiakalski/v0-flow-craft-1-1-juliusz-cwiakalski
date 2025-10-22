@@ -31,7 +31,7 @@ export interface Release {
 export const releases: Release[] = [
   {
     version: "0.4.1",
-    dateISO: "2025-01-21",
+    dateISO: "2025-10-23",
     items: [
       {
         id: "assignee-search-fix",
@@ -48,11 +48,26 @@ export const releases: Release[] = [
         },
         howToFind: "Open Issues and search by an assignee's name to filter.",
       },
+      {
+        id: "project-team-selectors-badge-fix",
+        kind: "Fixed",
+        title: "Project/Team selectors and badges fixed",
+        summary:
+          "Issue creation/edit forms now always show available Projects and Teams, even if not passed as props. Issue cards display Project and Team names instead of IDs.",
+        cta: {
+          label: "Try Issue Form",
+          href: "?open=issues",
+        },
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Open any Issue form or card to see correct Project/Team names and selectors.",
+      },
     ],
   },
   {
     version: "0.4.0",
-    dateISO: "2025-01-21",
+    dateISO: "2025-10-22",
     items: [
       {
         id: "settings-management",
@@ -89,7 +104,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.3.0",
-    dateISO: "2025-01-18",
+    dateISO: "2025-10-19",
     items: [
       {
         id: "dashboard",
@@ -118,7 +133,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.2.0",
-    dateISO: "2025-01-18",
+    dateISO: "2025-10-18",
     items: [
       {
         id: "quick-capture",
@@ -163,7 +178,7 @@ export const releases: Release[] = [
   },
   {
     version: "0.1.0",
-    dateISO: "2025-01-17",
+    dateISO: "2025-10-18",
     items: [
       {
         id: "initial-release",
