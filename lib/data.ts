@@ -1,4 +1,4 @@
-import type { Issue, Sprint, Priority, IssueStatus, IssueTemplate } from "@/types"
+import type { Issue, Priority, IssueStatus } from "@/types"
 
 // Priority color mapping
 export const priorityColors: Record<Priority, string> = {
@@ -27,96 +27,7 @@ export const generateTaskId = (existingIssues: Issue[]): string => {
   return `TSK-${String(maxId + 1).padStart(3, "0")}`
 }
 
-// Template definitions and utilities
-export const ISSUE_TEMPLATES: Record<string, IssueTemplate> = {
-  bug: {
-    id: "bug",
-    name: "Bug",
-    prefix: "[Bug] ",
-    isDefault: false,
-    defaults: {
-      priority: "P1",
-      status: "Todo",
-      defaultAssigneeUserId: undefined, // Can be set per template
-    },
-    acceptanceCriteria: [
-      "Steps to reproduce defined",
-      "Expected vs actual behavior described",
-      "Reproduction confirmed",
-    ],
-  },
-  feature: {
-    id: "feature",
-    name: "Feature",
-    prefix: "[Feature] ",
-    isDefault: true, // Default template
-    defaults: {
-      priority: "P3",
-      status: "Todo",
-      defaultAssigneeUserId: undefined,
-    },
-    acceptanceCriteria: ["Acceptance scenarios listed", "Non-functional constraints noted", "UX mock agreed"],
-  },
-  request: {
-    id: "request",
-    name: "Request",
-    prefix: "[Request] ",
-    isDefault: false,
-    defaults: {
-      priority: "P2",
-      status: "Todo",
-      defaultAssigneeUserId: undefined,
-    },
-    acceptanceCriteria: ["User impact clarified", "Success criteria measurable", "Approver identified"],
-  },
-}
-
 // Utility to generate unique AC IDs
 export const generateACId = (): string => {
   return `ac-${Math.random().toString(36).slice(2, 11)}`
 }
-
-// Utility to apply template to issue data
-export const applyIssueTemplate = (templateId: "bug" | "feature" | "request") => {
-  const template = ISSUE_TEMPLATES[templateId]
-  if (!template) return {}
-
-  return {
-    templateId,
-    priority: template.defaults.priority,
-    status: template.defaults.status,
-    defaultAssigneeUserId: template.defaults.defaultAssigneeUserId,
-    acceptanceCriteria: template.acceptanceCriteria.map((text) => ({
-      id: generateACId(),
-      text,
-      done: false,
-    })),
-  }
-}
-
-// Utilities for last-used template management
-export function getLastUsedTemplate(): string | null {
-  if (typeof window === "undefined") return null
-  try {
-    return localStorage.getItem("flowcraft:lastUsedTemplate")
-  } catch {
-    return null
-  }
-}
-
-export function setLastUsedTemplate(templateId: string): void {
-  if (typeof window === "undefined") return
-  try {
-    localStorage.setItem("flowcraft:lastUsedTemplate", templateId)
-  } catch {
-    // Silently fail if localStorage is not available
-  }
-}
-
-export function getDefaultTemplate(): string {
-  // Find the template marked as default, fallback to "feature"
-  const defaultTemplate = Object.values(ISSUE_TEMPLATES).find((t) => t.isDefault)
-  return defaultTemplate?.id || "feature"
-}
-
-// Sample data

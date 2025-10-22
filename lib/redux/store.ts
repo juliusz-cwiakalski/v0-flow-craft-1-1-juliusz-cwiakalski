@@ -7,7 +7,8 @@ import teamsReducer from "./slices/teamsSlice"
 import preferencesReducer from "./slices/preferencesSlice"
 import usersReducer from "./slices/usersSlice"
 import { localStorageMiddleware, loadState } from "./middleware/localStorage"
-import { demoIssues, demoProjects, demoSprints, demoTeams, demoUsers } from "@/lib/demo-data"
+import { demoIssues, demoProjects, demoSprints, demoTeams, demoUsers, demoIssueTemplates } from "@/lib/demo-data"
+import templatesReducer from "./slices/templatesSlice"
 
 const rootReducer = combineReducers({
   issues: issuesReducer,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   teams: teamsReducer,
   preferences: preferencesReducer,
   users: usersReducer,
+  templates: templatesReducer,
 })
 
 export type RootState = ReturnType<typeof rootReducer>
@@ -30,6 +32,7 @@ const demoPreloaded: Partial<RootState> = {
   teams: { teams: demoTeams },
   sprints: { sprints: demoSprints },
   issues: { issues: demoIssues },
+  templates: { templates: demoIssueTemplates, lastUsedTemplateId: undefined },
   // Use reducers to obtain default state for these slices
   preferences: preferencesReducer(undefined, { type: "@@INIT" } as any),
   ui: uiReducer(undefined, { type: "@@INIT" } as any),

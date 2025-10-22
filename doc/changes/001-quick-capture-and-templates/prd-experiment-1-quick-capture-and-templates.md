@@ -53,7 +53,8 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
 - [CREATE] **TemplatesSlice** — Redux slice for templates + persistence & last-used template.
 - [CREATE] **IssuesSlice: quickCreate flow** — Action to compose payload with template defaults and contextual sprint; add issue; maintain timestamps.
 - [CREATE] **TelemetryAdapter** — Thin abstraction (`track(eventName, payload)`) with console backend (V0).
-- [CREATE] **TemplateManagerBasic** — Minimal UI to list/create/edit templates (system + user-defined).
+- [MODIFY] **SettingsView** — Add a **Templates** tab to manage templates.
+- [CREATE] **TemplatesPanel** — Minimal UI to list/create/edit/duplicate/delete templates; enforce a single default.
 - [MODIFY] **IssueForm** — Show template selector in create mode; AC editing happens here only.
 - [MODIFY] **IssueCard** — AC progress badge `AC x/y` (hidden if no AC; green when x===y>0).
 - [MODIFY] **ChangelogPanel** — Add “Try Quick Capture” CTA using deeplink (`?open=quick-capture`) to open the modal immediately.
@@ -85,7 +86,7 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - ✅ **Preview-only** in modal; **editable** in Issue Form; **no max** count.  
 - **Template scope in V0**
   - Options: system-only vs. add minimal management
-  - ✅ **Minimal Template Manager** (basic CRUD) alongside seeded system templates (Bug/Feature/Request).  
+  - ✅ **Templates tab in Settings** with basic CRUD (list/create/edit/duplicate/delete) and default selection, alongside seeded system templates (Bug/Feature/Request).  
 - **State & persistence**
   - Options: local React state vs. Redux Toolkit + localStorage
   - ✅ **Redux Toolkit** as sole state system with localStorage persistence (per ADR-0008). :contentReference[oaicite:6]{index=6}
@@ -133,17 +134,20 @@ Reduce “work-about-work” and increase consistency of new tickets by enabling
   - **Feature**: prefix `[Feature] `, priority **P3**, status **Todo**, AC (3 delivery checks).  
   - **Request**: prefix `[Request] `, priority **P2**, status **Todo**, AC (3 validation checks). :contentReference[oaicite:7]{index=7}
 - Mark a single **default template** via `isDefault` in templates configuration (seeded default = **Feature**).  
-- Store templates in **TemplatesSlice**; persist to localStorage. User-defined templates **override** seeded defaults.  
+- Store templates in **TemplatesSlice**; persist to localStorage. Seed from `demoIssueTemplates` in `lib/demo-data.ts`. User-defined templates **override** seeded defaults.  
 - Remember `lastUsedTemplateId` in **TemplatesSlice** when a user creates via Quick Capture. On modal open, preselect:  
   1) `lastUsedTemplateId` if present; else  
   2) `default` template (the one with `isDefault: true`); else  
   3) Fallback to **Feature** (seeded).
 
-**4) Minimal Template Manager (Basic)**
-- Accessible from Settings (or a “Manage templates” link from Quick Capture).  
-- Capabilities (V0): **List**, **Create**, **Edit**, **Duplicate**, **Delete**.  
-- Template fields: `id`, `name`, `prefix`, `priority`, `status`, `defaultAssignee?`, `isDefault?`, `acceptanceCriteria[] (strings)`.  
-- On save: persist via TemplatesSlice; **remember last-used template** in TemplatesSlice.
+**4) Templates Management in Settings**
+- Location: **Settings → Templates** tab (visible alongside Projects/Teams/Users). Also reachable from a “Manage templates” link in Quick Capture.
+- Capabilities (V0): **List**, **Create**, **Edit**, **Duplicate**, **Delete**, **Set as default** (enforce exactly one default at a time).
+- Validation: unique `id`; `name` non-empty; `acceptanceCriteria` as non-empty strings; `defaultAssigneeUserId` must reference an existing user.
+- Template fields: `id`, `name`, `prefix`, `priority`, `status`, `defaultAssigneeUserId?`, `isDefault?`, `acceptanceCriteria[] (strings)`.
+- Persistence: Redux Toolkit slice with localStorage persistence per ADR-0008.
+- Migration: seed from `demoIssueTemplates` in `lib/demo-data.ts`; remove legacy `ISSUE_TEMPLATES` utilities from `lib/data.ts`.
+- On save: persist via TemplatesSlice; update `lastUsedTemplateId` when a template is used to create an issue.
 
 **5) Issue Creation & AC**
 - On create, map AC strings into `{id, text, done:false}`.  

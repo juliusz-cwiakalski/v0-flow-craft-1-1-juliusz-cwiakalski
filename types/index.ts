@@ -13,7 +13,7 @@ export interface Issue {
   sprintId?: string
   projectId?: string
   teamId?: string
-  templateId?: "bug" | "feature" | "request"
+  templateId?: string
   acceptanceCriteria?: AcceptanceCriterion[]
   statusChangeHistory?: StatusChangeEntry[]
   createdAt: Date
@@ -27,7 +27,7 @@ export interface AcceptanceCriterion {
 }
 
 export interface IssueTemplate {
-  id: "bug" | "feature" | "request"
+  id: string
   name: string
   prefix: string
   isDefault?: boolean // Added isDefault flag

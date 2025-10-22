@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion } from "@/types"
 import {
-  ISSUE_TEMPLATES,
-  applyIssueTemplate,
-  getLastUsedTemplate,
-  setLastUsedTemplate,
-  getDefaultTemplate,
-} from "@/lib/data"
+  selectTemplates,
+  selectDefaultTemplate,
+  selectLastUsedTemplateId,
+  setLastUsedTemplateId,
+  applyTemplateDefaults,
+} from "@/lib/redux/slices/templatesSlice"
+import { useDispatch } from "react-redux"
 import { telemetry } from "@/lib/telemetry"
 import { getCurrentUser } from "@/lib/user"
 import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
@@ -52,11 +53,15 @@ export function QuickCapture({
   onIssueCreated,
   source = "button",
 }: QuickCaptureProps) {
+  const dispatch = useDispatch()
+  const templates = useSelector(selectTemplates)
+  const defaultTemplate = useSelector(selectDefaultTemplate)
+  const lastUsedTemplateId = useSelector(selectLastUsedTemplateId)
   const { toast } = useToast()
   const users = useSelector((state: RootState) => selectAllUsers(state))
   const [formData, setFormData] = useState({
     title: "",
-    templateId: "none" as "bug" | "feature" | "request" | "none",
+    templateId: "none" as string,
     priority: "P3" as Priority,
     status: "Todo" as IssueStatus,
     assigneeUserId: "0",
@@ -65,7 +70,7 @@ export function QuickCapture({
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>([])
   const [showTemplateConfirm, setShowTemplateConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
-  const [pendingTemplateId, setPendingTemplateId] = useState<"bug" | "feature" | "request" | "none">("none")
+  const [pendingTemplateId, setPendingTemplateId] = useState<string>("none")
   const [userModifiedFields, setUserModifiedFields] = useState({
     title: false,
     priority: false,
@@ -82,11 +87,11 @@ export function QuickCapture({
         source,
       })
 
-      const lastUsed = getLastUsedTemplate()
-      const initialTemplate =
-        lastUsed && (lastUsed === "bug" || lastUsed === "feature" || lastUsed === "request")
-          ? lastUsed
-          : getDefaultTemplate()
+      const initialTemplateId =
+        lastUsedTemplateId && templates.some(t => t.id === lastUsedTemplateId)
+          ? lastUsedTemplateId
+          : defaultTemplate?.id || "none"
+      const initialTemplateObj = templates.find(t => t.id === initialTemplateId)
 
       let prefillSprintId = "0"
       if (sprintContext === "currentSprint") {
@@ -99,28 +104,26 @@ export function QuickCapture({
         prefillSprintId = sprintId
       }
 
-      setFormData({
-        title: "",
-        templateId: initialTemplate as "bug" | "feature" | "request" | "none",
-        priority: "P3",
-        status: "Todo",
-        assigneeUserId: "0",
-        sprintId: prefillSprintId,
-      })
-
-      if (initialTemplate !== "none") {
-        const templateData = applyIssueTemplate(initialTemplate as "bug" | "feature" | "request")
-        const template = ISSUE_TEMPLATES[initialTemplate]
+      if (initialTemplateObj) {
+        const templateData = applyTemplateDefaults(initialTemplateObj)
         setFormData({
-          title: template.prefix,
-          templateId: initialTemplate as "bug" | "feature" | "request",
-          priority: templateData.priority as Priority,
-          status: templateData.status as IssueStatus,
+          title: templateData.titlePrefix,
+          templateId: initialTemplateObj.id,
+          priority: templateData.priority,
+          status: templateData.status,
           assigneeUserId: templateData.defaultAssigneeUserId || "0",
           sprintId: prefillSprintId,
         })
         setAcceptanceCriteria(templateData.acceptanceCriteria || [])
       } else {
+        setFormData({
+          title: "",
+          templateId: "none",
+          priority: "P3",
+          status: "Todo",
+          assigneeUserId: "0",
+          sprintId: prefillSprintId,
+        })
         setAcceptanceCriteria([])
       }
 
@@ -139,7 +142,7 @@ export function QuickCapture({
     setIsDirty(hasContent)
   }, [formData.title, acceptanceCriteria])
 
-  const handleTemplateChange = (templateId: "bug" | "feature" | "request" | "none") => {
+  const handleTemplateChange = (templateId: string) => {
     const hasConflicts =
       userModifiedFields.title ||
       userModifiedFields.priority ||
@@ -155,7 +158,7 @@ export function QuickCapture({
     applyTemplate(templateId, false)
   }
 
-  const applyTemplate = (templateId: "bug" | "feature" | "request" | "none", forceOverwrite = false) => {
+  const applyTemplate = (templateId: string, forceOverwrite = false) => {
     if (templateId === "none") {
       setFormData({ ...formData, templateId: "none" })
       setAcceptanceCriteria([])
@@ -164,13 +167,18 @@ export function QuickCapture({
 
     telemetry.track("template_selected", { templateId })
 
-    const templateData = applyIssueTemplate(templateId)
-    const template = ISSUE_TEMPLATES[templateId]
+    const templateObj = templates.find(t => t.id === templateId)
+    if (!templateObj) {
+      setFormData({ ...formData, templateId })
+      setAcceptanceCriteria([])
+      return
+    }
+    const templateData = applyTemplateDefaults(templateObj)
 
     const newFormData = { ...formData, templateId }
 
     if (forceOverwrite || !userModifiedFields.title || formData.title === "") {
-      newFormData.title = template.prefix
+      newFormData.title = templateData.titlePrefix
     }
 
     if (forceOverwrite || !userModifiedFields.priority) {
@@ -208,13 +216,13 @@ export function QuickCapture({
     }
 
     if (formData.templateId !== "none") {
-      setLastUsedTemplate(formData.templateId)
+      dispatch(setLastUsedTemplateId(formData.templateId))
     }
 
     let finalAssigneeUserId = formData.assigneeUserId !== "0" ? formData.assigneeUserId : ""
     if (!finalAssigneeUserId && formData.templateId !== "none") {
-      const template = ISSUE_TEMPLATES[formData.templateId]
-      finalAssigneeUserId = template.defaults.defaultAssigneeUserId || ""
+      const templateObj = templates.find(t => t.id === formData.templateId)
+      finalAssigneeUserId = templateObj?.defaults.defaultAssigneeUserId || ""
       if (finalAssigneeUserId) {
         telemetry.track("assignee_autofilled", { source: "template" })
       }
@@ -255,17 +263,18 @@ export function QuickCapture({
 
     if (currentTemplateId !== "none") {
       // Re-apply the same template to get fresh defaults
-      const templateData = applyIssueTemplate(currentTemplateId)
+      const templateObj = templates.find(t => t.id === currentTemplateId)
+      const templateData = templateObj ? applyTemplateDefaults(templateObj) : undefined
 
       setFormData({
-        title: templateData ? ISSUE_TEMPLATES[currentTemplateId].prefix : "",
+        title: templateData ? templateData.titlePrefix : "",
         templateId: currentTemplateId,
-        priority: templateData.priority as Priority,
-        status: templateData.status as IssueStatus,
+        priority: templateData?.priority || "P3",
+        status: templateData?.status || "Todo",
         assigneeUserId: "0",
         sprintId: formData.sprintId, // Keep the same sprint context
       })
-      setAcceptanceCriteria(templateData.acceptanceCriteria || [])
+      setAcceptanceCriteria(templateData?.acceptanceCriteria || [])
     } else {
       // No template, just clear the title
       setFormData({
@@ -340,10 +349,10 @@ export function QuickCapture({
                   <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  <SelectItem value="bug">Bug</SelectItem>
-                  <SelectItem value="feature">Feature</SelectItem>
-                  <SelectItem value="request">Request</SelectItem>
+                  <SelectItem value="Todo">Todo</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="In Review">In Review</SelectItem>
+                  <SelectItem value="Done">Done</SelectItem>
                 </SelectContent>
               </Select>
             </div>

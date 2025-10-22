@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.4.1"
+export const APP_VERSION = "0.4.2"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
@@ -30,8 +30,52 @@ export interface Release {
 // Release content (newest first)
 export const releases: Release[] = [
   {
+    version: "0.4.2",
+    dateISO: "2025-10-22",
+    items: [
+      {
+        id: "templates-management-settings",
+        kind: "New",
+        title: "Templates Management in Settings",
+        summary:
+          "Create, edit, duplicate, delete, and set a default Issue Template. Configure title prefix, default priority/status, default assignee, and acceptance criteria. Changes persist and drive Quick Capture and Issue Form.",
+        cta: {
+          label: "Manage Templates",
+          href: "?open=settings&tab=templates",
+        },
+        deeplink: {
+          view: "settings",
+          query: { tab: "templates" },
+        },
+        howToFind: "Open Settings and select the Templates tab to manage templates",
+      },
+      {
+        id: "dynamic-templates-issue-flows",
+        kind: "Improved",
+        title: "Issue Form & Quick Capture use your templates",
+        summary:
+          "Template dropdowns now source from Settings. Defaults apply for title prefix, priority, status, assignee, and AC. Quick Capture remembers last-used template; Issue Form normalizes optional fields on submit.",
+        cta: {
+          label: "Try Quick Capture",
+          href: "?open=quick-capture",
+        },
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Open Quick Capture or Create Issue and choose a template",
+      },
+      {
+        id: "select-empty-value-fix",
+        kind: "Fixed",
+        title: "Select components avoid empty values",
+        summary:
+          "Replaced empty Select values with explicit sentinels (e.g., 'none') to satisfy component constraints and prevent runtime errors in Templates dialogs.",
+      },
+    ],
+  },
+  {
     version: "0.4.1",
-    dateISO: "2025-10-23",
+    dateISO: "2025-10-22",
     items: [
       {
         id: "assignee-search-fix",

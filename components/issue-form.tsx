@@ -22,7 +22,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import type { Issue, Priority, IssueStatus, Sprint, AcceptanceCriterion, Project, Team } from "@/types"
-import { ISSUE_TEMPLATES, applyIssueTemplate, generateACId } from "@/lib/data"
+import { generateACId } from "@/lib/data"
+import { selectTemplates, applyTemplateDefaults } from "@/lib/redux/slices/templatesSlice"
 import { telemetry } from "@/lib/telemetry"
 import { selectAllUsers } from "@/lib/redux/slices/usersSlice"
 import type { RootState } from "@/lib/redux/store"
@@ -59,6 +60,7 @@ export function IssueForm({
   const setOpen = controlledOnOpenChange || setInternalOpen
 
   const users = useSelector((state: RootState) => selectAllUsers(state))
+  const templates = useSelector(selectTemplates)
 
   const [formData, setFormData] = useState({
     title: issue?.title || "",
@@ -69,7 +71,8 @@ export function IssueForm({
     sprintId: issue?.sprintId || "0",
     projectId: issue?.projectId || "0",
     teamId: issue?.teamId || "0",
-    templateId: (issue?.templateId || "none") as "none" | "bug" | "feature" | "request",
+     templateId: (issue?.templateId || "none") as "none" | string,
+
   })
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(issue?.acceptanceCriteria || [])
   const [newACText, setNewACText] = useState("")
@@ -87,7 +90,8 @@ export function IssueForm({
         sprintId: issue?.sprintId || "0",
         projectId: issue?.projectId || "0",
         teamId: issue?.teamId || "0",
-        templateId: (issue?.templateId || "none") as "none" | "bug" | "feature" | "request",
+    templateId: (issue?.templateId || "none") as string,
+
       })
       setAcceptanceCriteria(issue?.acceptanceCriteria || [])
       setNewACText("")
@@ -95,19 +99,26 @@ export function IssueForm({
     }
   }, [open, issue])
 
-  const handleTemplateChange = (templateId: "none" | "bug" | "feature" | "request") => {
+  const handleTemplateChange = (templateId: string) => {
     if (templateId === "none") {
       setFormData({ ...formData, templateId: "none" })
+      setAcceptanceCriteria([])
       return
     }
 
-    const templateData = applyIssueTemplate(templateId)
-    const template = ISSUE_TEMPLATES[templateId]
+    const templateObj = templates.find(t => t.id === templateId)
+    if (!templateObj) {
+      setFormData({ ...formData, templateId })
+      setAcceptanceCriteria([])
+      return
+    }
+
+    const templateData = applyTemplateDefaults(templateObj)
 
     setFormData({
       ...formData,
       templateId,
-      title: formData.title || template.prefix,
+      title: formData.title || templateObj.prefix,
       priority: templateData.priority as Priority,
       status: templateData.status as IssueStatus,
       assigneeUserId: formData.assigneeUserId === "0" ? templateData.defaultAssigneeUserId || "0" : formData.assigneeUserId,
@@ -197,12 +208,14 @@ export function IssueForm({
                   <SelectTrigger>
                     <SelectValue placeholder="None" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="bug">Bug</SelectItem>
-                    <SelectItem value="feature">Feature</SelectItem>
-                    <SelectItem value="request">Request</SelectItem>
-                  </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {templates.map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                 </Select>
               </div>
             )}

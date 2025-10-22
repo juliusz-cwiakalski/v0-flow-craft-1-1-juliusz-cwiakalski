@@ -1,4 +1,4 @@
-import type { User, Project, Team, Sprint, Issue, ProjectStatus } from "@/types"
+import type {User, Project, Team, Sprint, Issue, ProjectStatus, IssueTemplate} from "@/types"
 
 // Centralized demo data for initial hydration
 
@@ -308,5 +308,57 @@ export const demoIssues: Issue[] = [
     teamId: "team-1",
     createdAt: new Date("2024-01-21"),
     updatedAt: new Date("2024-01-21"),
+  },
+]
+
+
+export const demoIssueTemplates: IssueTemplate[] = [
+  {
+    id: "bug",
+    name: "Bug",
+    prefix: "[Bug] ",
+    isDefault: false,
+    defaults: {
+      priority: "P1",
+      status: "Todo",
+      defaultAssigneeUserId: "user-1", // Alice Johnson
+    },
+    acceptanceCriteria: [
+      "Steps to reproduce defined",
+      "Expected vs actual behavior described",
+      "Reproduction confirmed",
+    ],
+  },
+  {
+    id: "feature",
+    name: "Feature",
+    prefix: "[Feature] ",
+    isDefault: true,
+    defaults: {
+      priority: "P3",
+      status: "Todo",
+      defaultAssigneeUserId: "user-2", // Bob Smith
+    },
+    acceptanceCriteria: [
+      "Acceptance scenarios listed",
+      "Non-functional constraints noted",
+      "UX mock agreed",
+    ],
+  },
+  {
+    id: "request",
+    name: "Request",
+    prefix: "[Request] ",
+    isDefault: false,
+    defaults: {
+      priority: "P2",
+      status: "Todo",
+      defaultAssigneeUserId: "user-4", // Charlie Brown
+    },
+    acceptanceCriteria: [
+      "User impact clarified",
+      "Success criteria measurable",
+      "Approver identified",
+    ],
   },
 ]
