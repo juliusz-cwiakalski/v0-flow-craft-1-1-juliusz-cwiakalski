@@ -349,10 +349,12 @@ export function QuickCapture({
                   <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Todo">Todo</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="In Review">In Review</SelectItem>
-                  <SelectItem value="Done">Done</SelectItem>
+                   <SelectItem value="none">None</SelectItem>
+                   {templates.map((template) => (
+                     <SelectItem key={template.id} value={template.id}>
+                       {template.name}
+                     </SelectItem>
+                   ))}
                 </SelectContent>
               </Select>
             </div>
