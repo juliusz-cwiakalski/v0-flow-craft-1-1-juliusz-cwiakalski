@@ -54,7 +54,7 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * [MODIFY] **Issue Details View** — Add **Status History** panel (read‑only V0).
 * [CREATE] **Settings Panel (Projects & Teams Management)** — Extend Projects to capture `startDate`, `endDate`, and `status`; optionally manage Project members (Users). Teams manage member assignment (Users) using autocomplete powered by the Users slice. Suggestions exclude already‑assigned users for the current entity; prevent adding the same user twice to the same project (duplicates also prevented within a single team); allow the same user across multiple projects. Stored entirely in UI via Redux + local storage per ADR‑0008; accessible from global navigation; guard deletes when referenced.
 * [CREATE] **Settings Panel (Users Management)** — Manage Users directory (CRUD + search/autocomplete) used by Projects/Teams membership pickers; accessible from **Settings**. Documented here; implementation deferred from this change.
-* [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter.
+* [MODIFY] **Telemetry Integration** — Emit dashboard and filter interaction events via existing telemetry adapter. Also emit `status_history_panel_opened` when the status history panel is viewed.
 
 ## DECISIONS
 
@@ -65,9 +65,9 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 * **Time window** — Default **Last 7 days (rolling)**; presets 7/14/30 + Custom; display in **user locale**. ✅
 * **Throughput** — Prefer **statusChangeHistory** (`to==='Done'` within window); fallback to PRD approximation using `updatedAt` when absent; tooltip clarifies approximation. ✅ 
 * **Workload** — Include Top‑5 non‑Done issues per assignee; show **Unassigned**; static in V0 (no click‑through) to minimize scope. ✅ 
-* **Accessibility** — Skip ARIA for prototype; note for future. ✅
-* **Telemetry** — Add `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`. ✅
-* **Testing** — Minimal unit tests for **pure derivations** (status counts/%, sprint progress, throughput window (history + fallback), workload grouping) and **filter application**. Skip complex UI tests for speed. ✅
+* **Accessibility** — Skip ARIA for prototype; note for future. Accessibility limitations and TODOs for future improvements are documented in accessibility-plan.md. ✅
+* **Telemetry** — Add `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`, `status_history_panel_opened`. ✅
+* **Testing** — Minimal unit tests for **pure derivations** (status counts/%, sprint progress, throughput window (history + fallback), workload grouping) and **filter application**. Unit tests also cover edge cases such as empty states, locale formatting, invalid/overlapping time ranges, and status history fallback. Skip complex UI tests for speed. ✅
 * **Projects & Teams** — Introduce simple entities and management panel; seed one default each; **sprints remain shared** across projects/teams; filters scope the data shown. ✅ 
 * **Users directory** — Add Users slice as canonical user list used by Teams/Projects membership pickers; supports search/autocomplete. ✅
 * **Project statuses** — Planned, Active, On Hold, Completed; default Planned; end date optional until completion. ✅
@@ -143,8 +143,8 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
 - **Issue Details** view allows changing Project and Team via dropdowns; saving updates the Issue and, when relevant, `lastUsedProjectId`/`lastUsedTeamId`.
 - **Dashboard** consumes the same scoped issues/sprints and reflects the currently selected Projects/Teams and Time Range.
 - Throughput derivation prefers status history; falls back to `updatedAt` when necessary and indicates “approximate”.
-- Telemetry emitted: `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`.
-- Minimal unit tests cover: status breakdown, active sprint progress, throughput (history + fallback), workload grouping, and scope filter selectors.
+- Telemetry emitted: `dashboard_view_opened`, `dashboard_time_range_changed`, `dashboard_scope_changed`, `filters_cleared`, `scope_changed_on_issues`, `scope_changed_on_current_sprint`, `status_history_panel_opened`.
+- Minimal unit tests cover: status breakdown, active sprint progress, throughput (history + fallback), workload grouping, scope filter selectors, and edge cases (empty states, locale formatting, invalid/overlapping time ranges, status history fallback).
 
 ## ACCEPTANCE CRITERIA
 
@@ -169,6 +169,8 @@ Deliver instant, low‑overhead visibility for leaders of 30–50‑person orgs 
   - Dashboard metrics and cards reflect the currently selected Projects/Teams and Time Range.
 - Derivations and telemetry:
   - Throughput indicates “approximate” when falling back to `updatedAt`.
+- Status history panel emits `status_history_panel_opened` telemetry event when viewed.
+- Accessibility limitations and TODOs for future improvements are documented in accessibility-plan.md.
   - Defined telemetry events fire at the specified interaction points.
 
 ## AI CODING AGENT PROMPT

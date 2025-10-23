@@ -427,14 +427,17 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `filters_cleared`
 - `scope_changed_on_issues`
 - `scope_changed_on_current_sprint`
+- `status_history_panel_opened`
 
 **Acceptance Criteria:**
 - Filters work and persist in all three views (Issues, Current Sprint, Dashboard).
 - "Clear filters" resets scope everywhere.
 - Issue creation defaults to last used scope.
-- Telemetry events fire on relevant interactions.
+- Telemetry events fire on relevant interactions, including `status_history_panel_opened` when the status history panel is viewed.
 - Issue cards and Kanban cards show Project/Team badges, fallback to Unassigned when missing.
 - Dashboard metrics/cards reflect current scope and time range.
+- Accessibility limitations and TODOs for future improvements are documented in accessibility-plan.md.
+- Minimal unit tests cover edge cases (empty states, locale formatting, invalid/overlapping time ranges, status history fallback).
 
 **Description**: Executive dashboard providing instant visibility into project health with key metrics, scope filtering, and time range controls.
 
