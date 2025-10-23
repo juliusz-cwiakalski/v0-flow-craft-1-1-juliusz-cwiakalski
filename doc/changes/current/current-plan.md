@@ -136,7 +136,7 @@ summary: >
 - Tasks:
   - [ ] Update doc/spec/specification.md with new dashboard cards, derivations, preferences fields, and behaviors.
   - [ ] Add brief ADR or note in doc/adr/ on preferences thresholds (optional if covered in ADR-0008 scope).
-  - [ ] Update lib/changelog.ts with user-visible changes and deep-link if any.
+  - [x] Update lib/changelog.ts with user-visible changes and deep-link if any. (done: added dashboard advanced metrics item)
   - [ ] Run pnpm lint and address warnings; ensure tests pass.
 - Acceptance criteria:
   - Must: Spec reflects implemented cards and interactions; changelog entry appears in UI.

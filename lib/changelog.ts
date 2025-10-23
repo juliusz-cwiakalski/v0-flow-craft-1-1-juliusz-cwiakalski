@@ -70,6 +70,15 @@ export const releases: Release[] = [
         summary:
           "Telemetry now logs every time the Issue History panel is opened, supporting future analytics and usage tracking.",
       },
+      {
+        id: "dashboard-advanced-metrics",
+        kind: "New",
+        title: "Dashboard: Velocity, Blocked/Stale, WIP, Cycle-time, ETA",
+        summary:
+          "Five new cards extend the dashboard: Velocity by sprint, Blocked & Stale, WIP Pressure with inline threshold, Cycle-time (median/p75), and Delivery ETA per project.",
+        cta: { label: "View Dashboard", href: "?open=dashboard" },
+        deeplink: { view: "dashboard" },
+      },
     ],
   },
   {
