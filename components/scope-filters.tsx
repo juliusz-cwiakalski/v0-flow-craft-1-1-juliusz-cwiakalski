@@ -89,3 +89,18 @@ export function ScopeFilters({
     </div>
   )
 }
+
+// Helper to build Issues view query params for deep linking
+export function buildIssuesQueryParams({ projectIds = [], teamIds = [], status, staleAgeDays }: {
+  projectIds?: string[]
+  teamIds?: string[]
+  status?: string
+  staleAgeDays?: number
+}): string {
+  const params = new URLSearchParams()
+  if (projectIds.length) params.set("projects", projectIds.join(","))
+  if (teamIds.length) params.set("teams", teamIds.join(","))
+  if (status) params.set("status", status)
+  if (typeof staleAgeDays === "number") params.set("staleAgeDays", String(staleAgeDays))
+  return params.toString() ? `?${params.toString()}` : ""
+}
