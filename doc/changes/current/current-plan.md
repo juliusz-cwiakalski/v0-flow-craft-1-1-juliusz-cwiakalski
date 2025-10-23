@@ -61,7 +61,7 @@ summary: >
   - Verify new state changes are traceable in Redux DevTools.
   - [x] Add Preferences fields in types/index.ts: `wipThreshold: number` (default 10), `staleAgeDays: number` (default 7). (done: fields already present in PreferencesState type)
   - [x] Extend lib/redux/slices/preferencesSlice.ts with actions: `setWipThreshold(number)`, `setStaleAgeDays(number)`; ensure persistence via existing middleware. (done: actions and initial state already present)
-  - [ ] Implement `deriveVelocityBySprint(issues: Issue[], sprints: Sprint[], limit=5)` in lib/dashboard-utils.ts returning last N sprints with done counts and dates.
+  - [x] Implement `deriveVelocityBySprint(issues: Issue[], sprints: Sprint[], limit=5)` in lib/dashboard-utils.ts returning last N sprints with done counts and dates. (done: function already existed; tests added in lib/dashboard-utils.test.ts)
   - [ ] Implement `deriveBlockedAndStale(issues: Issue[], staleAgeDays: number)` returning per-status counts and total; staleness by `updatedAt` older than N days; blocked if `history` includes latest `blocked` true flag or placeholder field (fallback: infer none).
   - [ ] Implement `deriveWipPressure(issues: Issue[], threshold: number)` returning `{ wip, threshold, ratio, level: 'green'|'amber'|'red' }` with levels at <80%, 80–100%, >100%.
   - [ ] Implement `deriveCycleTimeStats(issues: Issue[], range: DashboardTimeRange)` computing median and p75 from first transition to In Progress to Done within range; return `insufficientData: boolean` when missing.
