@@ -81,6 +81,7 @@ Scope extraction
 Subject generation
 - Verb selection from type: feat→"add", fix→"fix", docs→"docs", style→"style", refactor→"refactor", perf→"improve perf", test→"test", build→"build", ci→"ci", chore→"chore", revert→"revert".
 - Noun phrase from dominant filenames (e.g., throughput-card → "throughput card").
+- If OPENCODE_PHASE_TITLE env var is present (set by execute-plan), prefer "<verb> <normalized phase title>" as the subject topic.
 - Form: "<verb> <topic>" (lowercase, no trailing period). Truncate to maxSubjectLen preserving whole words.
 - If subjectOverride is provided, use it verbatim (still trimmed and length-limited).
 
