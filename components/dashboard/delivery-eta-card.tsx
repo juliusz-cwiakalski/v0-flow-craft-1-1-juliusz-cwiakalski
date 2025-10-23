@@ -2,12 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { DeliveryEtaEntry } from "@/lib/dashboard-utils"
+import { useEffect } from "react"
+import { trackEvent } from "@/lib/telemetry"
 
 interface DeliveryEtaCardProps {
   data: DeliveryEtaEntry[]
 }
 
 export function DeliveryEtaCard({ data }: DeliveryEtaCardProps) {
+  useEffect(() => {
+    trackEvent("eta_card_viewed", { projects: data.length })
+  }, [data.length])
   return (
     <Card>
       <CardHeader>

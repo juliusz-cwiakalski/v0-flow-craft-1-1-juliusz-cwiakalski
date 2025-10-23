@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { WipPressureResult } from "@/lib/dashboard-utils"
 import { useDispatch } from "react-redux"
 import { setWipThreshold } from "@/lib/redux/slices/preferencesSlice"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { trackEvent } from "@/lib/telemetry"
 
 interface WipPressureCardProps {
   data: WipPressureResult
@@ -13,6 +14,10 @@ interface WipPressureCardProps {
 export function WipPressureCard({ data }: WipPressureCardProps) {
   const dispatch = useDispatch()
   const [val, setVal] = useState<string>(String(data.threshold))
+
+  useEffect(() => {
+    trackEvent("wip_pressure_card_viewed", { wip: data.wip, threshold: data.threshold, level: data.level })
+  }, [data.wip, data.threshold, data.level])
 
   const levelColor = data.level === "red" ? "text-red-600" : data.level === "amber" ? "text-amber-600" : "text-green-600"
 
@@ -38,6 +43,7 @@ export function WipPressureCard({ data }: WipPressureCardProps) {
                 const n = parseInt(val, 10)
                 if (!Number.isNaN(n) && n > 0) {
                   dispatch(setWipThreshold(n))
+                  trackEvent("wip_threshold_changed", { threshold: n })
                 } else {
                   setVal(String(data.threshold))
                 }

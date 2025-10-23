@@ -2,12 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { CycleTimeStatsResult } from "@/lib/dashboard-utils"
+import { useEffect } from "react"
+import { trackEvent } from "@/lib/telemetry"
 
 interface CycleTimeTrendCardProps {
   data: CycleTimeStatsResult
 }
 
 export function CycleTimeTrendCard({ data }: CycleTimeTrendCardProps) {
+  useEffect(() => {
+    trackEvent("cycle_time_card_viewed", { insufficient: data.insufficientData })
+  }, [data.insufficientData])
   return (
     <Card>
       <CardHeader>

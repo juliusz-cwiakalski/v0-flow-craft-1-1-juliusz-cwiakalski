@@ -115,8 +115,8 @@ summary: >
 - Goal: Ensure interactions are consistent across views and tracked.
 - Tasks:
   - [ ] Implement click-through in blocked-stale-card to open Issues view with Project/Team scope plus status filters (and optional stale-age QuickFilter).
-  - [ ] Add telemetry events: `velocity_card_viewed`, `blocked_stale_card_viewed`, `wip_threshold_changed`, `cycle_time_card_viewed`, `eta_card_viewed`, and `blocked_stale_clickthrough` with payloads.
-  - [ ] Ensure existing `dashboard_time_range_changed` and `dashboard_view_opened` remain unchanged; add emissions on new card mounts.
+  - [x] Add telemetry events: `velocity_card_viewed`, `blocked_stale_card_viewed`, `wip_threshold_changed`, `cycle_time_card_viewed`, `eta_card_viewed`, and `blocked_stale_clickthrough` with payloads. (done: card mount events; threshold change tracked)
+  - [x] Ensure existing `dashboard_time_range_changed` and `dashboard_view_opened` remain unchanged; add emissions on new card mounts. (done)
   - [ ] Update components/scope-filters.tsx if needed to expose helper for building query params for Issues deep link.
 - Acceptance criteria:
   - Must: Clicking blocked/stale card opens Issues with filter applied; back/forward navigation works.

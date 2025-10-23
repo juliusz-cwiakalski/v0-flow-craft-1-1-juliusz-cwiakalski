@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { BlockedAndStaleResult } from "@/lib/dashboard-utils"
+import { useEffect } from "react"
+import { trackEvent } from "@/lib/telemetry"
 
 interface BlockedStaleCardProps {
   data: BlockedAndStaleResult
@@ -9,6 +11,9 @@ interface BlockedStaleCardProps {
 }
 
 export function BlockedStaleCard({ data, onOpenIssues }: BlockedStaleCardProps) {
+  useEffect(() => {
+    trackEvent("blocked_stale_card_viewed", { totalBlocked: data.totalBlocked, totalStale: data.totalStale })
+  }, [data.totalBlocked, data.totalStale])
   const total = data.totalBlocked + data.totalStale
   return (
     <Card>

@@ -2,12 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { VelocityBySprintEntry } from "@/lib/dashboard-utils"
+import { useEffect } from "react"
+import { trackEvent } from "@/lib/telemetry"
 
 interface VelocityCardProps {
   data: VelocityBySprintEntry[]
 }
 
 export function VelocityCard({ data }: VelocityCardProps) {
+  useEffect(() => {
+    trackEvent("velocity_card_viewed", { count: data.length })
+  }, [data.length])
   return (
     <Card>
       <CardHeader>
