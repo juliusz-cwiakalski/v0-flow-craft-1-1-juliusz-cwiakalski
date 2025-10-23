@@ -85,12 +85,12 @@ summary: >
 ### Phase 2: Dashboard cards UI
 - Goal: Add UI cards for new metrics and surface threshold controls.
 - Tasks:
-  - [ ] Create components/dashboard/velocity-card.tsx rendering last 3–5 sprints with counts (sparkline or list).
-  - [ ] Create components/dashboard/blocked-stale-card.tsx showing total blocked and stale per status; click opens Issues with applied filters.
-  - [ ] Create components/dashboard/wip-pressure-card.tsx showing gauge/indicator and inline editable threshold; dispatch `setWipThreshold` with telemetry.
-  - [ ] Create components/dashboard/cycle-time-trend-card.tsx showing median and p75; show "insufficient data" state when applicable.
-  - [ ] Create components/dashboard/delivery-eta-card.tsx listing per active project ETA optimistic/median with caveat tooltip.
-  - [ ] Update components/dashboard/dashboard-view.tsx to derive new data via lib/dashboard-utils.ts and render cards; pass preferences and handlers.
+  - [x] Create components/dashboard/velocity-card.tsx rendering last 3–5 sprints with counts (sparkline or list). (done: added VelocityCard)
+  - [x] Create components/dashboard/blocked-stale-card.tsx showing total blocked and stale per status; click opens Issues with applied filters. (done: added BlockedStaleCard; basic navigate handler wired)
+  - [x] Create components/dashboard/wip-pressure-card.tsx showing gauge/indicator and inline editable threshold; dispatch `setWipThreshold` with telemetry. (done: added WipPressureCard; dispatches setWipThreshold on blur)
+  - [x] Create components/dashboard/cycle-time-trend-card.tsx showing median and p75; show "insufficient data" state when applicable. (done: added CycleTimeTrendCard)
+  - [x] Create components/dashboard/delivery-eta-card.tsx listing per active project ETA optimistic/median with caveat tooltip. (done: added DeliveryEtaCard)
+  - [x] Update components/dashboard/dashboard-view.tsx to derive new data via lib/dashboard-utils.ts and render cards; pass preferences and handlers. (done: derives velocity, blocked/stale, wip, cycle-time, ETA; passes handler to open Issues)
 - Acceptance criteria:
   - Must: New cards render alongside existing 2x2 grid without layout break; responsive on md breakpoint.
   - Must: Cards reflect current Project/Team scope and dashboard time-range where applicable.
