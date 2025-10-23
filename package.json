@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "commit": "opencode run commit",
     "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start",
-    "test": "jest",
-    "plan": "opencode run document-plan",
     "execute-plan": "opencode run execute-plan",
-    "commit": "opencode run commit"
+    "lint": "next lint",
+    "plan": "opencode run document-plan",
+    "start": "next start",
+    "test": "jest"
   },
   "dependencies": {
     "@babel/core": "latest",
@@ -92,6 +92,6 @@
     "tailwindcss": "^4.1.9",
     "ts-jest": "^29.4.5",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5"
   }
 }
