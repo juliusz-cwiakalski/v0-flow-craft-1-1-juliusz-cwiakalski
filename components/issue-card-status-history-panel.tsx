@@ -9,6 +9,27 @@ interface StatusHistoryPanelProps {
   issue: Issue
 }
 
+function formatValue(val: unknown): string {
+  if (val instanceof Date) return val.toISOString()
+  if (typeof val === "string") return val
+  if (typeof val === "number" || typeof val === "boolean") return String(val)
+  if (val && typeof val === "object") {
+    // Try to handle ISO date strings
+    if (val.constructor && val.constructor.name === "Date") {
+      // Defensive: some objects may be Date but not instanceof
+      // (e.g., from JSON parse)
+      try {
+        return new Date(val as any).toISOString()
+      } catch {
+        return String(val)
+      }
+    }
+    // Fallback: JSON.stringify
+    return JSON.stringify(val)
+  }
+  return String(val)
+}
+
 export function StatusHistoryPanel({ issue }: StatusHistoryPanelProps) {
   React.useEffect(() => {
     trackEvent("issue_history_panel_opened", { issueId: issue.id })
@@ -40,7 +61,8 @@ export function StatusHistoryPanel({ issue }: StatusHistoryPanelProps) {
             <li key={idx}>
               <span className="font-mono text-xs">{entry.atISO}</span>:
               <span className="ml-2 font-semibold">{entry.field}</span>
-              <span className="ml-2">{JSON.stringify(entry.from)} → {JSON.stringify(entry.to)}</span>
+              <span className="ml-2">{formatValue(entry.from)} → {formatValue(entry.to)}</span>
+
               {entry.changedBy && (
                 <span className="ml-2 text-xs text-muted-foreground">by {entry.changedBy}</span>
               )}
