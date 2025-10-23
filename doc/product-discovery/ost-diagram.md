@@ -1,4 +1,4 @@
-\`\`\`mermaid
+```mermaid
 ---
 config:
   layout: tidy-tree
@@ -36,5 +36,4 @@ mindmap
       s5.4 Spójne doświadczenie mobilne pełna funkcjonalność full feature parity tryb offline first i szybkie przechwytywanie zadań quick add
       s5.5 Proste wizualizacje wykresy kolorowanie statusy i Gantt szybka ocena statusu bez konieczności złożonych tabel
 
-
-\`\`\`
+```

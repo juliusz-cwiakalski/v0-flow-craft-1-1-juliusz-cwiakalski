@@ -1,10 +1,16 @@
 "use client"
 import { Badge } from "@/components/ui/badge"
-import { ScopeFilters } from "@/components/scope-filters"
+import { ScopeFilters, buildIssuesQueryParams } from "@/components/scope-filters"
+import { useRouter } from "next/navigation"
 import { StatusBreakdownCard } from "@/components/dashboard/status-breakdown-card"
 import { ActiveSprintProgressCard } from "@/components/dashboard/active-sprint-progress-card"
 import { ThroughputCard } from "@/components/dashboard/throughput-card"
 import { WorkloadByAssigneeCard } from "@/components/dashboard/workload-by-assignee-card"
+import { VelocityCard } from "@/components/dashboard/velocity-card"
+import { BlockedStaleCard } from "@/components/dashboard/blocked-stale-card"
+import { WipPressureCard } from "@/components/dashboard/wip-pressure-card"
+import { CycleTimeTrendCard } from "@/components/dashboard/cycle-time-trend-card"
+import { DeliveryEtaCard } from "@/components/dashboard/delivery-eta-card"
 import type { Issue, Sprint, Project, Team, DashboardTimeRange, TimeRangePreset } from "@/types"
 import {
   deriveCountsByStatus,
@@ -12,9 +18,17 @@ import {
   deriveThroughput,
   deriveWorkloadByAssignee,
   applyScopeFilters,
+  deriveVelocityBySprint,
+  deriveBlockedAndStale,
+  deriveWipPressure,
+  deriveCycleTimeStats,
+  deriveDeliveryEtaPerProject,
 } from "@/lib/dashboard-utils"
 import { trackEvent } from "@/lib/telemetry"
 import { useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import type { RootState } from "@/lib/redux/store"
+import { setCurrentView } from "@/lib/redux/slices/uiSlice"
 
 interface DashboardViewProps {
   issues: Issue[]
@@ -43,6 +57,10 @@ export function DashboardView({
   onClearFilters,
   onTimeRangeChange,
 }: DashboardViewProps) {
+  const dispatch = useDispatch()
+  const router = useRouter()
+
+  const { wipThreshold, staleAgeDays } = useSelector((state: RootState) => state.preferences)
   // Track dashboard view opened
   useEffect(() => {
     trackEvent("dashboard_view_opened", {
@@ -65,6 +83,11 @@ export function DashboardView({
   const sprintProgress = deriveActiveSprintProgress(scopedIssues, sprints)
   const throughput = deriveThroughput(scopedIssues, timeRange)
   const workload = deriveWorkloadByAssignee(scopedIssues, 5)
+  const velocity = deriveVelocityBySprint(scopedIssues, sprints, 5)
+  const blockedStale = deriveBlockedAndStale(scopedIssues, staleAgeDays)
+  const wip = deriveWipPressure(scopedIssues, wipThreshold)
+  const cycle = deriveCycleTimeStats(scopedIssues, timeRange)
+  const eta = deriveDeliveryEtaPerProject(scopedIssues, sprints, timeRange)
 
   const handlePresetChange = (preset: TimeRangePreset) => {
     const newRange: DashboardTimeRange = { preset }
@@ -116,12 +139,28 @@ export function DashboardView({
         </div>
       </div>
 
-      {/* Dashboard cards in 2x2 grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Dashboard cards in responsive grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <StatusBreakdownCard data={statusBreakdown} />
         <ActiveSprintProgressCard data={sprintProgress} />
         <ThroughputCard data={throughput} />
         <WorkloadByAssigneeCard data={workload} />
+        <VelocityCard data={velocity} />
+        <BlockedStaleCard
+  data={blockedStale}
+  onOpenIssues={() => {
+    const query = buildIssuesQueryParams({
+      projectIds: selectedProjectIds,
+      teamIds: selectedTeamIds,
+      staleAgeDays,
+      status: "Blocked,Stale"
+    })
+    router.push(`/issues${query}`)
+  }}
+/>
+        <WipPressureCard data={wip} />
+        <CycleTimeTrendCard data={cycle} />
+        <DeliveryEtaCard data={eta} projects={projects} />
       </div>
     </div>
   )

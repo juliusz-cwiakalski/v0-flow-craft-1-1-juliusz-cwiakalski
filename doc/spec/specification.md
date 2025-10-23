@@ -376,6 +376,15 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 9. Roll-up Dashboard
 
+#### 9.0. Dashboard Layout and Deep Linking
+
+- **Responsive grid layout:** Dashboard grid automatically adapts to screen size: 1 column on mobile, 2 columns on medium screens, and 3 columns on wide (xl) screens. This ensures all metric cards remain readable and usable at every breakpoint.
+- **Delivery ETA card improvement:** The Delivery ETA card now displays project names instead of project IDs, improving clarity for users tracking delivery estimates across multiple projects.
+- **Blocked & Stale card deep linking:** Clicking "Open Issues" on the Blocked & Stale dashboard card navigates directly to the Issues view, with relevant filters (project, team, status, staleAgeDays) applied via query parameters. This enables fast drill-down from dashboard metrics to actionable issue lists.
+- **Helper function for deep linking:** The helper function `buildIssuesQueryParams` (located in `components/scope-filters.tsx`) constructs query strings for deep linking to the Issues view with the correct filters.
+- **Telemetry:** The telemetry event `blocked_stale_clickthrough` fires with the filter payload whenever a user navigates from the dashboard card to the Issues view.
+- **Extensibility:** The deep linking pattern is designed to be extensible for other dashboard cards, allowing future metric cards to support direct navigation to filtered issue lists or other views as needed.
+
 #### 9.1. Global Project/Team Scope Filtering (Cross-View, Persistent)
 
 **Description:**
@@ -444,6 +453,13 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `scope_changed_on_issues`
 - `scope_changed_on_current_sprint`
 - `issue_history_panel_opened`
+- `velocity_card_viewed`
+- `blocked_stale_card_viewed`
+- `blocked_stale_clickthrough`
+- `wip_threshold_changed`
+- `wip_pressure_card_viewed`
+- `cycle_time_card_viewed`
+- `eta_card_viewed`
 
 **Acceptance Criteria:**
 - Filters work and persist in all three views (Issues, Current Sprint, Dashboard).
@@ -480,6 +496,11 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `types/index.ts` - `Project`, `Team`, `DashboardTimeRange`, `TimeRangePreset`, `PreferencesState`, `IssueChange`
 - `lib/dashboard-utils.ts` - Metric derivation functions
 
+**Preferences**:
+- `wipThreshold: number` - Default 10, configurable via WIP Pressure card
+- `staleAgeDays: number` - Default 7, configurable via Blocked & Stale card
+- Persisted via Redux and localStorage middleware
+
 **Redux Slices**:
 - `lib/redux/slices/projectsSlice.ts` - Project entity management (seeded with "Main Project")
 - `lib/redux/slices/teamsSlice.ts` - Team entity management (seeded with "Main Team")
@@ -514,6 +535,37 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
    - Shows assignee name and count
    - Sorted descending by count
    - Derived from: `deriveWorkloadByAssignee(scopedIssues, 5)`
+
+5. **Velocity**
+   - Shows completion counts for last 3-5 sprints
+   - Displays sprint names and done counts
+   - Derived from: `deriveVelocityBySprint(scopedIssues, sprints, 5)`
+
+6. **Blocked & Stale**
+   - Shows total blocked and stale issues
+   - Blocked: issues with latest `blocked` flag or placeholder field
+   - Stale: issues with `updatedAt` older than N days (configurable via `staleAgeDays` preference)
+   - Click "Open Issues →" navigates to Issues view
+   - Derived from: `deriveBlockedAndStale(scopedIssues, staleAgeDays)`
+
+7. **WIP Pressure**
+   - Shows Work-in-Progress count vs configurable threshold
+   - Displays ratio and color-coded level (green <80%, amber 80-100%, red >100%)
+   - Inline editable threshold via preferences
+   - Derived from: `deriveWipPressure(scopedIssues, wipThreshold)`
+
+8. **Cycle-time Trend**
+   - Shows median and p75 cycle times (In Progress → Done)
+   - Respects selected time range
+   - Shows "insufficient data" when transitions missing
+   - Derived from: `deriveCycleTimeStats(scopedIssues, timeRange)`
+
+9. **Delivery ETA**
+   - Shows per-project delivery estimates
+   - Calculates ETA based on remaining issues and recent throughput
+   - Shows optimistic and median estimates
+   - Shows "insufficient data" when throughput=0
+   - Derived from: `deriveDeliveryEtaPerProject(scopedIssues, sprints, timeRange)`
 
 ...
 
@@ -666,6 +718,17 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
   - Tracks `issue_opened_via_deeplink` telemetry event
 
 ## Version History
+
+### v0.4.0 (2025-10-23)
+- Improved dashboard grid layout: now responsive (1 column mobile, 2 columns md, 3 columns xl)
+- Delivery ETA card now displays project names instead of IDs
+- Added deep linking from Blocked & Stale card to Issues view with relevant filters
+- Helper function for building query strings for deep linking
+- Telemetry event for dashboard card clickthrough
+- Added advanced dashboard metrics: Velocity, Blocked & Stale, WIP Pressure, Cycle-time Trend, Delivery ETA
+- Added configurable preferences: `wipThreshold` and `staleAgeDays`
+- Added inline threshold editing in WIP Pressure card
+- Enhanced dashboard derivation functions with comprehensive unit tests
 
 ### v0.3.0 (2025-01-18)
 - Added Roll-up Dashboard with 4 key metrics

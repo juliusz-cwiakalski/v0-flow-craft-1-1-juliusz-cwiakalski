@@ -114,9 +114,10 @@ Error handling & recovery
 - Only ask for user input when truly blocked by missing product decisions or irreconcilable conflicts.
 
 Plan grammar and updates
-- The plan uses markdown checkboxes for steps and may include sub-bullets with details and acceptance criteria.
+- The plan MUST follow the structure defined by document-plan: Context and Goals, Scope, Phases, Test Scenarios, Artifacts and Links, Plan revision log, Execution log.
+- Tasks to execute are the checkboxes under each "### Phase N: <title>" section in the "Tasks" subsection. The first checklist in the file must be Phase 1 Tasks.
 - Update the exact checkbox line from "- [ ]" to "- [x]" when done. Append a concise parenthetical note, e.g., "(done: updated throughput-card.tsx; tests added)".
-- Do not reorder steps. If a step is found to be dependent on a later step, note the dependency and proceed with the dependency first.
+- Do not reorder phases or tasks. If a step depends on a later step, note the dependency and proceed with the dependency first unless allowReorder=true.
 - Feedback-driven edits must preserve already completed steps; when titles change, add a parenthetical alias to retain traceability.
 
 Repository-aware guidance for the current example plan

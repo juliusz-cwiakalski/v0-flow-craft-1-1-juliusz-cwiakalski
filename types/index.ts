@@ -106,6 +106,8 @@ export interface PreferencesState {
   lastUsedProjectId?: string
   lastUsedTeamId?: string
   dashboardTimeRange: DashboardTimeRange
+  wipThreshold: number
+  staleAgeDays: number
 }
 
 export type ViewType = "issues" | "current-sprint" | "sprints" | "changelog" | "dashboard" | "settings"
