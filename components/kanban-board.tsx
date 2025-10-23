@@ -20,6 +20,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog"
+import { StatusHistoryPanel } from "./issue-card-status-history-panel"
 import { IssueForm } from "./issue-form"
 import { priorityColors } from "@/lib/data"
 import type { Issue, IssueStatus, Sprint, Project, Team } from "@/types"
@@ -157,45 +159,56 @@ export function KanbanBoard({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <IssueForm
-                                  issue={issue}
-                                  sprints={sprints}
-                                  projects={projects} // Pass projects prop
-                                  teams={teams} // Pass teams prop
-                                  onSubmit={(data) => onEdit(data as Issue)}
-                                  trigger={
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                      <span className="mr-2">✏️</span>
-                                      Edit
-                                    </DropdownMenuItem>
-                                  }
-                                />
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                      <span className="mr-2">🗑️</span>
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Issue</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete &quot;{issue.title}&quot;? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => onDelete(issue.id)}
-                                        className="bg-red-500 hover:bg-red-600"
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              </DropdownMenuContent>
+  <IssueForm
+    issue={issue}
+    sprints={sprints}
+    projects={projects}
+    teams={teams}
+    onSubmit={(data) => onEdit(data as Issue)}
+    trigger={
+      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <span className="mr-2">✏️</span>
+        Edit
+      </DropdownMenuItem>
+    }
+  />
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <span className="mr-2">🗑️</span>
+        Delete
+      </DropdownMenuItem>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Delete Issue</AlertDialogTitle>
+        <AlertDialogDescription>
+          Are you sure you want to delete &quot;{issue.title}&quot;? This action cannot be undone.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction
+          onClick={() => onDelete(issue.id)}
+          className="bg-red-500 hover:bg-red-600"
+        >
+          Delete
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+  <Dialog>
+    <DialogTrigger asChild>
+      <DropdownMenuItem onSelect={e => e.preventDefault()}>
+        <span className="mr-2">📜</span>
+        View History
+      </DropdownMenuItem>
+    </DialogTrigger>
+    <DialogContent showCloseButton>
+      <StatusHistoryPanel issue={issue} />
+    </DialogContent>
+  </Dialog>
+</DropdownMenuContent>
                             </DropdownMenu>
                           </div>
                         </CardHeader>
