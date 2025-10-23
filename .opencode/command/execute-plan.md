@@ -22,6 +22,20 @@ Inputs (via $ARGUMENTS)
 - typecheckCmd: string (default: pnpm tsc -p tsconfig.json)
 - commit: boolean (default true) — create git commits after each step
 - branch: string — create/switch to a feature branch for the execution
+- feedback: string — inline Markdown feedback to revise the plan before execution
+- feedbackFile: string — path to a Markdown file with feedback
+- feedbackMode: "merge" | "append" | "rewrite" (default: "merge") — strategy to apply feedback to the plan
+- confirmPlanUpdate: boolean (default true) — show computed plan diff before applying
+- allowReorder: boolean (default false) — permit reordering/removal/insertion of steps
+- anchorStep: string — step title to anchor insertions around (used when allowReorder=true)
+- insertPosition: "before" | "after" | "end" (default: "end") — where to insert new steps relative to anchor
+- planSection: string — optional section heading within the plan to target (defaults to first checklist in the file)
+- planRevisionLogSection: string (default: "Plan revision log") — section to append a summary of applied feedback
+- planBackup: boolean (default true) — create a timestamped backup of the plan before patching
+- watchFeedback: boolean (default false) — re-check and re-apply feedback before each step (idempotent)
+- retryFlakyTests: number (default 2)
+- maxFixAttempts: number (default 3)
+- commitGranularity: "per-step" | "per-file" (default: "per-step")
 
 Assumptions about this repo
 - Stack: Next.js + TypeScript + pnpm.
@@ -36,7 +50,29 @@ Hard rules for code changes
 - No external network calls or secret exposure.
 - If information is missing, infer 1–2 reasonable assumptions, proceed, and record assumptions in the plan notes.
 
+Plan feedback and course-correction (optional)
+- Feedback sources: use feedback (inline string) and/or feedbackFile (path) to guide plan corrections before implementation.
+- Parsing rules:
+  • New steps: lines starting with "- [ ]" within a "Steps" context are treated as steps to add.
+  • Step updates: provide the exact step title; sub-bullets become acceptance/notes under that step.
+  • Constraints: prefix with "Must:" or "Should:"; they become acceptance criteria bullets under the target step or a global notes section.
+  • Deletions/deferrals: use "Remove step:<title>" or "Defer step:<title>".
+- Merge strategy (feedbackMode):
+  • merge: map steps by normalized title; update or add acceptance, add new steps; do not remove/reorder unless allowReorder=true.
+  • append: append new steps and notes at the end of the targeted checklist/section.
+  • rewrite: replace the targeted checklist with feedback-defined steps (back up first if planBackup=true).
+- Placement controls: when inserting new steps and allowReorder=true, use anchorStep + insertPosition; else append to end of targeted checklist.
+- Confirmation: if confirmPlanUpdate=true, compute and present a readable diff; require confirmation prior to applying.
+- Logging: append a concise summary of applied changes under planRevisionLogSection, including assumptions.
+- Commit: if commit=true, commit plan changes as "chore(plan): apply feedback-driven updates" before execution.
+- Mid-run updates: if watchFeedback=true, re-parse and apply feedback before each step; changes must be idempotent and preserve already-completed steps.
+
 High-level workflow
+0) Plan revision (if feedback provided)
+   - Load plan and feedback (inline/file). Determine target section (planSection) and compute changes using feedbackMode.
+   - Present diff if confirmPlanUpdate=true; on approval, apply changes. Create a backup if planBackup=true.
+   - Append a brief summary under planRevisionLogSection. Commit plan changes if commit=true.
+
 1) Pre-flight context
    - Resolve plan path (default). Load and parse all checklist items, keeping order. Determine remaining unchecked steps.
    - Detect package manager and scripts from package.json. If runInstall=true, run dependency install.
@@ -44,6 +80,7 @@ High-level workflow
    - If confirmEach=true, present the next step summary and wait for confirmation; otherwise proceed.
 
 2) Execute each unchecked plan step (loop)
+   - If watchFeedback=true, re-check feedback and apply idempotent updates to the plan (preserve completed steps).
    For the current step:
    - Step brief: summarize the goal, inputs/outputs, and success criteria in 2–5 bullets.
    - Discover affected files by targeted search before edits (prefer components/, lib/, hooks/, app/, types/, redux/). Open and read relevant files fully enough to avoid missing context.
@@ -54,11 +91,11 @@ High-level workflow
      • Feature flags or fallbacks where risky.
    - Quality gates for this step:
      • Typecheck: must pass.
-     • Unit tests: add/update tests; must pass. Retry flakies up to 2 times.
+     • Unit tests: add/update tests; must pass. Retry flakies up to retryFlakyTests times.
      • Optional quick smoke: run a tiny usage path if applicable (no long-running servers).
    - Update docs if the plan calls for it (specs/changelog/types docs). Keep them concise and accurate.
    - Mark the step as done in the plan ([ ] -> [x]) with a one-line note of what changed and links to key files.
-   - Commit (if commit=true): conventional message. Example: "feat(history): compute throughput from status-only change entries; fallback to updatedAt"
+   - Commit (if commit=true): use commitGranularity; prefer per-step conventional messages. Example: "feat(history): compute throughput from status-only change entries; fallback to updatedAt"
    - If stopAfter is reached, stop.
 
 3) Finalization
@@ -73,13 +110,14 @@ Quality gates (must be green before done)
 - Smoke sanity: optional minimal interaction for changed UI (e.g., render component and assert key text via existing tests).
 
 Error handling & recovery
-- On failure, capture the exact error output. Attempt up to 3 focused fixes. If still failing, back out the last risky change and choose a simpler approach. Record the final state and rationale.
+- On failure, capture the exact error output. Attempt up to maxFixAttempts focused fixes. If still failing, back out the last risky change and choose a simpler approach. Record the final state and rationale.
 - Only ask for user input when truly blocked by missing product decisions or irreconcilable conflicts.
 
 Plan grammar and updates
 - The plan uses markdown checkboxes for steps and may include sub-bullets with details and acceptance criteria.
 - Update the exact checkbox line from "- [ ]" to "- [x]" when done. Append a concise parenthetical note, e.g., "(done: updated throughput-card.tsx; tests added)".
 - Do not reorder steps. If a step is found to be dependent on a later step, note the dependency and proceed with the dependency first.
+- Feedback-driven edits must preserve already completed steps; when titles change, add a parenthetical alias to retain traceability.
 
 Repository-aware guidance for the current example plan
 - Throughput logic (components/dashboard/throughput-card.tsx and lib/dashboard-utils.ts):
@@ -152,6 +190,6 @@ Final reporting
   - Files touched, commit subjects, and a one-line behavior summary per step.
   - Any assumptions made and deferrals with reasons.
 
-Proceed to execute the plan now unless confirmEach=true. If dryRun=true, perform discovery and planning and list intended diffs/commands without applying them.
+Proceed to plan revision (if feedback provided), then execute the plan unless confirmEach=true or confirmPlanUpdate=true. If dryRun=true, perform discovery and planning and list intended diffs/commands without applying them.
 
 $ARGUMENTS
