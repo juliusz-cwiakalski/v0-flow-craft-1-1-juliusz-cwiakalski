@@ -109,25 +109,45 @@ export function KanbanBoard({
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
                             <div className="space-y-1 flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-mono text-muted-foreground">{issue.id}</span>
-                                <Badge className={priorityColors[issue.priority]} variant="secondary">
-                                  {issue.priority}
-                                </Badge>
-                                {acProgress && acProgress.total > 0 && (
-                                  <Badge
-                                    variant={acProgress.completed === acProgress.total ? "default" : "secondary"}
-                                    className={
-                                      acProgress.completed === acProgress.total
-                                        ? "bg-green-500 text-white hover:bg-green-600"
-                                        : "bg-gray-200 text-gray-700"
-                                    }
-                                    title="Acceptance Criteria completed"
-                                  >
-                                    AC {acProgress.completed}/{acProgress.total}
-                                  </Badge>
-                                )}
-                              </div>
+<div className="flex items-center gap-2 flex-wrap">
+  <span className="text-xs font-mono text-muted-foreground">{issue.id}</span>
+  <Badge className={priorityColors[issue.priority]} variant="secondary">
+    {issue.priority}
+  </Badge>
+  {acProgress && acProgress.total > 0 && (
+    <Badge
+      variant={acProgress.completed === acProgress.total ? "default" : "secondary"}
+      className={
+        acProgress.completed === acProgress.total
+          ? "bg-green-500 text-white hover:bg-green-600"
+          : "bg-gray-200 text-gray-700"
+      }
+      title="Acceptance Criteria completed"
+    >
+      AC {acProgress.completed}/{acProgress.total}
+    </Badge>
+  )}
+  {/* Project badge */}
+  {issue.projectId ? (
+  <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+    📁 {projects.find(p => p.id === issue.projectId)?.name || issue.projectId}
+  </Badge>
+) : (
+  <Badge variant="outline" className="text-xs text-muted-foreground">
+    📁 Unassigned
+  </Badge>
+)}
+{/* Team badge */}
+{issue.teamId ? (
+  <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+    👥 {teams.find(t => t.id === issue.teamId)?.name || issue.teamId}
+  </Badge>
+) : (
+  <Badge variant="outline" className="text-xs text-muted-foreground">
+    👥 Unassigned
+  </Badge>
+) }
+</div>
                               <h4 className="font-medium text-sm leading-tight line-clamp-2">{issue.title}</h4>
                             </div>
                             <DropdownMenu>

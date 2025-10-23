@@ -5,10 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { KanbanBoard } from "./kanban-board"
 import type { Issue, Sprint, IssueStatus } from "@/types"
 
+import { ScopeFilters } from "@/components/scope-filters"
+import type { Project, Team } from "@/types"
+
 interface CurrentSprintViewProps {
   sprint: Sprint | null
   sprints: Sprint[]
   issues: Issue[]
+  projects: Project[]
+  teams: Team[]
+  selectedProjectIds: string[]
+  selectedTeamIds: string[]
+  onProjectsChange: (ids: string[]) => void
+  onTeamsChange: (ids: string[]) => void
+  onClearFilters: () => void
   onUpdateIssueStatus: (issueId: string, newStatus: IssueStatus) => void
   onEdit: (issue: Issue) => void
   onDelete: (issueId: string) => void
@@ -18,6 +28,13 @@ export function CurrentSprintView({
   sprint,
   sprints,
   issues,
+  projects,
+  teams,
+  selectedProjectIds,
+  selectedTeamIds,
+  onProjectsChange,
+  onTeamsChange,
+  onClearFilters,
   onUpdateIssueStatus,
   onEdit,
   onDelete,
@@ -26,6 +43,16 @@ export function CurrentSprintView({
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold">Current Sprint</h1>
+        {/* Scope Filters for Projects/Teams */}
+        <ScopeFilters
+          projects={projects}
+          teams={teams}
+          selectedProjectIds={selectedProjectIds}
+          selectedTeamIds={selectedTeamIds}
+          onProjectsChange={onProjectsChange}
+          onTeamsChange={onTeamsChange}
+          onClearFilters={onClearFilters}
+        />
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
             <span className="text-4xl">🎯</span>
@@ -37,7 +64,14 @@ export function CurrentSprintView({
     )
   }
 
-  const sprintIssues = issues.filter((issue) => issue.sprintId === sprint.id)
+  // Apply scope filters for Projects/Teams
+  const scopeFilteredIssues = issues.filter((issue) => {
+    const matchesProject = selectedProjectIds.length === 0 || (issue.projectId && selectedProjectIds.includes(issue.projectId))
+    const matchesTeam = selectedTeamIds.length === 0 || (issue.teamId && selectedTeamIds.includes(issue.teamId))
+    return matchesProject && matchesTeam
+  })
+
+  const sprintIssues = scopeFilteredIssues.filter((issue) => issue.sprintId === sprint.id)
   const completedIssues = sprintIssues.filter((issue) => issue.status === "Done")
   const inProgressIssues = sprintIssues.filter((issue) => issue.status === "In Progress")
   const inReviewIssues = sprintIssues.filter((issue) => issue.status === "In Review")
@@ -68,6 +102,17 @@ export function CurrentSprintView({
           Active
         </Badge>
       </div>
+
+      {/* Scope Filters for Projects/Teams */}
+      <ScopeFilters
+        projects={projects}
+        teams={teams}
+        selectedProjectIds={selectedProjectIds}
+        selectedTeamIds={selectedTeamIds}
+        onProjectsChange={onProjectsChange}
+        onTeamsChange={onTeamsChange}
+        onClearFilters={onClearFilters}
+      />
 
       <Card>
         <CardHeader>
@@ -170,14 +215,16 @@ export function CurrentSprintView({
         </Card>
       </div>
 
-      <KanbanBoard
-        sprint={sprint}
-        issues={issues}
-        sprints={sprints}
-        onUpdateIssueStatus={onUpdateIssueStatus}
-        onEdit={onEdit}
-        onDelete={onDelete}
-      />
+<KanbanBoard
+         sprint={sprint}
+         issues={sprintIssues}
+         sprints={sprints}
+         projects={projects}
+         teams={teams}
+         onUpdateIssueStatus={onUpdateIssueStatus}
+         onEdit={onEdit}
+         onDelete={onDelete}
+       />
     </div>
   )
 }

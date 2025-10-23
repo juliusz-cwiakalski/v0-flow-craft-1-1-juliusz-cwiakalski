@@ -14,19 +14,31 @@ import type { RootState } from "@/lib/redux/store"
 interface IssuesListProps {
   issues: Issue[]
   sprints: Sprint[]
-  projects?: Project[]
-  teams?: Team[]
+  projects: Project[]
+  teams: Team[]
+  selectedProjectIds: string[]
+  selectedTeamIds: string[]
+  onProjectsChange: (ids: string[]) => void
+  onTeamsChange: (ids: string[]) => void
+  onClearFilters: () => void
   onCreateIssue: (issueData: Partial<Issue>) => void
   onEditIssue: (issue: Issue) => void
   onDeleteIssue: (issueId: string) => void
   onAssignToSprint: (issueId: string, sprintId: string | undefined) => void
 }
 
+import { ScopeFilters } from "@/components/scope-filters"
+
 export function IssuesList({
   issues,
   sprints,
-  projects = [],
-  teams = [],
+  projects,
+  teams,
+  selectedProjectIds,
+  selectedTeamIds,
+  onProjectsChange,
+  onTeamsChange,
+  onClearFilters,
   onCreateIssue,
   onEditIssue,
   onDeleteIssue,
@@ -40,7 +52,14 @@ export function IssuesList({
   const users = useSelector((state: RootState) => selectAllUsers(state))
   const userNameById: Record<string, string> = Object.fromEntries(users.map((u) => [u.id, u.name]))
 
-  const filteredIssues = issues.filter((issue) => {
+  // Apply scope filters for Projects/Teams
+  const scopeFilteredIssues = issues.filter((issue) => {
+    const matchesProject = selectedProjectIds.length === 0 || (issue.projectId && selectedProjectIds.includes(issue.projectId))
+    const matchesTeam = selectedTeamIds.length === 0 || (issue.teamId && selectedTeamIds.includes(issue.teamId))
+    return matchesProject && matchesTeam
+  })
+
+  const filteredIssues = scopeFilteredIssues.filter((issue) => {
     const assigneeName = issue.assigneeUserId ? userNameById[issue.assigneeUserId] || "Unassigned" : "Unassigned"
     const lowerSearch = searchTerm.toLowerCase()
     const matchesSearch =
@@ -60,19 +79,32 @@ export function IssuesList({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Issues</h1>
-        <IssueForm
-          sprints={sprints}
-          projects={projects}
-          teams={teams}
-          onSubmit={onCreateIssue}
-          trigger={
-            <Button>
-              <span className="mr-2">+</span>
-              Create Issue
-            </Button>
-          }
-        />
+<IssueForm
+           sprints={sprints}
+           projects={projects}
+           teams={teams}
+           onSubmit={onCreateIssue}
+           defaultProjectId={selectedProjectIds[0] || "0"}
+           defaultTeamId={selectedTeamIds[0] || "0"}
+           trigger={
+             <Button>
+               <span className="mr-2">+</span>
+               Create Issue
+             </Button>
+           }
+         />
       </div>
+
+      {/* Scope Filters for Projects/Teams */}
+      <ScopeFilters
+        projects={projects}
+        teams={teams}
+        selectedProjectIds={selectedProjectIds}
+        selectedTeamIds={selectedTeamIds}
+        onProjectsChange={onProjectsChange}
+        onTeamsChange={onTeamsChange}
+        onClearFilters={onClearFilters}
+      />
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -137,14 +169,16 @@ export function IssuesList({
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredIssues.map((issue) => (
-          <IssueCard
-            key={issue.id}
-            issue={issue}
-            sprints={sprints}
-            onEdit={onEditIssue}
-            onDelete={onDeleteIssue}
-            onAssignToSprint={onAssignToSprint}
-          />
+<IssueCard
+             key={issue.id}
+             issue={issue}
+             sprints={sprints}
+             projects={projects}
+             teams={teams}
+             onEdit={onEditIssue}
+             onDelete={onDeleteIssue}
+             onAssignToSprint={onAssignToSprint}
+           />
         ))}
       </div>
 

@@ -360,6 +360,82 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 9. Roll-up Dashboard
 
+#### 9.1. Global Project/Team Scope Filtering (Cross-View, Persistent)
+
+**Description:**
+Users can select one or more Projects and/or Teams from multi-select dropdowns in the Issues, Current Sprint, and Dashboard views. These selections persist across navigation and reloads, and apply consistently to all filtered data and metrics. A "Clear filters" button resets scope to "All".
+
+**Functionality:**
+- **Scope Controls:**
+  - Multi-select dropdowns for Projects and Teams in Issues, Current Sprint, and Dashboard views.
+  - "Clear filters" button resets all filters to show all data.
+- **Persistence:**
+  - Selections are stored in Redux state and synced to localStorage (per ADR-0008).
+  - Last used Project/Team is remembered and prefilled for new issue creation.
+- **Cross-View Consistency:**
+  - Filters apply to all relevant lists, boards, and dashboard metrics.
+  - Navigating between views retains the selected scope.
+- **Badges/Labels:**
+  - Issue cards and Kanban cards display Project and Team badges, with "Unassigned" fallback.
+- **Telemetry:**
+  - Events emitted for filter changes, clear actions, and dashboard/time range changes.
+
+**Affected Components:**
+- Issues List, Issue Card, Issue Form
+- Current Sprint View, Kanban Board
+- Dashboard View and all metric cards
+- ScopeFilters component (UI)
+- Redux slices: preferences, projects, teams, issues
+
+**Data Types:**
+- `PreferencesState`:
+  - `selectedProjectIds: string[]`
+  - `selectedTeamIds: string[]`
+  - `lastUsedProjectId?: string`
+  - `lastUsedTeamId?: string`
+  - `dashboardTimeRange: { preset: '7d'|'14d'|'30d'|'custom', fromISO?: string, toISO?: string }`
+- `Issue`:
+  - `projectId?: string`
+  - `teamId?: string`
+  - `statusChangeHistory: Array<{ from: string, to: string, atISO: string }>`
+- `Project`, `Team`, `User` entities
+
+**Key Behaviors:**
+- Selecting Projects/Teams in any view updates the scope everywhere.
+- "Clear filters" resets all views to show all Projects/Teams.
+- New issues default to the last used Project/Team scope.
+- Issue cards and Kanban cards always show Project/Team badges.
+- Dashboard metrics/cards reflect the current scope and time range.
+- Telemetry events fire on all relevant interactions.
+
+**User Workflows:**
+- Select Projects/Teams in any view; filters persist and apply everywhere.
+- Create new issues; Project/Team fields default to last used scope.
+- View and edit issues; Project/Team can be changed via dropdowns.
+- Dashboard metrics update in real-time based on selected scope and time range.
+- Click "Clear filters" to reset all filters.
+
+**Data Flow:**
+- Scope filters are managed in Redux preferences slice and persisted to localStorage.
+- All selectors and metric derivations accept already-scoped data.
+- Issue creation and editing update last used Project/Team in preferences.
+
+**Telemetry Events:**
+- `dashboard_view_opened`
+- `dashboard_time_range_changed`
+- `dashboard_scope_changed`
+- `filters_cleared`
+- `scope_changed_on_issues`
+- `scope_changed_on_current_sprint`
+
+**Acceptance Criteria:**
+- Filters work and persist in all three views (Issues, Current Sprint, Dashboard).
+- "Clear filters" resets scope everywhere.
+- Issue creation defaults to last used scope.
+- Telemetry events fire on relevant interactions.
+- Issue cards and Kanban cards show Project/Team badges, fallback to Unassigned when missing.
+- Dashboard metrics/cards reflect current scope and time range.
+
 **Description**: Executive dashboard providing instant visibility into project health with key metrics, scope filtering, and time range controls.
 
 **Functionality**:

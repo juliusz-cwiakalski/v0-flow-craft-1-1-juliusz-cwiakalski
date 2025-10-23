@@ -239,9 +239,16 @@ export default function TaskFlowApp() {
     switch (currentView) {
       case "issues":
         return (
-          <IssuesList
+           <IssuesList
             issues={issues}
             sprints={sprints}
+            projects={projects}
+            teams={teams}
+            selectedProjectIds={selectedProjectIds}
+            selectedTeamIds={selectedTeamIds}
+            onProjectsChange={(ids) => dispatch(setSelectedProjects(ids))}
+            onTeamsChange={(ids) => dispatch(setSelectedTeams(ids))}
+            onClearFilters={() => dispatch(clearFilters())}
             onCreateIssue={handleCreateIssue}
             onEditIssue={handleEditIssue}
             onDeleteIssue={handleDeleteIssue}
@@ -250,10 +257,17 @@ export default function TaskFlowApp() {
         )
       case "current-sprint":
         return (
-          <CurrentSprintView
+           <CurrentSprintView
             sprint={activeSprint || null}
             sprints={sprints}
             issues={issues}
+            projects={projects}
+            teams={teams}
+            selectedProjectIds={selectedProjectIds}
+            selectedTeamIds={selectedTeamIds}
+            onProjectsChange={(ids) => dispatch(setSelectedProjects(ids))}
+            onTeamsChange={(ids) => dispatch(setSelectedTeams(ids))}
+            onClearFilters={() => dispatch(clearFilters())}
             onUpdateIssueStatus={handleUpdateIssueStatus}
             onEdit={handleEditIssue}
             onDelete={handleDeleteIssue}

@@ -37,6 +37,8 @@ interface IssueFormProps {
   trigger?: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  defaultProjectId?: string
+  defaultTeamId?: string
 }
 
 export function IssueForm({
@@ -48,6 +50,8 @@ export function IssueForm({
   trigger,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  defaultProjectId,
+  defaultTeamId,
 }: IssueFormProps) {
   // Source projects/teams from Redux if not provided or empty
   const reduxProjects = useSelector((state: RootState) => state.projects.projects)
@@ -62,18 +66,18 @@ export function IssueForm({
   const users = useSelector((state: RootState) => selectAllUsers(state))
   const templates = useSelector(selectTemplates)
 
-  const [formData, setFormData] = useState({
-    title: issue?.title || "",
-    description: issue?.description || "",
-    priority: (issue?.priority || "P3") as Priority,
-    status: (issue?.status || "Todo") as IssueStatus,
-    assigneeUserId: issue?.assigneeUserId || "0",
-    sprintId: issue?.sprintId || "0",
-    projectId: issue?.projectId || "0",
-    teamId: issue?.teamId || "0",
-     templateId: (issue?.templateId || "none") as "none" | string,
+const [formData, setFormData] = useState({
+  title: issue?.title || "",
+  description: issue?.description || "",
+  priority: (issue?.priority || "P3") as Priority,
+  status: (issue?.status || "Todo") as IssueStatus,
+  assigneeUserId: issue?.assigneeUserId || "0",
+  sprintId: issue?.sprintId || "0",
+  projectId: issue?.projectId || defaultProjectId || "0",
+  teamId: issue?.teamId || defaultTeamId || "0",
+  templateId: (issue?.templateId || "none") as "none" | string,
 
-  })
+})
   const [acceptanceCriteria, setAcceptanceCriteria] = useState<AcceptanceCriterion[]>(issue?.acceptanceCriteria || [])
   const [newACText, setNewACText] = useState("")
   const [deleteACId, setDeleteACId] = useState<string | null>(null)
