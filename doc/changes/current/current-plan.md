@@ -16,7 +16,7 @@ This plan covers tracking and presenting the full history of all issue changes (
 
 1. **Data Model & Redux Integration**
     - [x] Extend `Issue` type to include `history: Array<IssueChange>` where:
-      ```ts
+      \`\`\`ts
       type IssueChange = {
         atISO: string,
         field: string, // e.g. "status", "title", "description", "team", "assignee", "project"
@@ -24,7 +24,7 @@ This plan covers tracking and presenting the full history of all issue changes (
         to: unknown,   // new value
         changedBy?: string, // user id or name (optional)
       }
-      ```
+      \`\`\`
     - [x] Update `issuesSlice.ts` to append a history entry for every field change (not just status)
     - [x] Ensure history is persisted via localStorage middleware
     - [x] Add selectors for:
