@@ -6,7 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "test": "jest",
+    "plan": "opencode run document-plan",
+    "execute-plan": "opencode run execute-plan",
+    "commit": "opencode run commit"
   },
   "dependencies": {
     "@babel/core": "latest",

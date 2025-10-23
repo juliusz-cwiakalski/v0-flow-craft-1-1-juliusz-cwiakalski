@@ -35,7 +35,7 @@ Inputs (via $ARGUMENTS)
 - conventionalTypes: string — comma-separated allowlist for types; others will clamp to chore.
 
 Conventional Commit format
-- `type(scope)!: subject`
+- `type(scope)!: subject`
 - blank line
 - body
 - footers
