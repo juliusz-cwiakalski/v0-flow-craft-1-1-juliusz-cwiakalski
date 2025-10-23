@@ -30,6 +30,49 @@ export interface Release {
 // Release content (newest first)
 export const releases: Release[] = [
   {
+    version: "0.4.3",
+    dateISO: "2025-10-23",
+    items: [
+      {
+        id: "issue-history-viewer",
+        kind: "New",
+        title: "Comprehensive Issue History Viewer",
+        summary:
+          "Every change to an issue (status, title, description, team, assignee, project, etc.) is now tracked in a full audit trail. View the complete timeline in the Issue History panel, including who made each change.",
+        cta: {
+          label: "View Issue History",
+          href: "?open=issues",
+        },
+        deeplink: {
+          view: "issues",
+        },
+        howToFind: "Open any issue and click the History panel to see all changes."
+      },
+      {
+        id: "dashboard-throughput-logic",
+        kind: "Improved",
+        title: "Dashboard Throughput uses only status changes",
+        summary:
+          "Dashboard throughput and cycle-time metrics now use only status changes to 'Done' from the issue history. Other field changes do not affect metrics. If no status history is present, metrics fall back to updatedAt and show an 'approximate' tooltip.",
+        cta: {
+          label: "View Dashboard",
+          href: "?open=dashboard",
+        },
+        deeplink: {
+          view: "dashboard",
+        },
+        howToFind: "Open the Dashboard and check the Throughput card for accurate metrics."
+      },
+      {
+        id: "telemetry-history-panel",
+        kind: "Improved",
+        title: "Telemetry: History panel open events",
+        summary:
+          "Telemetry now logs every time the Issue History panel is opened, supporting future analytics and usage tracking.",
+      },
+    ],
+  },
+  {
     version: "0.4.2",
     dateISO: "2025-10-22",
     items: [

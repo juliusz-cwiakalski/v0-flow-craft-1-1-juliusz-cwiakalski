@@ -9,7 +9,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 1. Issue Management
 
-**Description**: Complete CRUD operations for managing project issues/tasks with detailed metadata.
+**Description**: Complete CRUD operations for managing project issues/tasks with detailed metadata and a comprehensive change history.
 
 **Functionality**:
 
@@ -21,6 +21,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - Track issue status through workflow stages (Todo → In Progress → In Review → Done)
 - Manage Acceptance Criteria (AC) for each issue with completion tracking
 - Use issue templates (Bug, Feature, Request) with pre-filled AC
+- **Track full change history for every issue field** (status, title, description, team, assignee, project, etc.)
 
 **Components**:
 
@@ -28,10 +29,21 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - `components/issue-card.tsx` - Individual issue card with actions menu and AC progress badge
 - `components/issue-form.tsx` - Dialog form for creating/editing issues with AC management and template selection
 - `components/issue-assignment-dialog.tsx` - Dialog for assigning issues to sprints
+- `components/issue-card-status-history-panel.tsx` - Panel showing a timeline of all changes to an issue (field, before/after, timestamp, changed by)
 
 **Data Types**:
 
-- `types/index.ts` - `Issue` interface (with `acceptanceCriteria` field), `Priority` type, `IssueStatus` type, `AcceptanceCriterion` interface, `IssueTemplate` interface
+- `types/index.ts` - `Issue` interface (with `acceptanceCriteria` and `history: IssueChange[]` fields), `Priority` type, `IssueStatus` type, `AcceptanceCriterion` interface, `IssueTemplate` interface
+- `IssueChange` type:
+  ```ts
+  type IssueChange = {
+    atISO: string,
+    field: string, // e.g. "status", "title", "description", "team", "assignee", "project"
+    from: unknown, // previous value
+    to: unknown,   // new value
+    changedBy?: string, // user id or name (optional)
+  }
+  ```
 
 **Key Functions** (in `app/page.tsx`):
 
@@ -40,6 +52,10 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 - `handleDeleteIssue()` - Removes issue
 - `handleUpdateIssueStatus()` - Changes issue status
 - `handleAssignToSprint()` - Assigns issue to sprint
+
+**Selectors**:
+- Full issue history (all field changes)
+- Status-only history (for dashboard metrics)
 
 **Priority Levels**:
 
@@ -397,7 +413,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `Issue`:
   - `projectId?: string`
   - `teamId?: string`
-  - `statusChangeHistory: Array<{ from: string, to: string, atISO: string }>`
+  - `history: Array<IssueChange>` (see Issue Management section)
 - `Project`, `Team`, `User` entities
 
 **Key Behaviors:**
@@ -427,17 +443,19 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `filters_cleared`
 - `scope_changed_on_issues`
 - `scope_changed_on_current_sprint`
-- `status_history_panel_opened`
+- `issue_history_panel_opened`
 
 **Acceptance Criteria:**
 - Filters work and persist in all three views (Issues, Current Sprint, Dashboard).
 - "Clear filters" resets scope everywhere.
 - Issue creation defaults to last used scope.
-- Telemetry events fire on relevant interactions, including `status_history_panel_opened` when the status history panel is viewed.
+- Telemetry events fire on relevant interactions, including `issue_history_panel_opened` when the history panel is viewed.
 - Issue cards and Kanban cards show Project/Team badges, fallback to Unassigned when missing.
 - Dashboard metrics/cards reflect current scope and time range.
 - Accessibility limitations and TODOs for future improvements are documented in accessibility-plan.md.
 - Minimal unit tests cover edge cases (empty states, locale formatting, invalid/overlapping time ranges, status history fallback).
+
+---
 
 **Description**: Executive dashboard providing instant visibility into project health with key metrics, scope filtering, and time range controls.
 
@@ -451,7 +469,6 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Telemetry tracking for dashboard usage
 
 **Components**:
-
 - `components/dashboard/dashboard-view.tsx` - Main dashboard container with filters and grid
 - `components/dashboard/status-breakdown-card.tsx` - Issue counts by status (Todo/In Progress/In Review/Done)
 - `components/dashboard/active-sprint-progress-card.tsx` - Active sprint completion percentage
@@ -460,16 +477,14 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - `components/scope-filters.tsx` - Project/Team multi-select filters with Clear button
 
 **Data Types**:
-
-- `types/index.ts` - `Project`, `Team`, `DashboardTimeRange`, `TimeRangePreset`, `PreferencesState`
+- `types/index.ts` - `Project`, `Team`, `DashboardTimeRange`, `TimeRangePreset`, `PreferencesState`, `IssueChange`
 - `lib/dashboard-utils.ts` - Metric derivation functions
 
 **Redux Slices**:
-
 - `lib/redux/slices/projectsSlice.ts` - Project entity management (seeded with "Main Project")
 - `lib/redux/slices/teamsSlice.ts` - Team entity management (seeded with "Main Team")
 - `lib/redux/slices/preferencesSlice.ts` - User preferences (selected filters, time range)
-- `lib/redux/slices/issuesSlice.ts` - Enhanced with `projectId`, `teamId`, `statusChangeHistory` fields
+- `lib/redux/slices/issuesSlice.ts` - Enhanced with `projectId`, `teamId`, `history: IssueChange[]` fields
 
 **Metric Cards**:
 
@@ -489,8 +504,10 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 3. **Throughput**
    - Issues closed (moved to Done) within time range
    - Respects selected time range preset (7d/14d/30d)
-   - Uses `statusChangeHistory` to track status transitions
+   - Uses `history` field to track status transitions (`field === "status" && to === "Done"`)
    - Derived from: `deriveThroughput(scopedIssues, timeRange)`
+   - **Only status changes are counted for throughput/cycle-time; other field changes are ignored.**
+   - **If no status history is present, falls back to `updatedAt` and marks result as approximate.**
 
 4. **Workload by Assignee**
    - Top 5 assignees by issue count
@@ -498,53 +515,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
    - Sorted descending by count
    - Derived from: `deriveWorkloadByAssignee(scopedIssues, 5)`
 
-**Scope Filtering**:
-
-- **Project Filter**: Multi-select dropdown, filters issues by `projectId`
-- **Team Filter**: Multi-select dropdown, filters issues by `teamId`
-- **Clear Filters**: Button to reset all filters at once
-- **Persistence**: Filter selections persist in Redux state across view navigation
-- **Cross-View**: Same filters apply to Issues, Current Sprint, and Dashboard views
-
-**Time Range Controls**:
-
-- **Presets**: Last 7 days, Last 14 days, Last 30 days
-- **Badge UI**: Clickable badges, active preset highlighted
-- **Persistence**: Selected range persists in Redux preferences
-- **Scope**: Only affects Throughput metric (status change history filtering)
-
-**Key Features**:
-
-- Pure derivation - no new data storage, all metrics computed from existing issues/sprints
-- Real-time updates - metrics recalculate on data changes
-- Scope filtering - Project/Team filters apply across all views
-- Time range control - Adjust throughput calculation window
-- Telemetry tracking - `dashboard_view_opened`, `dashboard_time_range_changed` events
-- Empty states - Graceful handling when no data or no active sprint
-- Responsive grid - 2x2 on desktop, stacks on mobile
-
-**Data Utilities** (in `lib/dashboard-utils.ts`):
-
-- `applyScopeFilters(issues, projectIds, teamIds)` - Filters issues by selected scope
-- `deriveCountsByStatus(issues)` - Counts issues by status
-- `deriveActiveSprintProgress(issues, sprints)` - Calculates active sprint completion %
-- `deriveThroughput(issues, timeRange)` - Counts issues closed in time range
-- `deriveWorkloadByAssignee(issues, topN)` - Top N assignees by issue count
-
-**Redux State**:
-
-- `projects` - Array of Project entities (seeded with default)
-- `teams` - Array of Team entities (seeded with default)
-- `preferences.selectedProjectIds` - Currently selected project IDs for filtering
-- `preferences.selectedTeamIds` - Currently selected team IDs for filtering
-- `preferences.dashboardTimeRange` - Current time range selection
-
-**Entry Points**:
-
-1. **Navigation**: Click "Dashboard" in top navigation
-2. **Changelog CTA**: Click "View Dashboard" in What's New modal or Changelog panel
-
-## User Workflows
+...
 
 ### Creating an Issue (Standard)
 

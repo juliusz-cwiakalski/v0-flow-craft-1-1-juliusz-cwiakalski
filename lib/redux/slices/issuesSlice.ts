@@ -27,16 +27,17 @@ const issuesSlice = createSlice({
         projectId: action.payload.projectId,
         teamId: action.payload.teamId,
         templateId: action.payload.templateId,
-        acceptanceCriteria: action.payload.acceptanceCriteria,
-        statusChangeHistory: [
-          {
-            from: "Created",
-            to: action.payload.status || "Todo",
-            atISO: new Date().toISOString(),
-          },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
+acceptanceCriteria: action.payload.acceptanceCriteria,
+         history: [
+           {
+             field: "status",
+             from: "Created",
+             to: action.payload.status || "Todo",
+             atISO: new Date().toISOString(),
+           },
+         ],
+         createdAt: new Date(),
+         updatedAt: new Date(),
       }
       state.issues.push(newIssue)
     },
@@ -46,22 +47,27 @@ const issuesSlice = createSlice({
         const oldIssue = state.issues[index]
         const newIssue = action.payload
 
-        if (oldIssue.status !== newIssue.status) {
-          const history = oldIssue.statusChangeHistory || []
-          newIssue.statusChangeHistory = [
-            ...history,
-            {
-              from: oldIssue.status,
-              to: newIssue.status,
-              atISO: new Date().toISOString(),
-            },
-          ]
-        }
-
-        state.issues[index] = {
-          ...newIssue,
-          updatedAt: new Date(),
-        }
+         // Track changes for all relevant fields
+         const fieldsToCheck = [
+           "title", "description", "priority", "status", "assigneeUserId", "sprintId", "projectId", "teamId", "templateId", "acceptanceCriteria"
+         ]
+         const history = oldIssue.history || []
+         let newHistory = [...history]
+         fieldsToCheck.forEach(field => {
+           if (JSON.stringify((oldIssue as any)[field]) !== JSON.stringify((newIssue as any)[field])) {
+             newHistory.push({
+               field,
+               from: (oldIssue as any)[field],
+               to: (newIssue as any)[field],
+               atISO: new Date().toISOString(),
+             })
+           }
+         })
+         state.issues[index] = {
+           ...newIssue,
+           history: newHistory,
+           updatedAt: new Date(),
+         }
       }
     },
     deleteIssue(state, action: PayloadAction<string>) {
@@ -70,17 +76,18 @@ const issuesSlice = createSlice({
     updateIssueStatus(state, action: PayloadAction<{ issueId: string; newStatus: IssueStatus }>) {
       const issue = state.issues.find((issue) => issue.id === action.payload.issueId)
       if (issue) {
-        const history = issue.statusChangeHistory || []
-        issue.statusChangeHistory = [
-          ...history,
-          {
-            from: issue.status,
-            to: action.payload.newStatus,
-            atISO: new Date().toISOString(),
-          },
-        ]
-        issue.status = action.payload.newStatus
-        issue.updatedAt = new Date()
+         const history = issue.history || []
+         issue.history = [
+           ...history,
+           {
+             field: "status",
+             from: issue.status,
+             to: action.payload.newStatus,
+             atISO: new Date().toISOString(),
+           },
+         ]
+         issue.status = action.payload.newStatus
+         issue.updatedAt = new Date()
       }
     },
     assignIssueToSprint(state, action: PayloadAction<{ issueId: string; sprintId: string | undefined }>) {
@@ -110,4 +117,14 @@ export const {
   assignIssueToSprint,
   moveUnfinishedIssuesToBacklog,
 } = issuesSlice.actions
+export const selectIssueHistory = (state: IssuesState, issueId: string) => {
+  const issue = state.issues.find(i => i.id === issueId)
+  return issue?.history || []
+}
+
+export const selectStatusChangeHistory = (state: IssuesState, issueId: string) => {
+  const issue = state.issues.find(i => i.id === issueId)
+  return (issue?.history || []).filter(h => h.field === "status")
+}
+
 export default issuesSlice.reducer

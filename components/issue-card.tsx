@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { IssueForm } from "./issue-form"
 import { IssueAssignmentDialog } from "./issue-assignment-dialog"
+import { StatusHistoryPanel } from "./issue-card-status-history-panel"
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog"
 import { priorityColors, statusColors } from "@/lib/data"
 import { telemetry } from "@/lib/telemetry"
 import type { Issue, Sprint, Project, Team } from "@/types"
@@ -103,6 +105,17 @@ export function IssueCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem onSelect={e => e.preventDefault()}>
+                    <span className="mr-2">📜</span>
+                    View History
+                  </DropdownMenuItem>
+                </DialogTrigger>
+                <DialogContent showCloseButton>
+                  <StatusHistoryPanel issue={issue} />
+                </DialogContent>
+              </Dialog>
               <IssueForm
                 issue={issue}
                 sprints={sprints}

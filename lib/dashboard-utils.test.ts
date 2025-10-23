@@ -71,23 +71,23 @@ describe("dashboard-utils", () => {
       const range: DashboardTimeRange = { preset: "7d" }
       expect(deriveThroughput([], range)).toEqual({ count: 0, approximate: true })
     })
-    it("counts issues with statusChangeHistory in range", () => {
+    it("counts issues with history status changes to Done in range", () => {
       const now = new Date()
       const lastWeek = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000)
       const issues: Issue[] = [
         {
-          statusChangeHistory: [
-            { to: "Done", atISO: lastWeek.toISOString() },
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: lastWeek.toISOString() },
           ],
         } as Issue,
         {
-          statusChangeHistory: [
-            { to: "Done", atISO: now.toISOString() },
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: now.toISOString() },
           ],
         } as Issue,
         {
-          statusChangeHistory: [
-            { to: "Todo", atISO: now.toISOString() },
+          history: [
+            { field: "status", from: "Todo", to: "In Progress", atISO: now.toISOString() },
           ],
         } as Issue,
       ]
@@ -106,6 +106,118 @@ describe("dashboard-utils", () => {
       const result = deriveThroughput(issues, range)
       expect(result.count).toBe(1)
       expect(result.approximate).toBe(true)
+    })
+    it("does not count non-status field changes", () => {
+      const now = new Date()
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "title", from: "Old", to: "New", atISO: now.toISOString() },
+          ],
+        } as Issue,
+        {
+          history: [
+            { field: "description", from: "A", to: "B", atISO: now.toISOString() },
+          ],
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(0)
+      expect(result.approximate).toBe(false)
+    })
+    it("counts only once per issue even with multiple Done status changes", () => {
+      const now = new Date()
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: now.toISOString() },
+            { field: "status", from: "Todo", to: "Done", atISO: now.toISOString() },
+          ],
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(1)
+      expect(result.approximate).toBe(false)
+    })
+    it("handles mixed history and fallback scenarios", () => {
+      const now = new Date()
+      const lastWeek = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000)
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: lastWeek.toISOString() },
+          ],
+        } as Issue,
+        {
+          history: [
+            { field: "status", from: "Todo", to: "In Progress", atISO: now.toISOString() },
+          ],
+        } as Issue,
+        {
+          status: "Done", updatedAt: now,
+        } as Issue,
+        {
+          status: "Done", updatedAt: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(1)
+      expect(result.approximate).toBe(false)
+    })
+    it("returns 0 if history present but no Done status changes in range", () => {
+      const now = new Date()
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "status", from: "Todo", to: "In Progress", atISO: now.toISOString() },
+          ],
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(0)
+      expect(result.approximate).toBe(false)
+    })
+    it("triggers fallback only if none of the issues have history", () => {
+      const now = new Date()
+      const issues: Issue[] = [
+        { status: "Done", updatedAt: now } as Issue,
+        { status: "Done", updatedAt: now } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(2)
+      expect(result.approximate).toBe(true)
+    })
+    it("does not count status changes to Done outside the time range", () => {
+      const now = new Date()
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+          ],
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(0)
+      expect(result.approximate).toBe(false)
+    })
+    it("ignores malformed/invalid dates in history", () => {
+      const issues: Issue[] = [
+        {
+          history: [
+            { field: "status", from: "In Review", to: "Done", atISO: "not-a-date" },
+          ],
+        } as Issue,
+      ]
+      const range: DashboardTimeRange = { preset: "7d" }
+      const result = deriveThroughput(issues, range)
+      expect(result.count).toBe(0)
+      expect(result.approximate).toBe(false)
     })
   })
 

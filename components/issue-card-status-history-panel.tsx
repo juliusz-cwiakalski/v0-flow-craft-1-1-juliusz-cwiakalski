@@ -11,17 +11,19 @@ interface StatusHistoryPanelProps {
 
 export function StatusHistoryPanel({ issue }: StatusHistoryPanelProps) {
   React.useEffect(() => {
-    trackEvent("status_history_panel_opened", { issueId: issue.id })
+    trackEvent("issue_history_panel_opened", { issueId: issue.id })
   }, [issue.id])
 
-  if (!issue.statusChangeHistory || issue.statusChangeHistory.length === 0) {
+  const history = issue.history || []
+
+  if (history.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Status Change History</CardTitle>
+          <CardTitle>Issue Change History</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground">No status history available.</div>
+          <div className="text-sm text-muted-foreground">No change history available.</div>
         </CardContent>
       </Card>
     )
@@ -30,14 +32,18 @@ export function StatusHistoryPanel({ issue }: StatusHistoryPanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Status Change History</CardTitle>
+        <CardTitle>Issue Change History</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="text-sm space-y-2">
-          {issue.statusChangeHistory.map((entry, idx) => (
+          {history.map((entry, idx) => (
             <li key={idx}>
               <span className="font-mono text-xs">{entry.atISO}</span>:
-              <span className="ml-2">{entry.from} → {entry.to}</span>
+              <span className="ml-2 font-semibold">{entry.field}</span>
+              <span className="ml-2">{JSON.stringify(entry.from)} → {JSON.stringify(entry.to)}</span>
+              {entry.changedBy && (
+                <span className="ml-2 text-xs text-muted-foreground">by {entry.changedBy}</span>
+              )}
             </li>
           ))}
         </ul>

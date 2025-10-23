@@ -131,11 +131,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-prod",
     createdAt: daysAgo(24),
     updatedAt: daysAgo(18),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(24) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(22) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(19) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(18) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(24) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(22) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(19) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(18) },
     ],
   },
   {
@@ -151,11 +151,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-prod",
     createdAt: daysAgo(23),
     updatedAt: daysAgo(18),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(23) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(21) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(19) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(18) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(23) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(21) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(19) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(18) },
     ],
   },
   {
@@ -171,11 +171,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-prod",
     createdAt: daysAgo(22),
     updatedAt: daysAgo(17),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(22) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(20) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(18) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(17) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(22) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(20) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(18) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(17) },
     ],
   },
   {
@@ -191,11 +191,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-prod",
     createdAt: daysAgo(21),
     updatedAt: daysAgo(17),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(21) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(19) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(18) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(17) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(21) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(19) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(18) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(17) },
     ],
   },
 
@@ -213,11 +213,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-dev",
     createdAt: daysAgo(10),
     updatedAt: daysAgo(7),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(10) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(9) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(8) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(7) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(10) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(9) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(8) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(7) },
     ],
   },
   {
@@ -233,11 +233,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-dev",
     createdAt: daysAgo(10),
     updatedAt: daysAgo(3),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(10) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(9) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(5) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(3) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(10) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(9) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(5) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(3) },
     ],
   },
   {
@@ -253,9 +253,9 @@ export const demoIssues: Issue[] = [
     teamId: "team-dev",
     createdAt: daysAgo(6),
     updatedAt: daysAgo(1),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(6) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(2) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(6) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(2) },
     ],
   },
   {
@@ -300,11 +300,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-dev",
     createdAt: daysAgo(4),
     updatedAt: daysAgo(1),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(4) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(3) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(2) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(1) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(4) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(3) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(2) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(1) },
     ],
   },
   {
@@ -320,11 +320,11 @@ export const demoIssues: Issue[] = [
     teamId: "team-dev",
     createdAt: daysAgo(4),
     updatedAt: daysAgo(1),
-    statusChangeHistory: [
-      { from: "Created", to: "Todo", atISO: isoDaysAgo(4) },
-      { from: "Todo", to: "In Progress", atISO: isoDaysAgo(3) },
-      { from: "In Progress", to: "In Review", atISO: isoDaysAgo(2) },
-      { from: "In Review", to: "Done", atISO: isoDaysAgo(1) },
+    history: [
+      { field: "status", from: "Created", to: "Todo", atISO: isoDaysAgo(4) },
+      { field: "status", from: "Todo", to: "In Progress", atISO: isoDaysAgo(3) },
+      { field: "status", from: "In Progress", to: "In Review", atISO: isoDaysAgo(2) },
+      { field: "status", from: "In Review", to: "Done", atISO: isoDaysAgo(1) },
     ],
   },
 

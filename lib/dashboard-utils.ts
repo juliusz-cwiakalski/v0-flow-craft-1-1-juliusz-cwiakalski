@@ -79,15 +79,15 @@ export function deriveThroughput(issues: Issue[], timeRange: DashboardTimeRange)
   let hasHistory = false
 
   for (const issue of issues) {
-    if (issue.statusChangeHistory && issue.statusChangeHistory.length > 0) {
-      hasHistory = true
-      const doneEntries = issue.statusChangeHistory.filter(
-        (entry) => entry.to === "Done" && new Date(entry.atISO) >= fromDate && new Date(entry.atISO) <= toDate,
-      )
-      if (doneEntries.length > 0) {
-        count++
-      }
-    }
+     if (issue.history && issue.history.length > 0) {
+       hasHistory = true
+       const doneEntries = issue.history.filter(
+         (entry) => entry.field === "status" && entry.to === "Done" && new Date(entry.atISO) >= fromDate && new Date(entry.atISO) <= toDate,
+       )
+       if (doneEntries.length > 0) {
+         count++
+       }
+     }
   }
 
   // Fallback to updatedAt approximation if no history

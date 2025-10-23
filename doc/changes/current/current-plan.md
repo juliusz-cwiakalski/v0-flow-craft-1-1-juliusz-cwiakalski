@@ -38,11 +38,13 @@ This plan covers tracking and presenting the full history of all issue changes (
     - [x] Allow filtering or highlighting by field type (optional)
     - [x] Ensure read-only, accessible, and clear formatting
     - [x] Make the isse history available via the issue contex actions (next to edit, delete, etc.) (done: added View History to issue context actions via dialog; see issue-card.tsx)
+    - [ ] Make sure that issue history is also available in context menu in current sprint view (card view) (not done yet)
 
 3. **Dashboard Integration**
-    - [ ] Update `throughput-card.tsx` and related dashboard logic to use only status change entries for metrics (where `field === "status"` and `to === "Done"`)
-    - [ ] Fallback to `updatedAt` if no status history; show tooltip “approximate”
-    - [ ] Ensure dashboard statistics are unaffected by non-status changes (description, title, etc.)
+    - [x] Update `throughput-card.tsx` and related dashboard logic to use only status change entries for metrics (where `field === "status"` and `to === "Done"`)
+    - [x] Fallback to `updatedAt` if no status history; show tooltip “approximate”
+    - [x] Ensure dashboard statistics are unaffected by non-status changes (description, title, etc.)
+    - [ ] fix bug in dashboard - now thorughput (rolling) stopped workingm see doc/changes/003-rollup-dashboard-lite/prd-change3-experiment-2-rollup-dashboard-lite.md how it should work
 
 4. **Telemetry**
     - [ ] Log when history view is opened in `lib/telemetry.ts`

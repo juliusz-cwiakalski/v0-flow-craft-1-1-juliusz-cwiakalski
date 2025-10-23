@@ -3,6 +3,14 @@ export type IssueStatus = "Todo" | "In Progress" | "In Review" | "Done"
 export type SprintStatus = "Planned" | "Active" | "Completed"
 export type ProjectStatus = "Planned" | "Active" | "On Hold" | "Completed"
 
+export interface IssueChange {
+  atISO: string
+  field: string // e.g. "status", "title", "description", "team", "assignee", "project"
+  from: unknown // previous value
+  to: unknown   // new value
+  changedBy?: string // user id or name (optional)
+}
+
 export interface Issue {
   id: string
   title: string
@@ -15,7 +23,7 @@ export interface Issue {
   teamId?: string
   templateId?: string
   acceptanceCriteria?: AcceptanceCriterion[]
-  statusChangeHistory?: StatusChangeEntry[]
+  history?: IssueChange[]
   createdAt: Date
   updatedAt: Date
 }
@@ -49,10 +57,12 @@ export interface Sprint {
   updatedAt: Date
 }
 
-export interface StatusChangeEntry {
-  from: IssueStatus | "Created"
-  to: IssueStatus
+export interface IssueChange {
   atISO: string
+  field: string // e.g. "status", "title", "description", "team", "assignee", "project"
+  from: unknown // previous value
+  to: unknown   // new value
+  changedBy?: string // user id or name (optional)
 }
 
 export interface Project {
