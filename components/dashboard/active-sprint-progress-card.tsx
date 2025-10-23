@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useLocale } from "@/components/ui/locale-context"
 import type { ActiveSprintProgress } from "@/lib/dashboard-utils"
 
 interface ActiveSprintProgressCardProps {
@@ -8,6 +9,7 @@ interface ActiveSprintProgressCardProps {
 }
 
 export function ActiveSprintProgressCard({ data }: ActiveSprintProgressCardProps) {
+  const locale = useLocale()
   if (!data.sprintMeta) {
     return (
       <Card>
@@ -21,9 +23,22 @@ export function ActiveSprintProgressCard({ data }: ActiveSprintProgressCardProps
     )
   }
 
+  if (data.total === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Active Sprint Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground text-center py-8">No issues in active sprint</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const { sprintMeta } = data
-  const startDate = new Date(sprintMeta.startDate).toLocaleDateString()
-  const endDate = new Date(sprintMeta.endDate).toLocaleDateString()
+  const startDate = new Date(sprintMeta.startDate).toLocaleDateString(locale)
+  const endDate = new Date(sprintMeta.endDate).toLocaleDateString(locale)
 
   return (
     <Card>

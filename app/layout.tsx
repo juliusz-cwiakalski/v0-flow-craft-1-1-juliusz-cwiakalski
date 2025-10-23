@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import { ReduxProvider } from "@/lib/redux/provider"
+import { LocaleProvider } from "@/components/ui/locale-context"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -18,9 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <ReduxProvider>
-          <Suspense fallback={null}>{children}</Suspense>
-        </ReduxProvider>
+         <ReduxProvider>
+           <LocaleProvider>
+             <Suspense fallback={null}>{children}</Suspense>
+           </LocaleProvider>
+         </ReduxProvider>
       </body>
     </html>
   )

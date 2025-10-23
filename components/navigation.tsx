@@ -209,7 +209,7 @@ export function Navigation({
                   title="What's New"
                 >
                   <span className="text-lg">✨</span>
-                  <span>What's New</span>
+                  <span>What&apos;s New</span>
                   {hasUnseenUpdates && <span className="ml-2 w-2 h-2 bg-blue-500 rounded-full" />}
                 </Button>
               </div>
