@@ -137,7 +137,7 @@ export function DashboardView({
       </div>
 
       {/* Dashboard cards in responsive grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <StatusBreakdownCard data={statusBreakdown} />
         <ActiveSprintProgressCard data={sprintProgress} />
         <ThroughputCard data={throughput} />
@@ -146,7 +146,7 @@ export function DashboardView({
         <BlockedStaleCard data={blockedStale} onOpenIssues={() => dispatch(setCurrentView("issues"))} />
         <WipPressureCard data={wip} />
         <CycleTimeTrendCard data={cycle} />
-        <DeliveryEtaCard data={eta} />
+        <DeliveryEtaCard data={eta} projects={projects} />
       </div>
     </div>
   )
