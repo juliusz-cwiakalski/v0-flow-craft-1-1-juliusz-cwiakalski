@@ -20,10 +20,13 @@ export function BlockedStaleCard({ data, onOpenIssues }: BlockedStaleCardProps) 
       <CardHeader>
         <CardTitle className="text-lg flex items-center justify-between">
           <span>Blocked & Stale</span>
-          {onOpenIssues && (
+           {onOpenIssues && (
             <button
               type="button"
-              onClick={onOpenIssues}
+              onClick={() => {
+                trackEvent("blocked_stale_clickthrough", { totalBlocked: data.totalBlocked, totalStale: data.totalStale })
+                onOpenIssues()
+              }}
               className="text-xs text-blue-600 underline decoration-dotted"
               aria-label="Open Issues with blocked or stale filters"
             >

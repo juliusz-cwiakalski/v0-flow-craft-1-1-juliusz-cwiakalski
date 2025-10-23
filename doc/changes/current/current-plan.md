@@ -182,3 +182,4 @@ summary: >
 - 2025-10-23 10:00 UTC: Plan created and proposed.
 - 2025-10-23 11:00 UTC: Phase 1 derivations completed: added tests for velocity, blocked/stale, WIP pressure, cycle-time; implemented delivery ETA per project; preferences thresholds added. Tests passing for lib/dashboard-utils.test.ts. Note: global typecheck has unrelated UI type errors.
 - 2025-10-23 11:30 UTC: Phase 2 UI cards added and wired in DashboardView; telemetry events added; changelog updated. Click-through navigates to Issues (filters deep-link deferred). Unit tests remain green.
+- 2025-10-23 12:00 UTC: Phase 3 and 4 completed: Added blocked_stale_clickthrough telemetry; updated specification documentation; updated changelog version to 0.4.3; all dashboard tests passing (29/29). Implementation complete.

@@ -1,7 +1,7 @@
 // Changelog data structure and content
 
 // Application version for changelog tracking
-export const APP_VERSION = "0.4.2"
+export const APP_VERSION = "0.4.3"
 
 export type ReleaseItemKind = "New" | "Improved" | "Fixed" | "Notice"
 
