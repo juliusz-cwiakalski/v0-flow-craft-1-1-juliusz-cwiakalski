@@ -9,6 +9,8 @@ const initialState: PreferencesState = {
   dashboardTimeRange: {
     preset: "7d",
   },
+  wipThreshold: 10,
+  staleAgeDays: 7,
 }
 
 const preferencesSlice = createSlice({
@@ -34,6 +36,12 @@ const preferencesSlice = createSlice({
     setDashboardTimeRange(state, action: PayloadAction<DashboardTimeRange>) {
       state.dashboardTimeRange = action.payload
     },
+    setWipThreshold(state, action: PayloadAction<number>) {
+      state.wipThreshold = action.payload
+    },
+    setStaleAgeDays(state, action: PayloadAction<number>) {
+      state.staleAgeDays = action.payload
+    },
   },
 })
 
@@ -44,5 +52,7 @@ export const {
   setLastUsedProject,
   setLastUsedTeam,
   setDashboardTimeRange,
+  setWipThreshold,
+  setStaleAgeDays,
 } = preferencesSlice.actions
 export default preferencesSlice.reducer
