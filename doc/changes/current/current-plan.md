@@ -54,17 +54,22 @@ summary: >
 ## Phases
 
 ### Phase 1: Derivations and Preferences wiring
-- Goal: Implement pure helpers and extend preferences to support thresholds/time windows required by new cards.
+- Goal: Implement pure helpers and extend preferences to support thresholds/time windows required by new cards, fully compliant with ADR-0008 Redux and persistence conventions.
 - Tasks:
-  - [ ] Add Preferences fields in types/index.ts: `wipThreshold: number` (default 10), `staleAgeDays: number` (default 7).
-  - [ ] Extend lib/redux/slices/preferencesSlice.ts with actions: `setWipThreshold(number)`, `setStaleAgeDays(number)`; ensure persistence via existing middleware.
+  - Tag new preferences fields (`wipThreshold`, `staleAgeDays`) for local persistence in the slice.
+  - Update persistence middleware/config to include new fields and ensure versioning/migration logic is compatible.
+  - Verify new state changes are traceable in Redux DevTools.
+  - [x] Add Preferences fields in types/index.ts: `wipThreshold: number` (default 10), `staleAgeDays: number` (default 7). (done: fields already present in PreferencesState type)
+  - [x] Extend lib/redux/slices/preferencesSlice.ts with actions: `setWipThreshold(number)`, `setStaleAgeDays(number)`; ensure persistence via existing middleware. (done: actions and initial state already present)
   - [ ] Implement `deriveVelocityBySprint(issues: Issue[], sprints: Sprint[], limit=5)` in lib/dashboard-utils.ts returning last N sprints with done counts and dates.
   - [ ] Implement `deriveBlockedAndStale(issues: Issue[], staleAgeDays: number)` returning per-status counts and total; staleness by `updatedAt` older than N days; blocked if `history` includes latest `blocked` true flag or placeholder field (fallback: infer none).
   - [ ] Implement `deriveWipPressure(issues: Issue[], threshold: number)` returning `{ wip, threshold, ratio, level: 'green'|'amber'|'red' }` with levels at <80%, 80–100%, >100%.
   - [ ] Implement `deriveCycleTimeStats(issues: Issue[], range: DashboardTimeRange)` computing median and p75 from first transition to In Progress to Done within range; return `insufficientData: boolean` when missing.
-  - [ ] Implement `deriveDeliveryEtaPerProject(issues: Issue[], sprints: Sprint[], range: DashboardTimeRange)` returning per-project `{ projectId, remaining, recentThroughputMedian, recentThroughputBest, etaMedianDays?, etaOptimisticDays? }` with nulls when throughput=0.
+  - [x] Implement `deriveDeliveryEtaPerProject(issues: Issue[], sprints: Sprint[], range: DashboardTimeRange)` returning per-project `{ projectId, remaining, recentThroughputMedian, recentThroughputBest, etaMedianDays?, etaOptimisticDays? }` with nulls when throughput=0. (done: added deriveDeliveryEtaPerProject in lib/dashboard-utils.ts; tests in lib/dashboard-utils.test.ts)
 - Acceptance criteria:
   - Must: New Preferences fields exist with defaults; actions update and persist.
+  - Must: New preferences fields are tagged for local persistence and included in migration/versioning logic.
+  - Must: All new state changes are visible and traceable in Redux DevTools.
   - Must: Each derive* function is pure, covered by unit tests with fixed dates, and returns stable shapes even on empty inputs.
   - Must: No changes to existing derive* behavior (status, sprint progress, throughput, workload).
 - Files and modules:
