@@ -74,30 +74,29 @@ export interface ThroughputResult {
 export function deriveThroughput(issues: Issue[], timeRange: DashboardTimeRange): ThroughputResult {
   const { fromDate, toDate } = getTimeRangeDates(timeRange)
 
-  // Prefer status history
   let count = 0
-  let hasHistory = false
+  let approximate = false
 
   for (const issue of issues) {
-     if (issue.history && issue.history.length > 0) {
-       hasHistory = true
-       const doneEntries = issue.history.filter(
-         (entry) => entry.field === "status" && entry.to === "Done" && new Date(entry.atISO) >= fromDate && new Date(entry.atISO) <= toDate,
-       )
-       if (doneEntries.length > 0) {
-         count++
-       }
-     }
+    let counted = false
+    if (issue.history && issue.history.length > 0) {
+      const doneEntries = issue.history.filter(
+        (entry) => entry.field === "status" && entry.to === "Done" && new Date(entry.atISO) >= fromDate && new Date(entry.atISO) <= toDate,
+      )
+      if (doneEntries.length > 0) {
+        count++
+        counted = true
+      }
+    }
+    if (!counted && issue.status === "Done" && issue.updatedAt && issue.updatedAt >= fromDate && issue.updatedAt <= toDate) {
+      count++
+      approximate = true
+    }
   }
 
-  // Fallback to updatedAt approximation if no history
-  if (!hasHistory) {
-    count = issues.filter((i) => i.status === "Done" && i.updatedAt >= fromDate && i.updatedAt <= toDate).length
-    return { count, approximate: true }
-  }
-
-  return { count, approximate: false }
+  return { count, approximate }
 }
+
 
 export interface WorkloadEntry {
   assigneeId: string // "unassigned" sentinel or userId

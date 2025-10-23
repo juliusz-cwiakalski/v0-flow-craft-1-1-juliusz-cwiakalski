@@ -56,19 +56,30 @@ export function StatusHistoryPanel({ issue }: StatusHistoryPanelProps) {
         <CardTitle>Issue Change History</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="text-sm space-y-2">
-          {history.map((entry, idx) => (
-            <li key={idx}>
-              <span className="font-mono text-xs">{entry.atISO}</span>:
-              <span className="ml-2 font-semibold">{entry.field}</span>
-              <span className="ml-2">{formatValue(entry.from)} → {formatValue(entry.to)}</span>
+         <ul className="text-sm space-y-2" tabIndex={0} role="list">
+           {history.map((entry, idx) => (
+             <li key={idx} role="listitem">
+               <span
+                 className="font-mono text-xs cursor-help"
+                 title={entry.atISO}
+               >
+                 {new Date(entry.atISO).toLocaleString()}
+               </span>:
+               {entry.field === "status" ? (
+                 <span className="ml-2 font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded">
+                    Status
+                 </span>
+               ) : (
+                 <span className="ml-2 font-semibold">{entry.field}</span>
+               )}
+               <span className="ml-2">{formatValue(entry.from)}  {formatValue(entry.to)}</span>
 
-              {entry.changedBy && (
-                <span className="ml-2 text-xs text-muted-foreground">by {entry.changedBy}</span>
-              )}
-            </li>
-          ))}
-        </ul>
+               {entry.changedBy && (
+                 <span className="ml-2 text-xs text-muted-foreground">by {entry.changedBy}</span>
+               )}
+             </li>
+           ))}
+         </ul>
       </CardContent>
     </Card>
   )
