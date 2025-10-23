@@ -376,6 +376,15 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 ### 9. Roll-up Dashboard
 
+#### 9.0. Dashboard Layout and Deep Linking
+
+- **Responsive grid layout:** Dashboard grid automatically adapts to screen size: 1 column on mobile, 2 columns on medium screens, and 3 columns on wide (xl) screens. This ensures all metric cards remain readable and usable at every breakpoint.
+- **Delivery ETA card improvement:** The Delivery ETA card now displays project names instead of project IDs, improving clarity for users tracking delivery estimates across multiple projects.
+- **Blocked & Stale card deep linking:** Clicking "Open Issues" on the Blocked & Stale dashboard card navigates directly to the Issues view, with relevant filters (project, team, status, staleAgeDays) applied via query parameters. This enables fast drill-down from dashboard metrics to actionable issue lists.
+- **Helper function for deep linking:** The helper function `buildIssuesQueryParams` (located in `components/scope-filters.tsx`) constructs query strings for deep linking to the Issues view with the correct filters.
+- **Telemetry:** The telemetry event `blocked_stale_clickthrough` fires with the filter payload whenever a user navigates from the dashboard card to the Issues view.
+- **Extensibility:** The deep linking pattern is designed to be extensible for other dashboard cards, allowing future metric cards to support direct navigation to filtered issue lists or other views as needed.
+
 #### 9.1. Global Project/Team Scope Filtering (Cross-View, Persistent)
 
 **Description:**
@@ -711,11 +720,14 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 ## Version History
 
 ### v0.4.0 (2025-10-23)
+- Improved dashboard grid layout: now responsive (1 column mobile, 2 columns md, 3 columns xl)
+- Delivery ETA card now displays project names instead of IDs
+- Added deep linking from Blocked & Stale card to Issues view with relevant filters
+- Helper function for building query strings for deep linking
+- Telemetry event for dashboard card clickthrough
 - Added advanced dashboard metrics: Velocity, Blocked & Stale, WIP Pressure, Cycle-time Trend, Delivery ETA
 - Added configurable preferences: `wipThreshold` and `staleAgeDays`
 - Added inline threshold editing in WIP Pressure card
-- Added click-through navigation from Blocked & Stale card to Issues view
-- Added telemetry for new dashboard cards and interactions
 - Enhanced dashboard derivation functions with comprehensive unit tests
 
 ### v0.3.0 (2025-01-18)
