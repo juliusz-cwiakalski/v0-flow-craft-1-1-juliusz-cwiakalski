@@ -1,6 +1,7 @@
 "use client"
 import { Badge } from "@/components/ui/badge"
-import { ScopeFilters } from "@/components/scope-filters"
+import { ScopeFilters, buildIssuesQueryParams } from "@/components/scope-filters"
+import { useRouter } from "next/navigation"
 import { StatusBreakdownCard } from "@/components/dashboard/status-breakdown-card"
 import { ActiveSprintProgressCard } from "@/components/dashboard/active-sprint-progress-card"
 import { ThroughputCard } from "@/components/dashboard/throughput-card"
@@ -57,6 +58,8 @@ export function DashboardView({
   onTimeRangeChange,
 }: DashboardViewProps) {
   const dispatch = useDispatch()
+  const router = useRouter()
+
   const { wipThreshold, staleAgeDays } = useSelector((state: RootState) => state.preferences)
   // Track dashboard view opened
   useEffect(() => {
@@ -143,7 +146,18 @@ export function DashboardView({
         <ThroughputCard data={throughput} />
         <WorkloadByAssigneeCard data={workload} />
         <VelocityCard data={velocity} />
-        <BlockedStaleCard data={blockedStale} onOpenIssues={() => dispatch(setCurrentView("issues"))} />
+        <BlockedStaleCard
+  data={blockedStale}
+  onOpenIssues={() => {
+    const query = buildIssuesQueryParams({
+      projectIds: selectedProjectIds,
+      teamIds: selectedTeamIds,
+      staleAgeDays,
+      status: "Blocked,Stale"
+    })
+    router.push(`/issues${query}`)
+  }}
+/>
         <WipPressureCard data={wip} />
         <CycleTimeTrendCard data={cycle} />
         <DeliveryEtaCard data={eta} projects={projects} />
