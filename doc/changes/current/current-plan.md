@@ -180,3 +180,4 @@ summary: >
 ## Execution log
 
 - 2025-10-23 10:00 UTC: Plan created and proposed.
+- 2025-10-23 11:00 UTC: Phase 1 derivations completed: added tests for velocity, blocked/stale, WIP pressure, cycle-time; implemented delivery ETA per project; preferences thresholds added. Tests passing for lib/dashboard-utils.test.ts. Note: global typecheck has unrelated UI type errors.
