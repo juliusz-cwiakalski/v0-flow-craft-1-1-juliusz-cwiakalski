@@ -5,6 +5,49 @@
 FlowCraft is a modern task and sprint management application built with Next.js, React, and TypeScript. It provides a
 comprehensive solution for managing issues, organizing sprints, and tracking project progress through multiple views.
 
+<!-- TOC -->
+* [FlowCraft Functional Specification](#flowcraft-functional-specification)
+  * [Overview](#overview)
+  * [Core Features](#core-features)
+    * [1. Issue Management](#1-issue-management)
+    * [2. Sprint Management](#2-sprint-management)
+    * [3. Current Sprint View](#3-current-sprint-view)
+    * [4. Quick Capture](#4-quick-capture)
+    * [5. Changelog & What's New](#5-changelog--whats-new)
+    * [6. Navigation System](#6-navigation-system)
+    * [7. Data Management](#7-data-management)
+    * [8. UI Component Library](#8-ui-component-library)
+    * [9. Roll-up Dashboard](#9-roll-up-dashboard)
+      * [9.0. Dashboard Layout and Deep Linking](#90-dashboard-layout-and-deep-linking)
+      * [9.1. Global Project/Team Scope Filtering (Cross-View, Persistent)](#91-global-projectteam-scope-filtering-cross-view-persistent)
+    * [Creating an Issue (Standard)](#creating-an-issue-standard)
+    * [Creating an Issue (Quick Capture)](#creating-an-issue-quick-capture)
+    * [Editing an Issue](#editing-an-issue)
+    * [Managing Acceptance Criteria](#managing-acceptance-criteria)
+    * [Managing Sprints](#managing-sprints)
+    * [Working in Current Sprint](#working-in-current-sprint)
+    * [Viewing What's New](#viewing-whats-new)
+    * [Viewing Dashboard Metrics](#viewing-dashboard-metrics)
+    * [Filtering Data Across Views](#filtering-data-across-views)
+  * [Data Flow](#data-flow)
+    * [State Management](#state-management)
+    * [Data Persistence](#data-persistence)
+  * [Validation Rules](#validation-rules)
+    * [Issue Validation](#issue-validation)
+    * [Sprint Validation](#sprint-validation)
+  * [Keyboard Shortcuts](#keyboard-shortcuts)
+  * [Deep Links](#deep-links)
+  * [Version History](#version-history)
+    * [v0.4.3 (2025-10-23)](#v043-2025-10-23)
+    * [v0.4.2 (2025-10-22)](#v042-2025-10-22)
+    * [v0.4.1 (2025-10-22)](#v041-2025-10-22)
+    * [v0.4.0 (2025-10-22)](#v040-2025-10-22)
+    * [v0.3.0 (2025-10-19)](#v030-2025-10-19)
+    * [v0.2.0 (2025-10-18)](#v020-2025-10-18)
+    * [v0.1.0 (2025-10-18)](#v010-2025-10-18)
+    * [v0.0.1 (Initial)](#v001-initial)
+<!-- TOC -->
+
 ## Core Features
 
 ### 1. Issue Management
@@ -719,7 +762,22 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 
 ## Version History
 
-### v0.4.0 (2025-10-23)
+### v0.4.3 (2025-10-23)
+- Comprehensive Issue History Viewer: Full audit trail for every issue change, viewable in the Issue History panel.
+- Dashboard Throughput now uses only status changes to 'Done' for metrics, with fallback and tooltip for approximate values.
+- Telemetry logs every time the Issue History panel is opened.
+- Dashboard: Five new cards — Velocity, Blocked/Stale, WIP Pressure, Cycle-time, Delivery ETA.
+
+### v0.4.2 (2025-10-22)
+- Templates Management in Settings: Create, edit, duplicate, delete, and set default Issue Templates. Configure title prefix, priority, status, assignee, and AC.
+- Issue Form & Quick Capture now use your templates, with defaults and last-used memory.
+- Select components avoid empty values, preventing runtime errors in Templates dialogs.
+
+### v0.4.1 (2025-10-22)
+- Issue search now matches assignee names and avoids duplicate user mapping.
+- Project/Team selectors and badges fixed: Issue forms always show available Projects/Teams, and cards display names instead of IDs.
+
+### v0.4.0 (2025-10-22)
 - Improved dashboard grid layout: now responsive (1 column mobile, 2 columns md, 3 columns xl)
 - Delivery ETA card now displays project names instead of IDs
 - Added deep linking from Blocked & Stale card to Issues view with relevant filters
@@ -730,7 +788,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Added inline threshold editing in WIP Pressure card
 - Enhanced dashboard derivation functions with comprehensive unit tests
 
-### v0.3.0 (2025-01-18)
+### v0.3.0 (2025-10-19)
 - Added Roll-up Dashboard with 4 key metrics
 - Added Project and Team entities with default seeding
 - Added cross-view scope filtering (Project/Team)
@@ -741,7 +799,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Enhanced issues with projectId, teamId, statusChangeHistory fields
 - Added telemetry for dashboard usage
 
-### v0.2.0 (2025-01-18)
+### v0.2.0 (2025-10-18)
 - Added Quick Capture with keyboard shortcut (Q)
 - Added deep-link support (`?open=quick-capture` and `?open=issue&id={KEY}`)
 - Added Issue Templates (Bug, Feature, Request)
@@ -756,7 +814,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Added dirty state confirmation
 - Added template conflict resolution
 
-### v0.1.0 (2025-01-17)
+### v0.1.0 (2025-10-18)
 - Added Changelog & What's New system
 - Added version tracking with localStorage
 - Added changelog panel view

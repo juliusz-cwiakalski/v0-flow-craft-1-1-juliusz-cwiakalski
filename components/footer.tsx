@@ -37,6 +37,15 @@ export function Footer() {
             >
               GitHub Repository
             </a>
+            <span className="hidden sm:inline">•</span>
+            <a
+              href="https://github.com/juliusz-cwiakalski/v0-flow-craft-1-1-juliusz-cwiakalski/blob/main/doc/spec/specification.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground hover:underline font-medium"
+            >
+              System Specification
+            </a>
           </div>
         </div>
       </div>
