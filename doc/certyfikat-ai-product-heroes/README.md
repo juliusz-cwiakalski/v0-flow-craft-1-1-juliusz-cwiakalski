@@ -17,6 +17,9 @@ FlowCraft traci klientów, gdy ich zespoły rosną do 30-50 osób, ponieważ "wy
       * [2. Mój Proces Odkrywczy (Discovery): Innowacyjne Wykorzystanie AI](#2-mój-proces-odkrywczy-discovery-innowacyjne-wykorzystanie-ai)
       * [3. Strategia i Priorytety (Discovery → OST → Prototyp)](#3-strategia-i-priorytety-discovery--ost--prototyp)
       * [4. Zaimplementowane Rozwiązania i ich Wpływ (OST → Prototyp = Złota Nić)](#4-zaimplementowane-rozwiązania-i-ich-wpływ-ost--prototyp--złota-nić)
+        * [**Funkcjonalność 1: Quick Capture z Szablonami (Adresuje Opportunity 3 i 4 z OST)**](#funkcjonalność-1-quick-capture-z-szablonami-adresuje-opportunity-3-i-4-z-ost)
+        * [**Funkcjonalność 2: Dashboard analityczny z filtrowaniem (Adresuje Opportunity 2 z OST)**](#funkcjonalność-2-dashboard-analityczny-z-filtrowaniem-adresuje-opportunity-2-z-ost)
+        * [**Funkcje wspierające:**](#funkcje-wspierające)
     * [Podsumowanie: Dlaczego ten projekt zasługuje na wyróżnienie?](#podsumowanie-dlaczego-ten-projekt-zasługuje-na-wyróżnienie)
     * [Kluczowe Artefakty Projektu](#kluczowe-artefakty-projektu)
 <!-- TOC -->
@@ -54,7 +57,7 @@ Cały ten proces, od surowych danych po syntezę problemów, został zrealizowan
 
 Mój prototyp wprowadza funkcjonalności, które tworzą spójną historię – "Złotą Nić" – od problemu do przekonującej propozycji biznesowej. Co więcej, backlog zadań w prototypie odzwierciedla mój proces — zadania zrealizowane to te związane z analizą, a bieżący sprint to implementacja opisanych poniżej funkcji.
 
-**Funkcjonalność 1: Quick Capture z Szablonami (Adresuje Opportunity 3 i 4 z OST)**
+##### **Funkcjonalność 1: Quick Capture z Szablonami (Adresuje Opportunity 3 i 4 z OST)**
 
 *   **Co to jest?** Błyskawiczny modal do tworzenia zadań (skrót klawiszowy "Q"), który wykorzystuje **w pełni zarządzalne szablony** (Bug, Feature, Request). Szablony automatycznie uzupełniają priorytet, status, a nawet **predefiniowane Kryteria Akceptacji (AC)**, co wspiera budowanie procesów takich jak Definition of Ready.
 *   **Jak wynika z OST?** To bezpośrednia realizacja rozwiązań **S3.4 (Szablony do szybkiego przechwytywania)** i **S4.3 (Szablony procesów)**. Atakuje "podatek koordynacyjny", minimalizując tarcie przy dodawaniu zadań i standaryzując jakość wprowadzanych danych.
@@ -62,7 +65,7 @@ Mój prototyp wprowadza funkcjonalności, które tworzą spójną historię – 
 
 ![Modal Quick Capture z wybranym szablonem "Feature" i predefiniowanymi kryteriami akceptacji](quick-capture-modal-screenshot.png "Rys. 2: Funkcjonalność Quick Capture w akcji. Umożliwia stworzenie dobrze zdefiniowanego zadania w mniej niż 10 sekund, eliminując chaos i 'pracę o pracy'.")
 
-**Funkcjonalność 2: Dashboard analityczny z filtrowaniem (Adresuje Opportunity 2 z OST)**
+##### **Funkcjonalność 2: Dashboard analityczny z filtrowaniem (Adresuje Opportunity 2 z OST)**
 
 *   **Co to jest?** Nowy widok "Dashboard", który agreguje kluczowe metryki i wizualizuje postęp w czasie rzeczywistym. Obejmuje nie tylko podstawowe dane, ale również **zaawansowane wskaźniki kluczowe dla skalujących się zespołów**, takie jak Velocity, Cycle Time, WIP (Work-in-Progress) Pressure oraz prognozy dostarczenia (Delivery ETA). Całość jest w pełni filtrowalna według projektów i zespołów.
 *   **Jak wynika z OST?** Jest to w pełni funkcjonalna wersja rozwiązania **S2.1 (Ujednolicony pulpit nawigacyjny portfolio)**. Daje managerom i liderom widok "z lotu ptaka", którego tak bardzo im brakuje w prostych narzędziach.
@@ -70,7 +73,7 @@ Mój prototyp wprowadza funkcjonalności, które tworzą spójną historię – 
 
 ![Dashboard analityczny pokazujący metryki takie jak Velocity, Cycle Time i WIP Pressure](dashboard-view-screenshot.png "Rys. 3: Dashboard analityczny dający managerom wgląd 'z lotu ptaka'. Ta funkcja bezpośrednio adresuje brak widoczności na poziomie portfolio, który był główną przyczyną churnu.")
 
-**Funkcje wspierające:**
+##### **Funkcje wspierające:**
 *   **Zarządzanie Projektami i Zespołami:** Stworzyłem panel ustawień, który jest fundamentem dla funkcji filtrowania na dashboardzie i pozwala na logiczną organizację pracy w rosnącej firmie.
 
 ![Panel ustawień do zarządzania projektami i zespołami](settings-panel-screenshot.png "Rys. 4: Panel ustawień, który jest fundamentem dla skalowalności FlowCraft. Umożliwia logiczną organizację pracy w miarę wzrostu firmy.")

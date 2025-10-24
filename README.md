@@ -8,7 +8,7 @@ A modern task management application prototype built with Next.js, Redux Toolkit
 
 ## About This Project
 
-This is a prototype created for the [AI Product Heroes](https://www.aiproductheroes.pl/) certification, demonstrating a strategic, AI-driven approach to solving a real-world business problem.
+This is a prototype created for the [AI Product Heroes](https://www.aiproductheroes.pl/) certification, demonstrating a strategic, AI-driven approach to solving a real-world business problem. See [description of certification task solution description](doc/certyfikat-ai-product-heroes/README.md) (Polish).
 
 The core challenge: **FlowCraft is losing customers as their teams scale to 30-50 employees because they "outgrow" the tool.** This prototype directly addresses the root causes of this churn, which were identified through an innovative, AI-powered discovery process.
 
