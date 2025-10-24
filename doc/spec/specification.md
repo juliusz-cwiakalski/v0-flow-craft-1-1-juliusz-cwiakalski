@@ -78,7 +78,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
 
 - `types/index.ts` - `Issue` interface (with `acceptanceCriteria` and `history: IssueChange[]` fields), `Priority` type, `IssueStatus` type, `AcceptanceCriterion` interface, `IssueTemplate` interface
 - `IssueChange` type:
-  ```ts
+  \`\`\`ts
   type IssueChange = {
     atISO: string,
     field: string, // e.g. "status", "title", "description", "team", "assignee", "project"
@@ -86,7 +86,7 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
     to: unknown,   // new value
     changedBy?: string, // user id or name (optional)
   }
-  ```
+  \`\`\`
 
 **Key Functions** (in `app/page.tsx`):
 
