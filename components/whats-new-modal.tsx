@@ -125,7 +125,7 @@ export function WhatsNewModal({
           ))}
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-4">
+        <DialogFooter className="flex-col sm:flex-row gap-4 sticky bottom-0 bg-background pt-4 shadow-lg z-10">
           <div className="flex items-center space-x-2 mr-auto">
             <Checkbox
               id="dont-show"
@@ -140,6 +140,14 @@ export function WhatsNewModal({
             <Button variant="outline" onClick={onViewChangelog}>
               View all updates
             </Button>
+            <a
+              href="https://github.com/juliusz-cwiakalski/v0-flow-craft-1-1-juliusz-cwiakalski/blob/main/doc/spec/specification.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground hover:underline border rounded-md bg-background"
+            >
+              System Specification
+            </a>
             <Button onClick={handleDismiss}>Got it</Button>
           </div>
         </DialogFooter>
