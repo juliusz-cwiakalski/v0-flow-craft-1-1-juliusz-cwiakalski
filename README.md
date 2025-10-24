@@ -8,20 +8,28 @@ A modern task management application prototype built with Next.js, Redux Toolkit
 
 ## About This Project
 
-This is a prototype created for the [AI Product Heroes](https://www.aiproductheroes.pl/) certification task, demonstrating modern web application development with AI-assisted tools.
+This is a prototype created for the [AI Product Heroes](https://www.aiproductheroes.pl/) certification, demonstrating a strategic, AI-driven approach to solving a real-world business problem.
+
+The core challenge: **FlowCraft is losing customers as their teams scale to 30-50 employees because they "outgrow" the tool.** This prototype directly addresses the root causes of this churn, which were identified through an innovative, AI-powered discovery process.
+
+I implemented two key features to solve this:
+- **Quick Capture with templates:** To reduce operational chaos and "work about work."
+- **An advanced analytics Dashboard:** To provide managers with the "bird's-eye view" they were missing.
+
+These changes, derived directly from a data-driven Opportunity Solution Tree, represent the first critical step in evolving FlowCraft into a platform that scales *with* its customers, rather than losing them.
 
 **Created by:** [Juliusz Ćwiąkalski](https://www.linkedin.com/in/juliusz-cwiakalski/)
 
 **Source Code:** [GitHub Repository](https://github.com/juliusz-cwiakalski/v0-flow-craft-1-1-juliusz-cwiakalski)
 
-## Features
+## Core Features
 
-- **Issue Management** - Create, edit, and track issues with priorities, statuses, and acceptance criteria
-- **Sprint Planning** - Organize work into sprints with kanban boards and progress tracking
-- **Quick Capture** - Rapid issue creation with keyboard shortcuts and templates
-- **Dashboard** - Real-time metrics and insights with project/team filtering
-- **Changelog** - Built-in version tracking and feature announcements
-- **Settings** - Manage projects and teams with full CRUD operations
+- **Issue Management**: Full CRUD operations for issues, including status tracking, acceptance criteria, and a complete, auditable change history.
+- **Sprint Planning**: Organize work into sprints with a Kanban board for clear visualization and progress tracking.
+- **Quick Capture**: A streamlined modal (press `Q`) for rapid issue creation using customizable templates, designed to make FlowCraft the single source of truth.
+- **Analytics Dashboard**: A "bird's-eye view" of key metrics like Velocity, Cycle Time, and WIP Pressure, with project/team filtering to give managers strategic insights.
+- **Settings & Administration**: Manage projects, teams, users, and issue templates to customize FlowCraft for a growing organization.
+- **What's New Panel**: An in-app changelog to announce new features and drive adoption.
 
 ## Technology Stack
 
@@ -44,12 +52,24 @@ This project is built and maintained using [v0.app](https://v0.app), an AI-power
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
 
-## Documentation
+## Project Documentation & Artifacts
 
-- **Specification:** `doc/spec/specification.md`
-- **Technical Design:** `doc/technical-design.md`
-- **Architecture Decisions:** `doc/adr/`
-- **Change Specifications:** `doc/changes/`
+This repository contains the complete "Golden Thread" of product discovery, from problem definition to a functional prototype.
+
+- **[Certification Write-Up (PL)](doc/certyfikat-ai-product-heroes/README.md)**: The detailed project description submitted for the AI Product Heroes certification.
+
+### 1. Product Discovery & Strategy
+The complete discovery process, from AI-driven pain point analysis to the final roadmap.
+- **[Product Discovery Overview](doc/product-discovery/README.md)**: An overview of the structured discovery workflow.
+- **[Pain Point Analysis](doc/product-discovery/pain-points-analysis-notebookml.md)**: A deep dive into the core problems driving churn, synthesized using a custom AI-powered workflow.
+- **[Opportunity Solution Tree (OST)](doc/product-discovery/ost-notebooklm.md)**: The strategic framework mapping user needs to potential solutions.
+- **[Roadmap & Prioritization](doc/product-discovery/roadmap-notebooklm.md)**: Data-driven feature ranking using MoSCoW and RICE frameworks.
+
+### 2. Specification & Design
+- **[Functional Specification](doc/spec/specification.md)**: A detailed breakdown of all implemented features, data models, and user flows.
+- **[Technical Design](doc/technical-design.md)**: A comprehensive overview of the application's architecture, data models, and component design.
+- **[Product Experiments & PRDs](doc/changes)**: Definitions and Product Requirement Documents for the core experiments implemented in the prototype.
+- **[Architecture Decision Records (ADRs)](doc/adr)**: Key architectural decisions made throughout the project.
 
 ## License
 

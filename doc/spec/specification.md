@@ -38,14 +38,14 @@ comprehensive solution for managing issues, organizing sprints, and tracking pro
   * [Keyboard Shortcuts](#keyboard-shortcuts)
   * [Deep Links](#deep-links)
   * [Version History](#version-history)
-    * [v0.4.3 (2025-10-23)](#v043-2025-10-23)
-    * [v0.4.2 (2025-10-22)](#v042-2025-10-22)
-    * [v0.4.1 (2025-10-22)](#v041-2025-10-22)
-    * [v0.4.0 (2025-10-22)](#v040-2025-10-22)
-    * [v0.3.0 (2025-10-19)](#v030-2025-10-19)
-    * [v0.2.0 (2025-10-18)](#v020-2025-10-18)
-    * [v0.1.0 (2025-10-18)](#v010-2025-10-18)
-    * [v0.0.1 (Initial)](#v001-initial)
+    * [v0.4.3 (2025-10-23) - Issue History & Advanced Dashboard Metrics](#v043-2025-10-23---issue-history--advanced-dashboard-metrics)
+    * [v0.4.2 (2025-10-22) - Template Management in Settings](#v042-2025-10-22---template-management-in-settings)
+    * [v0.4.1 (2025-10-22) - Search and Filter Fixes](#v041-2025-10-22---search-and-filter-fixes)
+    * [v0.4.0 (2025-10-22) - Dashboard UI and Deep Linking](#v040-2025-10-22---dashboard-ui-and-deep-linking)
+    * [v0.3.0 (2025-10-19) - Roll-up Dashboard & Scope Filtering](#v030-2025-10-19---roll-up-dashboard--scope-filtering)
+    * [v0.2.0 (2025-10-18) - Quick Capture & Issue Templates](#v020-2025-10-18---quick-capture--issue-templates)
+    * [v0.1.0 (2025-10-18) - Changelog and What's New System](#v010-2025-10-18---changelog-and-whats-new-system)
+    * [v0.0.1 (Initial) - Core Functionality](#v001-initial---core-functionality)
 <!-- TOC -->
 
 ## Core Features
@@ -762,22 +762,22 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 
 ## Version History
 
-### v0.4.3 (2025-10-23)
+### v0.4.3 (2025-10-23) - Issue History & Advanced Dashboard Metrics
 - Comprehensive Issue History Viewer: Full audit trail for every issue change, viewable in the Issue History panel.
 - Dashboard Throughput now uses only status changes to 'Done' for metrics, with fallback and tooltip for approximate values.
 - Telemetry logs every time the Issue History panel is opened.
 - Dashboard: Five new cards — Velocity, Blocked/Stale, WIP Pressure, Cycle-time, Delivery ETA.
 
-### v0.4.2 (2025-10-22)
+### v0.4.2 (2025-10-22) - Template Management in Settings
 - Templates Management in Settings: Create, edit, duplicate, delete, and set default Issue Templates. Configure title prefix, priority, status, assignee, and AC.
 - Issue Form & Quick Capture now use your templates, with defaults and last-used memory.
 - Select components avoid empty values, preventing runtime errors in Templates dialogs.
 
-### v0.4.1 (2025-10-22)
+### v0.4.1 (2025-10-22) - Search and Filter Fixes
 - Issue search now matches assignee names and avoids duplicate user mapping.
 - Project/Team selectors and badges fixed: Issue forms always show available Projects/Teams, and cards display names instead of IDs.
 
-### v0.4.0 (2025-10-22)
+### v0.4.0 (2025-10-22) - Dashboard UI and Deep Linking
 - Improved dashboard grid layout: now responsive (1 column mobile, 2 columns md, 3 columns xl)
 - Delivery ETA card now displays project names instead of IDs
 - Added deep linking from Blocked & Stale card to Issues view with relevant filters
@@ -788,7 +788,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Added inline threshold editing in WIP Pressure card
 - Enhanced dashboard derivation functions with comprehensive unit tests
 
-### v0.3.0 (2025-10-19)
+### v0.3.0 (2025-10-19) - Roll-up Dashboard & Scope Filtering
 - Added Roll-up Dashboard with 4 key metrics
 - Added Project and Team entities with default seeding
 - Added cross-view scope filtering (Project/Team)
@@ -799,7 +799,7 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Enhanced issues with projectId, teamId, statusChangeHistory fields
 - Added telemetry for dashboard usage
 
-### v0.2.0 (2025-10-18)
+### v0.2.0 (2025-10-18) - Quick Capture & Issue Templates
 - Added Quick Capture with keyboard shortcut (Q)
 - Added deep-link support (`?open=quick-capture` and `?open=issue&id={KEY}`)
 - Added Issue Templates (Bug, Feature, Request)
@@ -814,13 +814,13 @@ Users can select one or more Projects and/or Teams from multi-select dropdowns i
 - Added dirty state confirmation
 - Added template conflict resolution
 
-### v0.1.0 (2025-10-18)
+### v0.1.0 (2025-10-18) - Changelog and What's New System
 - Added Changelog & What's New system
 - Added version tracking with localStorage
 - Added changelog panel view
 - Initial release with core features
 
-### v0.0.1 (Initial)
+### v0.0.1 (Initial) - Core Functionality
 - Issue management (CRUD)
 - Sprint management (CRUD)
 - Current Sprint Kanban view
