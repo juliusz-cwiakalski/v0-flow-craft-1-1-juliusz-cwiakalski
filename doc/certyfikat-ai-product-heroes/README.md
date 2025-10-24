@@ -26,6 +26,8 @@ FlowCraft traci klientów, gdy ich zespoły rosną do 30-50 osób, ponieważ "wy
 
 ---
 
+> **Nota:** Projekt ten jest rozszerzeniem i modyfikacją aplikacji bazowej [FlowCraft v1.0](https://go.kaca.la/v0-flowcraft-1.0) przygotowanej przez Piotra Kacałę na potrzeby kursu AI Product Heroes. Moja praca obejmowała przeprowadzenie pełnego procesu product discovery oraz implementację nowych, strategicznych funkcjonalności w oparciu o tę bazę.
+
 ### Szczegółowy opis projektu:
 
 #### 1. Kontekst i Problem Biznesowy (Problem)

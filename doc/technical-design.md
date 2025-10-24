@@ -2,8 +2,9 @@
 
 ## Architecture Overview
 
-FlowCraft is built as a modern single-page application using Next.js 14+ with the App Router, React 18+, and TypeScript.
-The architecture follows a component-based design with unidirectional data flow and centralized state management via Redux Toolkit.
+This document describes the technical design of the enhanced FlowCraft prototype. This project builds upon the [FlowCraft v1.0 base application](https://go.kaca.la/v0-flowcraft-1.0) provided by Piotr Kacała for the AI Product Heroes course.
+
+FlowCraft is built as a modern single-page application using Next.js 14+ with the App Router, React 18+, and TypeScript. The architecture follows a component-based design with unidirectional data flow and centralized state management via Redux Toolkit.
 
 ### Technology Stack
 
